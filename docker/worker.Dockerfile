@@ -26,4 +26,4 @@ COPY . .
 RUN pnpm --filter @frint3d/web exec prisma generate
 
 WORKDIR /app/apps/worker
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "exec", "tsx", "watch", "src/index.ts"]

@@ -1,0 +1,97 @@
+# frint3d — tek VPS Docker Compose stack
+# Usage:
+#   cp .env.example .env && edit
+#   docker compose up -d postgres redis
+#   docker compose run --rm web pnpm db:migrate
+#   docker compose run --rm web pnpm db:seed
+#   docker compose up
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: frint3d
+      POSTGRES_PASSWORD: frint3d
+      POSTGRES_DB: frint3d
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U frint3d -d frint3d"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://frint3d:frint3d@postgres:5432/frint3d
+      REDIS_URL: redis://redis:6379
+      NEXTAUTH_URL: http://localhost:3000
+      UPLOAD_DIR: /data/uploads
+      SLICE_DIR: /data/slices
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/data/uploads
+      - slices_data:/data/slices
+      # Dev mode — kaynak değişikliği hot reload için mount.
+      # Prod'da (Faz 5) bu satır kalkacak, multi-stage build kullanılacak.
+      - ./apps/web:/app/apps/web
+      - ./apps/worker:/app/apps/worker
+      - ./packages:/app/packages
+      - /app/apps/web/node_modules
+      - /app/apps/web/.next
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://frint3d:frint3d@postgres:5432/frint3d
+      REDIS_URL: redis://redis:6379
+      UPLOAD_DIR: /data/uploads
+      SLICE_DIR: /data/slices
+      ORCA_SLICER_BIN: /usr/local/bin/orca-slicer
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/data/uploads
+      - slices_data:/data/slices
+      - ./apps/worker:/app/apps/worker
+      - ./apps/web:/app/apps/web
+      - /app/apps/worker/node_modules
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+  slices_data:

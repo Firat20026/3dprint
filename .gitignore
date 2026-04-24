@@ -1,0 +1,21 @@
+node_modules
+.next
+.turbo
+dist
+out
+.DS_Store
+*.log
+
+# env
+.env
+.env.local
+.env.*.local
+
+# data
+/data
+/uploads
+/slices
+
+# editor
+.vscode
+.idea

@@ -1,0 +1,32 @@
+{
+  "name": "frint3d",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@10.7.1",
+  "scripts": {
+    "dev": "pnpm --filter @frint3d/web dev",
+    "build": "pnpm --filter @frint3d/web build",
+    "start": "pnpm --filter @frint3d/web start",
+    "lint": "pnpm --filter @frint3d/web lint",
+    "worker:dev": "pnpm --filter @frint3d/worker dev",
+    "db:generate": "pnpm --filter @frint3d/web exec prisma generate",
+    "db:migrate": "pnpm --filter @frint3d/web exec prisma migrate dev",
+    "db:seed": "pnpm --filter @frint3d/web exec prisma db seed",
+    "db:studio": "pnpm --filter @frint3d/web exec prisma studio",
+    "db:push": "pnpm --filter @frint3d/web exec prisma db push"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "esbuild",
+      "sharp",
+      "unrs-resolver",
+      "bcrypt"
+    ]
+  }
+}

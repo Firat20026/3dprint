@@ -1,0 +1,25 @@
+{
+  "name": "@frint3d/worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/index.ts",
+    "start": "tsx --env-file=.env src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "prisma:generate": "prisma generate --schema ../web/prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bullmq": "^5.34.0",
+    "ioredis": "^5.4.2",
+    "yauzl": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.2",
+    "@types/yauzl": "^2.10.3",
+    "prisma": "^6.19.3",
+    "tsx": "^4.19.2",
+    "typescript": "^6.0.2"
+  }
+}

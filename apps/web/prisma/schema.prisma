@@ -1,0 +1,432 @@
+// frint3d database schema
+// docs: see ~/.claude/plans/bubbly-singing-bonbon.md (Veri Modeli)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// Auth (NextAuth-compatible)
+// =====================================================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  name          String?
+  image         String?
+  role          Role      @default(USER)
+  credits       Int       @default(0) // cached sum of CreditLedger
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts        Account[]
+  sessions        Session[]
+  designs         Design[]         @relation("UserDesigns")
+  sliceJobs       SliceJob[]
+  cartItems       CartItem[]
+  orders          Order[]
+  creditPurchases CreditPurchase[]
+  creditLedger    CreditLedger[]
+  meshyJobs       MeshyJob[]
+  shippingAddresses ShippingAddress[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// =====================================================
+// Inventory: materials & print profiles
+// =====================================================
+
+enum MaterialType {
+  PLA
+  PETG
+  TPU
+  PVA
+  PCTG
+  ABS
+  ASA
+  PA
+  PC
+  PET
+  CARBON_FIBER
+}
+
+model Material {
+  id              String       @id @default(cuid())
+  name            String       // "PLA Mat Siyah"
+  type            MaterialType
+  colorHex        String       // "#0a0a0a"
+  densityGcm3     Float        @default(1.24) // PLA default
+  diameterMm      Float        @default(1.75)
+  stockGrams      Float        @default(0)
+  pricePerGramTRY Float
+  isActive        Boolean      @default(true)
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  sliceJobs SliceJob[]
+  cartItems CartItem[]
+}
+
+model PrintProfile {
+  id              String   @id @default(cuid())
+  name            String   // "Standart"
+  layerHeightMm   Float    // 0.20
+  infillPercent   Int      // 15
+  supportsEnabled Boolean  @default(false)
+  speedMmPerS     Int      @default(180)
+  isDefault       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sliceJobs SliceJob[]
+  cartItems CartItem[]
+  designs   Design[]
+}
+
+// =====================================================
+// Designs (catalog + marketplace)
+// =====================================================
+
+enum DesignSource {
+  ADMIN
+  USER_MARKETPLACE
+  MESHY
+}
+
+enum DesignStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  ARCHIVED
+}
+
+model Design {
+  id                     String       @id @default(cuid())
+  slug                   String       @unique
+  title                  String
+  description            String?      @db.Text
+  thumbnailUrl           String?
+  modelFileKey           String       // path under /data/designs
+  fileFormat             String       // stl|3mf
+  source                 DesignSource @default(ADMIN)
+  status                 DesignStatus @default(DRAFT)
+  category               String?
+  tagsJson               Json         @default("[]")
+  basePriceMarkupPercent Int          @default(0) // marketplace seller markup
+  defaultProfileId       String?
+  uploaderId             String?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+
+  uploader        User?         @relation("UserDesigns", fields: [uploaderId], references: [id])
+  defaultProfile  PrintProfile? @relation(fields: [defaultProfileId], references: [id])
+  sliceJobs       SliceJob[]
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+
+  @@index([status, source])
+  @@index([category])
+}
+
+// =====================================================
+// Slicing
+// =====================================================
+
+enum SliceStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
+}
+
+model SliceJob {
+  id              String      @id @default(cuid())
+  userId          String?
+  designId        String?
+  sourceFileKey   String      // input STL/3MF path
+  fileHash        String      // sha256 of input — for cache lookups
+  materialId      String
+  profileId       String
+  status          SliceStatus @default(QUEUED)
+  errorText       String?     @db.Text
+  filamentGrams   Float?
+  filamentMeters  Float?
+  printSeconds    Int?
+  unitPriceTRY    Decimal?    @db.Decimal(10, 2)
+  resultGcodeKey  String?
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user      User?         @relation(fields: [userId], references: [id])
+  design    Design?       @relation(fields: [designId], references: [id])
+  material  Material      @relation(fields: [materialId], references: [id])
+  profile   PrintProfile  @relation(fields: [profileId], references: [id])
+  cartItems CartItem[]
+  orderItems OrderItem[]
+
+  @@index([userId, status])
+  @@index([fileHash, materialId, profileId]) // cache lookup
+}
+
+// =====================================================
+// Cart & Orders
+// =====================================================
+
+model CartItem {
+  id                 String   @id @default(cuid())
+  userId             String
+  sliceJobId         String?  // for upload-based items
+  designId           String?  // for catalog items
+  materialId         String
+  profileId          String
+  quantity           Int      @default(1)
+  snapshotPriceTRY   Decimal  @db.Decimal(10, 2)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sliceJob SliceJob?    @relation(fields: [sliceJobId], references: [id])
+  design   Design?      @relation(fields: [designId], references: [id])
+  material Material     @relation(fields: [materialId], references: [id])
+  profile  PrintProfile @relation(fields: [profileId], references: [id])
+
+  @@index([userId])
+}
+
+model ShippingAddress {
+  id          String   @id @default(cuid())
+  userId      String
+  fullName    String
+  phone       String
+  city        String
+  district    String
+  postalCode  String?
+  addressLine String   @db.Text
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([userId])
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  IN_QUEUE
+  PRINTING
+  SHIPPED
+  DELIVERED
+  CANCELED
+  REFUNDED
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  userId            String
+  status            OrderStatus @default(PENDING_PAYMENT)
+  iyzicoToken       String?     @unique
+  iyzicoPaymentId   String?
+  iyzicoConvId      String?     @unique // conversation id
+  subtotalTRY       Decimal     @db.Decimal(10, 2)
+  shippingTRY       Decimal     @db.Decimal(10, 2)
+  totalTRY          Decimal     @db.Decimal(10, 2)
+  shippingAddressId String?
+  shippingSnapshot  Json
+  cargoTrackingNo   String?
+  cargoCarrier      String?
+  notes             String?     @db.Text
+  paidAt            DateTime?
+  shippedAt         DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id])
+  shippingAddress ShippingAddress? @relation(fields: [shippingAddressId], references: [id])
+  items           OrderItem[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id            String   @id @default(cuid())
+  orderId       String
+  sliceJobId    String?
+  designId      String?
+  quantity      Int
+  unitPriceTRY  Decimal  @db.Decimal(10, 2)
+  totalPriceTRY Decimal  @db.Decimal(10, 2)
+  snapshot      Json     // material/profile/file info at time of order
+  createdAt     DateTime @default(now())
+
+  order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sliceJob SliceJob? @relation(fields: [sliceJobId], references: [id])
+  design   Design?   @relation(fields: [designId], references: [id])
+
+  @@index([orderId])
+}
+
+// =====================================================
+// Credits & Meshy AI
+// =====================================================
+
+model CreditPack {
+  id        String   @id @default(cuid())
+  name      String   // "Başlangıç"
+  credits   Int      // 100
+  priceTRY  Decimal  @db.Decimal(10, 2)
+  badge     String?  // "Popüler", "En İyi Değer"
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchases CreditPurchase[]
+}
+
+enum CreditPurchaseStatus {
+  PENDING_PAYMENT
+  PAID
+  CANCELED
+  REFUNDED
+}
+
+model CreditPurchase {
+  id              String               @id @default(cuid())
+  userId          String
+  packId          String
+  credits         Int
+  priceTRY        Decimal              @db.Decimal(10, 2)
+  status          CreditPurchaseStatus @default(PENDING_PAYMENT)
+  iyzicoToken     String?              @unique
+  iyzicoPaymentId String?
+  iyzicoConvId    String?              @unique
+  paidAt          DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  user User       @relation(fields: [userId], references: [id])
+  pack CreditPack @relation(fields: [packId], references: [id])
+
+  @@index([userId])
+}
+
+enum LedgerReason {
+  PURCHASE
+  MESHY_TEXT
+  MESHY_IMAGE
+  REFUND
+  ADMIN_GRANT
+  ADMIN_REVOKE
+}
+
+model CreditLedger {
+  id        String       @id @default(cuid())
+  userId    String
+  delta     Int          // +/- credits
+  reason    LedgerReason
+  refId     String?      // CreditPurchase.id or MeshyJob.id
+  note      String?
+  createdAt DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+enum MeshyMode {
+  TEXT
+  IMAGE
+}
+
+enum MeshyStatus {
+  PENDING
+  RUNNING
+  DONE
+  FAILED
+}
+
+model MeshyJob {
+  id             String      @id @default(cuid())
+  userId         String
+  mode           MeshyMode
+  prompt         String?     @db.Text
+  imageKey       String?
+  status         MeshyStatus @default(PENDING)
+  errorText      String?     @db.Text
+  modelFileKey   String?     // resulting glb/stl path
+  thumbnailUrl   String?
+  creditsCharged Int
+  externalJobId  String?     // Meshy API job id (when real provider)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+}
+
+// =====================================================
+// Settings (singleton key/value store)
+// =====================================================
+
+model Settings {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}

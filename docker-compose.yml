@@ -58,13 +58,6 @@ services:
     volumes:
       - uploads_data:/data/uploads
       - slices_data:/data/slices
-      # Dev mode — kaynak değişikliği hot reload için mount.
-      # Prod'da (Faz 5) bu satır kalkacak, multi-stage build kullanılacak.
-      - ./apps/web:/app/apps/web
-      - ./apps/worker:/app/apps/worker
-      - ./packages:/app/packages
-      - /app/apps/web/node_modules
-      - /app/apps/web/.next
 
   worker:
     build:
@@ -86,9 +79,6 @@ services:
     volumes:
       - uploads_data:/data/uploads
       - slices_data:/data/slices
-      - ./apps/worker:/app/apps/worker
-      - ./apps/web:/app/apps/web
-      - /app/apps/worker/node_modules
 
 volumes:
   postgres_data:

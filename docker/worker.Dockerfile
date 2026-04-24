@@ -25,4 +25,5 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm --filter @frint3d/web exec prisma generate
 
-CMD ["pnpm", "--filter", "@frint3d/worker", "dev"]
+WORKDIR /app/apps/worker
+CMD ["pnpm", "dev"]

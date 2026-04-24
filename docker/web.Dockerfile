@@ -24,4 +24,5 @@ RUN pnpm --filter @frint3d/web exec prisma generate
 
 EXPOSE 3000
 ENV NEXT_TELEMETRY_DISABLED=1
-CMD ["pnpm", "--filter", "@frint3d/web", "dev"]
+WORKDIR /app/apps/web
+CMD ["pnpm", "dev"]

@@ -88,23 +88,6 @@ export function publicOrigin(req: Request): string {
   }
 }
 
-/**
- * Same idea as publicOrigin() but for contexts where we don't have a Request
- * (e.g. inside a server action triggered by a redirect). Headers-based.
- */
-export function publicOriginFromHeaders(
-  headers: Headers | null | undefined,
-): string {
-  const fromEnv = process.env.NEXTAUTH_URL?.replace(/\/$/, "");
-  if (fromEnv) return fromEnv;
-  if (headers) {
-    const proto = headers.get("x-forwarded-proto") ?? "https";
-    const host = headers.get("x-forwarded-host") ?? headers.get("host");
-    if (host) return `${proto}://${host}`;
-  }
-  return "http://localhost:3000";
-}
-
 export type BuyerInputUser = {
   id: string;
   name: string | null;

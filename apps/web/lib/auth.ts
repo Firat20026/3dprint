@@ -83,6 +83,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
   },
+  events: {
+    async signIn({ user, account, isNewUser }) {
+      // Lazy import to avoid bundling observability into edge auth.config.
+      const { track, EVENTS } = await import("@/lib/observability");
+      void track(
+        isNewUser ? EVENTS.USER_SIGNUP : EVENTS.USER_LOGIN,
+        {
+          provider: account?.provider ?? "credentials",
+          isNewUser: Boolean(isNewUser),
+        },
+        { userId: user.id ?? null },
+      );
+    },
+    async signOut(message) {
+      const { track, EVENTS } = await import("@/lib/observability");
+      // NextAuth v5: message can be { token } (jwt) or { session } (db). We
+      // only need the userId when present.
+      const userId =
+        ("token" in message && message.token && "id" in message.token
+          ? (message.token.id as string | undefined)
+          : undefined) ??
+        ("session" in message && message.session && "userId" in message.session
+          ? (message.session.userId as string | undefined)
+          : undefined) ??
+        null;
+      void track(EVENTS.USER_LOGOUT, {}, { userId });
+    },
+  },
 });
 
 export async function requireUser() {

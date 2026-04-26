@@ -8,6 +8,7 @@ const sections = [
   { href: "/admin/orders", label: "Siparişler" },
   { href: "/admin/queue", label: "Baskı Kuyruğu" },
   { href: "/admin/materials", label: "Materyaller" },
+  { href: "/admin/observability", label: "Olaylar & Hatalar" },
   { href: "/admin/settings", label: "Ayarlar" },
 ];
 

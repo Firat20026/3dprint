@@ -6,11 +6,17 @@
  * Kredi paketi satın alma akışı. CreditPurchase draft yaratır, iyzico
  * CheckoutForm initialize eder; callback `/api/payments/iyzico/credits-callback`
  * CreditLedger'a PURCHASE yazar + User.credits cache'i artırır.
+ *
+ * Buyer bilgisi: User profilinden alınır (name, email zorunlu; phone, TCKN
+ * opsiyonel — yoksa sandbox dummy değerleri gönderilir, kullanıcıya profilini
+ * tamamlama uyarısı UI tarafında verilir).
  */
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { initializePayment } from "@/lib/iyzico";
+import { buildBuyer, extractClientIp } from "@/lib/iyzico-helpers";
+import { track, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,7 +38,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "pack not available" }, { status: 404 });
   }
 
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      identityNumber: true,
+      city: true,
+      registrationAddress: true,
+    },
+  });
   if (!user) {
     return NextResponse.json({ error: "user not found" }, { status: 401 });
   }
@@ -52,40 +69,39 @@ export async function POST(req: Request) {
     },
   });
 
+  void track(
+    EVENTS.CREDIT_PURCHASE_INITIATED,
+    {
+      purchaseId: purchase.id,
+      packId: pack.id,
+      credits: pack.credits,
+      priceTRY: Number(pack.priceTRY),
+    },
+    { userId: user.id },
+  );
+
   const origin = new URL(req.url).origin;
   const callbackUrl = `${origin}/api/payments/iyzico/credits-callback`;
 
-  const nameParts = (user.name ?? user.email).trim().split(/\s+/);
-  const surname = nameParts.length > 1 ? (nameParts.pop() ?? "-") : "-";
-  const name = nameParts.join(" ") || "Müşteri";
-
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "85.34.78.112";
+  const buyer = buildBuyer({
+    user,
+    ip: extractClientIp(req),
+  });
 
   const init = await initializePayment({
     orderId: purchase.id,
     conversationId,
     priceTRY: Number(pack.priceTRY),
     paidPriceTRY: Number(pack.priceTRY),
-    buyer: {
-      id: user.id,
-      name,
-      surname,
-      email: user.email,
-      gsmNumber: "+905555555555",
-      identityNumber: "11111111111",
-      registrationAddress: "-",
-      city: "İstanbul",
-      country: "Türkiye",
-      ip,
-    },
+    buyer,
     shippingAddress: {
-      contactName: user.name ?? user.email,
-      city: "İstanbul",
-      country: "Türkiye",
-      address: "-",
+      // Virtual purchase but iyzico still wants a shippingAddress object.
+      // Reuse buyer's known city/address so the data shown in iyzico merchant
+      // panel matches the actual customer.
+      contactName: `${buyer.name} ${buyer.surname}`.trim(),
+      city: buyer.city,
+      country: buyer.country,
+      address: buyer.registrationAddress,
     },
     basketItems: [
       {
@@ -111,6 +127,16 @@ export async function POST(req: Request) {
     where: { id: purchase.id },
     data: { iyzicoToken: init.token },
   });
+
+  void track(
+    EVENTS.PAYMENT_INITIATED,
+    {
+      kind: "credits",
+      purchaseId: purchase.id,
+      provider: "iyzico",
+    },
+    { userId: user.id },
+  );
 
   return NextResponse.json({
     purchaseId: purchase.id,

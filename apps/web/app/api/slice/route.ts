@@ -20,6 +20,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { saveUpload } from "@/lib/storage";
 import { enqueueSlice } from "@/lib/queue";
+import { validateModelFile, type ValidExt } from "@/lib/file-validators";
+import { track, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,6 +68,14 @@ export async function POST(req: Request) {
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());
+
+  // Magic-byte validation. Extension alone is bypassable; here we sniff the
+  // first bytes to ensure the upload actually matches the format we accept.
+  const validation = validateModelFile(bytes, ("." + ext) as ValidExt);
+  if (!validation.ok) {
+    return NextResponse.json({ error: validation.reason }, { status: 400 });
+  }
+
   const fileHash = createHash("sha256").update(bytes).digest("hex");
 
   // Cache lookup — same bytes + same print settings = same result.
@@ -79,6 +89,11 @@ export async function POST(req: Request) {
     orderBy: { createdAt: "desc" },
   });
   if (cached) {
+    void track(
+      EVENTS.SLICE_CACHE_HIT,
+      { sliceJobId: cached.id, fileHash, materialId, profileId },
+      { userId: session?.user?.id ?? null },
+    );
     return NextResponse.json({ jobId: cached.id, cached: true });
   }
 
@@ -96,6 +111,18 @@ export async function POST(req: Request) {
   });
 
   await enqueueSlice(job.id);
+
+  void track(
+    EVENTS.SLICE_QUEUED,
+    {
+      sliceJobId: job.id,
+      fileHash,
+      materialId,
+      profileId,
+      bytes: bytes.length,
+    },
+    { userId: session?.user?.id ?? null },
+  );
 
   return NextResponse.json({ jobId: job.id, cached: false });
 }

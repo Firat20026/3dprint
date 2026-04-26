@@ -15,9 +15,12 @@ import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { saveUpload } from "@/lib/storage";
 import { scheduleMockCompletion } from "@/lib/meshy/mock";
+import { track, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const MAX_PROMPT_LENGTH = 1000;
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -44,6 +47,12 @@ export async function POST(req: Request) {
 
   if (mode === "TEXT" && prompt.length < 3) {
     return NextResponse.json({ error: "prompt en az 3 karakter" }, { status: 400 });
+  }
+  if (prompt && prompt.length > MAX_PROMPT_LENGTH) {
+    return NextResponse.json(
+      { error: `prompt en fazla ${MAX_PROMPT_LENGTH} karakter olabilir` },
+      { status: 400 },
+    );
   }
   if (mode === "IMAGE" && !(image instanceof File)) {
     return NextResponse.json({ error: "image dosyası gerekli" }, { status: 400 });
@@ -111,6 +120,22 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ error: msg }, { status: 500 });
   }
+
+  void track(
+    EVENTS.MESHY_JOB_STARTED,
+    { jobId: job.id, mode, creditsCharged: cost, hasPrompt: Boolean(prompt) },
+    { userId },
+  );
+  void track(
+    EVENTS.CREDITS_SPENT,
+    {
+      source: "meshy",
+      refId: job.id,
+      amount: cost,
+      reason: mode === "TEXT" ? "MESHY_TEXT" : "MESHY_IMAGE",
+    },
+    { userId },
+  );
 
   scheduleMockCompletion(job.id);
 

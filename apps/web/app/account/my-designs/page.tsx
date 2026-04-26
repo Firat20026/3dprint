@@ -9,6 +9,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { saveUpload } from "@/lib/storage";
 import { slugify } from "@/lib/designs";
+import { track, EVENTS } from "@/lib/observability";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +66,7 @@ async function submitDesign(formData: FormData) {
     slug = `${baseSlug}-${i}`;
   }
 
-  await prisma.design.create({
+  const created = await prisma.design.create({
     data: {
       slug,
       title,
@@ -78,6 +79,46 @@ async function submitDesign(formData: FormData) {
       source: "USER_MARKETPLACE",
       basePriceMarkupPercent: markup,
       uploaderId: session.user.id,
+    },
+    select: { id: true, title: true },
+  });
+
+  void track(
+    EVENTS.DESIGN_SUBMITTED,
+    { designId: created.id, title: created.title, markup },
+    { userId: session.user.id },
+  );
+
+  revalidatePath("/account/my-designs");
+  revalidatePath("/admin/designs");
+}
+
+async function resubmitDesign(formData: FormData) {
+  "use server";
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("UNAUTHORIZED");
+  const id = String(formData.get("id") ?? "");
+  if (!id) throw new Error("id required");
+
+  // Owner-only: ensure the design belongs to this user before status change.
+  const design = await prisma.design.findUnique({
+    where: { id },
+    select: { id: true, uploaderId: true, status: true },
+  });
+  if (!design || design.uploaderId !== session.user.id) {
+    throw new Error("NOT_FOUND");
+  }
+  if (design.status !== "REJECTED") {
+    throw new Error("Sadece reddedilmiş tasarımlar yeniden gönderilebilir");
+  }
+
+  await prisma.design.update({
+    where: { id },
+    data: {
+      status: "PENDING_REVIEW",
+      rejectionReason: null,
+      reviewedAt: null,
+      reviewedById: null,
     },
   });
 
@@ -237,9 +278,17 @@ export default async function MyDesignsPage() {
                 {designs.map((d) => (
                   <tr
                     key={d.id}
-                    className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                    className="border-t border-[var(--color-border)] bg-[var(--color-surface)] align-top"
                   >
-                    <td className="px-4 py-3 font-medium">{d.title}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-medium">{d.title}</div>
+                      {d.status === "REJECTED" && d.rejectionReason && (
+                        <div className="mt-2 max-w-md rounded-[var(--radius-button)] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-2 py-1.5 text-xs text-[var(--color-danger)]">
+                          <span className="font-semibold">Red sebebi:</span>{" "}
+                          {d.rejectionReason}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-[var(--color-text-muted)]">
                       {d.category ?? "—"}
                     </td>
@@ -257,6 +306,11 @@ export default async function MyDesignsPage() {
                                 ? "accent"
                                 : "default"
                         }
+                        className={
+                          d.status === "REJECTED"
+                            ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/15 text-[var(--color-danger)]"
+                            : ""
+                        }
                       >
                         {STATUS_LABELS[d.status] ?? d.status}
                       </Badge>
@@ -272,6 +326,13 @@ export default async function MyDesignsPage() {
                         >
                           Katalogda →
                         </Link>
+                      ) : d.status === "REJECTED" ? (
+                        <form action={resubmitDesign}>
+                          <input type="hidden" name="id" value={d.id} />
+                          <SubmitButton size="sm" pendingLabel="Gönderiliyor...">
+                            Yeniden Gönder
+                          </SubmitButton>
+                        </form>
                       ) : (
                         <span className="text-sm text-[var(--color-text-subtle)]">—</span>
                       )}

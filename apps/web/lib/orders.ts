@@ -96,8 +96,17 @@ export async function createOrderDraft(input: CreateOrderInput) {
   const lines: Array<Omit<Prisma.OrderItemCreateManyOrderInput, "orderId">> = [];
 
   for (const item of input.items) {
-    if (item.quantity <= 0) continue;
-    const qty = Math.min(20, Math.floor(item.quantity));
+    if (!Number.isFinite(item.quantity) || item.quantity < 1) {
+      throw new Error(
+        `quantity must be at least 1 (got ${item.quantity}) for item`,
+      );
+    }
+    if (item.quantity > 20) {
+      throw new Error(
+        `quantity must be at most 20 (got ${item.quantity}) for item`,
+      );
+    }
+    const qty = Math.floor(item.quantity);
 
     if (item.kind === "slice") {
       const job = jobById.get(item.sliceJobId);

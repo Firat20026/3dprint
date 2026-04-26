@@ -4,11 +4,11 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 import { requireAdmin } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Input, Label } from "@/components/ui/input";
 import { saveUpload } from "@/lib/storage";
 import { slugify } from "@/lib/designs";
+import { track, EVENTS } from "@/lib/observability";
 import type { DesignStatus } from "@prisma/client";
 
 const ALLOWED_EXT = [".stl", ".3mf"] as const;
@@ -93,13 +93,23 @@ async function createDesign(formData: FormData) {
 
 async function approveDesign(formData: FormData) {
   "use server";
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = String(formData.get("id") ?? "");
   if (!id) throw new Error("id gerekli");
   await prisma.design.update({
     where: { id },
-    data: { status: "PUBLISHED" },
+    data: {
+      status: "PUBLISHED",
+      reviewedAt: new Date(),
+      reviewedById: admin.id,
+      rejectionReason: null,
+    },
   });
+  void track(
+    EVENTS.DESIGN_APPROVED,
+    { designId: id, reviewerId: admin.id },
+    { userId: admin.id },
+  );
   revalidatePath("/admin/designs");
   revalidatePath("/account/my-designs");
   revalidatePath("/designs");
@@ -107,13 +117,26 @@ async function approveDesign(formData: FormData) {
 
 async function rejectDesign(formData: FormData) {
   "use server";
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = String(formData.get("id") ?? "");
+  const reason = String(formData.get("reason") ?? "").trim();
   if (!id) throw new Error("id gerekli");
+  if (reason.length < 3) throw new Error("Red sebebi gerekli (en az 3 karakter)");
+  if (reason.length > 500) throw new Error("Red sebebi en fazla 500 karakter");
   await prisma.design.update({
     where: { id },
-    data: { status: "REJECTED" },
+    data: {
+      status: "REJECTED",
+      reviewedAt: new Date(),
+      reviewedById: admin.id,
+      rejectionReason: reason,
+    },
   });
+  void track(
+    EVENTS.DESIGN_REJECTED,
+    { designId: id, reviewerId: admin.id, reason: reason.slice(0, 200) },
+    { userId: admin.id },
+  );
   revalidatePath("/admin/designs");
   revalidatePath("/account/my-designs");
 }
@@ -204,19 +227,49 @@ export default async function AdminDesignsPage() {
                       {d.createdAt.toLocaleDateString("tr-TR")}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        <form action={approveDesign}>
-                          <input type="hidden" name="id" value={d.id} />
-                          <SubmitButton size="sm" pendingLabel="Onaylanıyor">
-                            Onayla
-                          </SubmitButton>
-                        </form>
-                        <form action={rejectDesign}>
-                          <input type="hidden" name="id" value={d.id} />
-                          <SubmitButton size="sm" variant="ghost" pendingLabel="Reddediliyor">
-                            Reddet
-                          </SubmitButton>
-                        </form>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/designs/${d.id}/review`}
+                            className="inline-flex h-9 items-center rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-xs text-[var(--color-text)] hover:bg-[var(--color-surface-3)]"
+                          >
+                            İncele
+                          </Link>
+                          <form action={approveDesign}>
+                            <input type="hidden" name="id" value={d.id} />
+                            <SubmitButton size="sm" pendingLabel="Onaylanıyor">
+                              Onayla
+                            </SubmitButton>
+                          </form>
+                        </div>
+                        <details className="text-xs">
+                          <summary className="cursor-pointer text-right text-[var(--color-danger)] hover:underline">
+                            Hızlı reddet ↓
+                          </summary>
+                          <form
+                            action={rejectDesign}
+                            className="mt-2 flex flex-col items-end gap-1.5"
+                          >
+                            <input type="hidden" name="id" value={d.id} />
+                            <textarea
+                              name="reason"
+                              required
+                              minLength={3}
+                              maxLength={500}
+                              rows={2}
+                              placeholder="Red sebebi (kullanıcı görecek)"
+                              className="w-64 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2 py-1 text-xs text-[var(--color-text)] focus:border-[var(--color-danger)] focus:outline-none"
+                            />
+                            <SubmitButton
+                              size="sm"
+                              variant="ghost"
+                              pendingLabel="Reddediliyor"
+                              style={{ color: "var(--color-danger)" }}
+                            >
+                              Reddet
+                            </SubmitButton>
+                          </form>
+                        </details>
                       </div>
                     </td>
                   </tr>

@@ -28,19 +28,29 @@ model User {
   image         String?
   role          Role      @default(USER)
   credits       Int       @default(0) // cached sum of CreditLedger
+
+  // Profile (used for iyzico buyer defaults and shipping convenience)
+  phone               String?  // +90 normalized format
+  identityNumber      String?  // TCKN, 11 digits — required for production iyzico in Turkey
+  city                String?
+  registrationAddress String?
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts        Account[]
-  sessions        Session[]
-  designs         Design[]         @relation("UserDesigns")
-  sliceJobs       SliceJob[]
-  cartItems       CartItem[]
-  orders          Order[]
-  creditPurchases CreditPurchase[]
-  creditLedger    CreditLedger[]
-  meshyJobs       MeshyJob[]
+  accounts          Account[]
+  sessions          Session[]
+  designs           Design[]         @relation("UserDesigns")
+  reviewedDesigns   Design[]         @relation("DesignReviewer")
+  sliceJobs         SliceJob[]
+  cartItems         CartItem[]
+  orders            Order[]
+  creditPurchases   CreditPurchase[]
+  creditLedger      CreditLedger[]
+  meshyJobs         MeshyJob[]
   shippingAddresses ShippingAddress[]
+  analyticsEvents   AnalyticsEvent[]
+  errorLogs         ErrorLog[]
 }
 
 model Account {
@@ -165,10 +175,17 @@ model Design {
   basePriceMarkupPercent Int          @default(0) // marketplace seller markup
   defaultProfileId       String?
   uploaderId             String?
+
+  // Review workflow
+  rejectionReason String?   @db.Text
+  reviewedAt      DateTime?
+  reviewedById    String?
+
   createdAt              DateTime     @default(now())
   updatedAt              DateTime     @updatedAt
 
   uploader        User?         @relation("UserDesigns", fields: [uploaderId], references: [id])
+  reviewedBy      User?         @relation("DesignReviewer", fields: [reviewedById], references: [id])
   defaultProfile  PrintProfile? @relation(fields: [defaultProfileId], references: [id])
   sliceJobs       SliceJob[]
   cartItems       CartItem[]
@@ -387,6 +404,10 @@ model CreditLedger {
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
+  // Idempotency: prevents duplicate refunds/grants for the same source.
+  // refId is null for some manual adjustments — composite unique allows multiple null rows
+  // in PostgreSQL only with the @@unique on a tuple where one part is non-null.
+  @@unique([refId, reason], name: "uniq_ledger_ref_reason")
 }
 
 enum MeshyMode {
@@ -429,4 +450,59 @@ model Settings {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+// =====================================================
+// Observability: events + error logs
+// =====================================================
+
+enum EventLevel {
+  DEBUG
+  INFO
+  WARN
+}
+
+model AnalyticsEvent {
+  id         String     @id @default(cuid())
+  name       String     // e.g. "USER_SIGNUP", "PAYMENT_SUCCESS"
+  level      EventLevel @default(INFO)
+  userId     String?
+  sessionId  String?
+  properties Json       @default("{}")
+  ipAddress  String?
+  userAgent  String?    @db.Text
+  occurredAt DateTime   @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([name, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([occurredAt])
+}
+
+enum ErrorSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model ErrorLog {
+  id            String        @id @default(cuid())
+  message       String        @db.Text
+  stack         String?       @db.Text
+  severity      ErrorSeverity @default(MEDIUM)
+  source        String        // e.g. "api:checkout", "worker:slicer"
+  userId        String?
+  requestPath   String?
+  requestMethod String?
+  metadata      Json          @default("{}")
+  resolved      Boolean       @default(false)
+  occurredAt    DateTime      @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([severity, resolved, occurredAt])
+  @@index([source, occurredAt])
+  @@index([resolved, occurredAt])
 }

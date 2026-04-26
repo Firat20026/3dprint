@@ -133,8 +133,14 @@ export default async function AccountPage() {
                 E-postanı değiştirmek için destekle iletişime geç.
               </p>
             </div>
-            <div>
+            <div className="flex flex-wrap items-center gap-3">
               <SubmitButton pendingLabel="Kaydediliyor...">Kaydet</SubmitButton>
+              <Link
+                href="/account/settings"
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-brand-2)] hover:underline"
+              >
+                Detaylı ayarlar (telefon, TCKN, adres, şifre) →
+              </Link>
             </div>
           </form>
         </section>

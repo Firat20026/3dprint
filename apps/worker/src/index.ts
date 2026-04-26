@@ -19,25 +19,19 @@ import { absolutePath } from "./storage.js";
 import { runSlicer } from "./slicer.js";
 import { getSettings } from "./settings.js";
 import { calculatePrice } from "./pricing.js";
+import { track, logError } from "./observability.js";
 
 const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 const QUEUE_NAME = "slice";
 
 const connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null });
 connection.on("connect", () => console.log(`[worker] redis → ${REDIS_URL}`));
-connection.on("error", (err) => console.error("[worker] redis:", err.message));
+connection.on("error", (err) => {
+  console.error("[worker] redis:", err.message);
+  void logError(err, { source: "worker:redis", severity: "HIGH" });
+});
 
 type SliceJobPayload = { sliceJobId: string };
-
-// Density by material type — used to convert volume → grams in OrcaSlicer filament.json.
-// Also used by mock slicer. Values in g/cm³ at room temp (common vendor spec).
-const DENSITY_BY_TYPE: Record<string, number> = {
-  PLA: 1.24,
-  PETG: 1.27,
-  TPU: 1.21,
-  ABS: 1.04,
-  ASA: 1.07,
-};
 
 const worker = new Worker<SliceJobPayload>(
   QUEUE_NAME,
@@ -58,12 +52,15 @@ const worker = new Worker<SliceJobPayload>(
       });
 
       const inputPath = absolutePath(sj.sourceFileKey);
-      const density = DENSITY_BY_TYPE[sj.material.type] ?? 1.24;
+      // Density now comes from DB (Material.densityGcm3) rather than a hardcoded
+      // map by enum type. Admins can edit material density and the slicer picks
+      // it up immediately.
+      const density = sj.material.densityGcm3;
 
       console.log(
         `[worker] slicing ${path.basename(inputPath)} ` +
           `layer=${sj.profile.layerHeightMm}mm infill=${sj.profile.infillPercent}% ` +
-          `material=${sj.material.name}`,
+          `material=${sj.material.name} density=${density}`,
       );
 
       const result = await runSlicer({
@@ -100,6 +97,20 @@ const worker = new Worker<SliceJobPayload>(
           `grams=${result.filamentGrams} seconds=${result.printSeconds} ` +
           `price=₺${breakdown.unitPriceTRY} elapsed=${elapsedMs}ms`,
       );
+
+      void track(
+        "SLICE_DONE",
+        {
+          sliceJobId,
+          filamentGrams: result.filamentGrams,
+          printSeconds: result.printSeconds,
+          unitPriceTRY: Number(breakdown.unitPriceTRY),
+          materialId: sj.materialId,
+          profileId: sj.profileId,
+          elapsedMs,
+        },
+        { userId: sj.userId },
+      );
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`[worker] FAILED sliceJob=${sliceJobId}: ${msg}`);
@@ -111,6 +122,12 @@ const worker = new Worker<SliceJobPayload>(
           finishedAt: new Date(),
         },
       });
+      void logError(err, {
+        source: "worker:slicer",
+        severity: "HIGH",
+        metadata: { sliceJobId },
+      });
+      void track("SLICE_FAILED", { sliceJobId, error: msg.slice(0, 500) });
       // Don't rethrow — BullMQ would retry a deterministic slicer for the same inputs,
       // which won't help. Admin can manually requeue.
     }

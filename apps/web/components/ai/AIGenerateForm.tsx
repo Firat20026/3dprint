@@ -209,6 +209,11 @@ export function AIGenerateForm({
             <p className="text-sm text-[var(--color-text-muted)]">
               {job.errorText ?? "Bilinmeyen bir hata oluştu."}
             </p>
+            {job.creditsCharged > 0 && (
+              <p className="rounded-full bg-[var(--color-success)]/15 px-3 py-1 text-xs text-[var(--color-success)]">
+                ✓ {job.creditsCharged} kredi iade edildi
+              </p>
+            )}
           </div>
         ) : job.status !== "DONE" ? (
           <div className="flex h-[420px] flex-col items-center justify-center gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]">

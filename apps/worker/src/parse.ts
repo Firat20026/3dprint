@@ -46,13 +46,13 @@ export async function parseGcode3mf(buffer: Buffer): Promise<SliceResult> {
 /** Extract `used_g="12.34"` (grams) from slice_info XML. */
 export function extractFilamentGrams(xml: string): number {
   const m = xml.match(/used_g\s*=\s*"([0-9.]+)"/i);
-  return m ? parseFloat(m[1]) : 0;
+  return m && m[1] ? parseFloat(m[1]) : 0;
 }
 
 /** Extract `used_m="1.234"` (meters) — optional. */
 export function extractFilamentMeters(xml: string): number {
   const m = xml.match(/used_m\s*=\s*"([0-9.]+)"/i);
-  return m ? parseFloat(m[1]) : 0;
+  return m && m[1] ? parseFloat(m[1]) : 0;
 }
 
 /**
@@ -70,7 +70,7 @@ export function extractPrintSeconds(gcode: string): number {
     /estimated printing time\s*\(normal mode\)\s*=\s*([^\n\r]+)/i,
   );
   const any = normal ?? window.match(/estimated printing time[^=]*=\s*([^\n\r]+)/i);
-  if (!any) return 0;
+  if (!any || !any[1]) return 0;
   return parseDuration(any[1].trim());
 }
 
@@ -79,6 +79,7 @@ export function parseDuration(s: string): number {
   let total = 0;
   const parts = s.matchAll(/(\d+(?:\.\d+)?)\s*([dhms])/gi);
   for (const p of parts) {
+    if (!p[1] || !p[2]) continue;
     const n = parseFloat(p[1]);
     switch (p[2].toLowerCase()) {
       case "d": total += n * 86400; break;

@@ -6,19 +6,21 @@
  *
  * `lib/meshy/client.ts` interface'i ileride real provider için aynı kalır;
  * şu an yalnızca mock path kullanılıyor — `MESHY_PROVIDER=real` yapıldığında
- * `real.ts` yazılır (ayrı PR).
+ * `real.ts` yazılır (ayrı PR). Real provider de aynı `markJobFailed` helper'ını
+ * çağıracak, böylece refund logic tek yerde durur.
  */
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { mkdir, copyFile, readFile } from "node:fs/promises";
 import path from "node:path";
 import { prisma } from "@/lib/db";
+import { refundMeshyJob } from "@/lib/meshy/refund";
+import { track, logError, EVENTS } from "@/lib/observability";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR ?? "./data/uploads";
 
 /**
  * Meshy mock — `sample/cube_20mm.stl`'yi yeni bir meshy key altına kopyalar.
- * Gerçek implementasyonda burada external API sonucunu indiriyor olacağız.
  */
 async function produceMockArtifact(): Promise<{
   modelFileKey: string;
@@ -29,12 +31,10 @@ async function produceMockArtifact(): Promise<{
     "../../samples/cube_20mm.stl",
   );
 
-  // cwd = apps/web; monorepo kökündeki samples/ dizini
   let bytes: Buffer | null = null;
   try {
     bytes = await readFile(sampleSource);
   } catch {
-    // dev sırasında farklı cwd'de çalışıyorsa fallback: process.cwd() altında samples/
     const fallback = path.resolve(process.cwd(), "samples/cube_20mm.stl");
     bytes = await readFile(fallback).catch(() => null);
   }
@@ -45,12 +45,51 @@ async function produceMockArtifact(): Promise<{
   const fullDest = path.join(UPLOAD_DIR, key);
   await mkdir(path.dirname(fullDest), { recursive: true });
 
-  // copyFile yerine buffer'ı yaz — her iki yol da tamam; buffer zaten elimizde.
   const { writeFile } = await import("node:fs/promises");
   await writeFile(fullDest, bytes);
-  void copyFile; // type import kept for readability
+  void copyFile;
 
   return { modelFileKey: key, thumbnailUrl: null };
+}
+
+/**
+ * Centralized "mark job failed and refund credits". Use this from any provider
+ * (mock or real) so refund logic stays in one place.
+ */
+export async function markMeshyJobFailed(
+  jobId: string,
+  error: unknown,
+): Promise<void> {
+  const message = error instanceof Error ? error.message : String(error);
+
+  // Update status first; if this fails we still want to attempt refund.
+  await prisma.meshyJob
+    .update({
+      where: { id: jobId },
+      data: {
+        status: "FAILED",
+        errorText: message.slice(0, 2000),
+      },
+    })
+    .catch(() => void 0);
+
+  void track(EVENTS.MESHY_JOB_FAILED, {
+    jobId,
+    error: message.slice(0, 500),
+  });
+
+  try {
+    await refundMeshyJob(jobId);
+  } catch (e) {
+    // Refund infra is best-effort; log but don't propagate (caller already
+    // failed the job, we don't want to mask the original error with a
+    // refund-write error).
+    await logError(e, {
+      source: "meshy:refund",
+      severity: "HIGH",
+      metadata: { jobId },
+    });
+  }
 }
 
 /**
@@ -66,24 +105,22 @@ export function scheduleMockCompletion(jobId: string, delayMs = 3000): void {
         data: { status: "RUNNING" },
       });
       const { modelFileKey, thumbnailUrl } = await produceMockArtifact();
-      await prisma.meshyJob.update({
+      const updated = await prisma.meshyJob.update({
         where: { id: jobId },
         data: {
           status: "DONE",
           modelFileKey,
           thumbnailUrl: thumbnailUrl ?? undefined,
         },
+        select: { userId: true },
       });
+      void track(
+        EVENTS.MESHY_JOB_DONE,
+        { jobId, modelFileKey },
+        { userId: updated.userId },
+      );
     } catch (e) {
-      await prisma.meshyJob
-        .update({
-          where: { id: jobId },
-          data: {
-            status: "FAILED",
-            errorText: e instanceof Error ? e.message : "mock failed",
-          },
-        })
-        .catch(() => void 0);
+      await markMeshyJobFailed(jobId, e);
     }
   }, delayMs);
 }

@@ -12,6 +12,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createOrderDraft } from "@/lib/orders";
 import { initializePayment } from "@/lib/iyzico";
+import { buildBuyer, extractClientIp } from "@/lib/iyzico-helpers";
+import { track, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,7 +43,28 @@ export async function POST(req: Request) {
     );
   }
 
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+  void track(
+    EVENTS.ORDER_CREATED,
+    {
+      orderId: order.id,
+      itemCount: order.items.length,
+      totalTRY: Number(order.totalTRY),
+    },
+    { userId: session.user.id },
+  );
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      phone: true,
+      identityNumber: true,
+      city: true,
+      registrationAddress: true,
+    },
+  });
   if (!user) {
     return NextResponse.json({ error: "user not found" }, { status: 401 });
   }
@@ -49,32 +72,24 @@ export async function POST(req: Request) {
   const origin = new URL(req.url).origin;
   const callbackUrl = `${origin}/api/payments/iyzico/callback`;
 
-  const nameParts = (body.shipping.fullName as string).trim().split(/\s+/);
-  const surname = nameParts.pop() ?? "-";
-  const name = nameParts.join(" ") || body.shipping.fullName || "Müşteri";
-
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "85.34.78.112";
+  const buyer = buildBuyer({
+    user,
+    ip: extractClientIp(req),
+    override: {
+      fullName: body.shipping.fullName,
+      phone: body.shipping.phone,
+      identityNumber: body.shipping.identityNumber,
+      address: body.shipping.address,
+      city: body.shipping.city,
+    },
+  });
 
   const init = await initializePayment({
     orderId: order.id,
     conversationId: order.iyzicoConvId!,
     priceTRY: Number(order.totalTRY),
     paidPriceTRY: Number(order.totalTRY),
-    buyer: {
-      id: user.id,
-      name,
-      surname,
-      email: user.email,
-      gsmNumber: sanitizeGsm(body.shipping.phone),
-      identityNumber: body.shipping.identityNumber || "11111111111",
-      registrationAddress: body.shipping.address,
-      city: body.shipping.city,
-      country: "Türkiye",
-      ip,
-    },
+    buyer,
     shippingAddress: {
       contactName: body.shipping.fullName,
       city: body.shipping.city,
@@ -99,6 +114,11 @@ export async function POST(req: Request) {
       where: { id: order.id },
       data: { status: "CANCELED", notes: `iyzico init failed: ${init.error}` },
     });
+    void track(EVENTS.PAYMENT_DENIED, {
+      orderId: order.id,
+      reason: "init-failed",
+      error: init.error,
+    });
     return NextResponse.json({ error: init.error }, { status: 502 });
   }
 
@@ -107,17 +127,19 @@ export async function POST(req: Request) {
     data: { iyzicoToken: init.token },
   });
 
+  void track(
+    EVENTS.PAYMENT_INITIATED,
+    {
+      kind: "order",
+      orderId: order.id,
+      provider: "iyzico",
+      totalTRY: Number(order.totalTRY),
+    },
+    { userId: session.user.id },
+  );
+
   return NextResponse.json({
     orderId: order.id,
     paymentPageUrl: init.paymentPageUrl,
   });
-}
-
-function sanitizeGsm(phone: string): string {
-  // iyzico +905xxxxxxxxx formatında ister. "0555..." veya "5 55 ..." gibi input'ları normalize et.
-  const digits = phone.replace(/\D/g, "");
-  if (digits.startsWith("90")) return `+${digits}`;
-  if (digits.startsWith("0")) return `+9${digits}`;
-  if (digits.startsWith("5")) return `+90${digits}`;
-  return `+${digits}`;
 }

@@ -15,7 +15,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { initializePayment } from "@/lib/iyzico";
-import { buildBuyer, extractClientIp } from "@/lib/iyzico-helpers";
+import { buildBuyer, extractClientIp, publicOrigin } from "@/lib/iyzico-helpers";
 import { track, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
@@ -80,7 +80,8 @@ export async function POST(req: Request) {
     { userId: user.id },
   );
 
-  const origin = new URL(req.url).origin;
+  // Use NEXTAUTH_URL as the canonical public origin — see /api/checkout for why.
+  const origin = publicOrigin(req);
   const callbackUrl = `${origin}/api/payments/iyzico/credits-callback`;
 
   const buyer = buildBuyer({

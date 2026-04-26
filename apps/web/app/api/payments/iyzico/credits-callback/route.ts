@@ -12,6 +12,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { retrievePayment } from "@/lib/iyzico";
+import { publicOrigin } from "@/lib/iyzico-helpers";
 import { track, logError, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
@@ -20,14 +21,13 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const token = url.searchParams.get("mockToken") ?? url.searchParams.get("token");
-  return handle(token, url.origin);
+  return handle(token, publicOrigin(req));
 }
 
 export async function POST(req: Request) {
   const form = await req.formData().catch(() => null);
   const token = form?.get("token");
-  const url = new URL(req.url);
-  return handle(typeof token === "string" ? token : null, url.origin);
+  return handle(typeof token === "string" ? token : null, publicOrigin(req));
 }
 
 async function handle(token: string | null, origin: string) {

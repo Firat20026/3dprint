@@ -69,6 +69,42 @@ export function extractClientIp(req: Request): string {
   );
 }
 
+/**
+ * Public origin (e.g. https://kanki.example.com) — used to build callback
+ * URLs that iyzico will hit and to redirect users after payment.
+ *
+ * `req.url` reflects the *internal* URL behind a reverse proxy / SSL terminator
+ * (often http://localhost:3000), so we prefer `NEXTAUTH_URL` which is already
+ * set to the canonical public URL. Falls back to `req.url` only when env
+ * is missing (local dev without NEXTAUTH_URL set).
+ */
+export function publicOrigin(req: Request): string {
+  const fromEnv = process.env.NEXTAUTH_URL?.replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  try {
+    return new URL(req.url).origin;
+  } catch {
+    return "http://localhost:3000";
+  }
+}
+
+/**
+ * Same idea as publicOrigin() but for contexts where we don't have a Request
+ * (e.g. inside a server action triggered by a redirect). Headers-based.
+ */
+export function publicOriginFromHeaders(
+  headers: Headers | null | undefined,
+): string {
+  const fromEnv = process.env.NEXTAUTH_URL?.replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  if (headers) {
+    const proto = headers.get("x-forwarded-proto") ?? "https";
+    const host = headers.get("x-forwarded-host") ?? headers.get("host");
+    if (host) return `${proto}://${host}`;
+  }
+  return "http://localhost:3000";
+}
+
 export type BuyerInputUser = {
   id: string;
   name: string | null;

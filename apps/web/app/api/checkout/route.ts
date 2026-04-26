@@ -12,7 +12,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createOrderDraft } from "@/lib/orders";
 import { initializePayment } from "@/lib/iyzico";
-import { buildBuyer, extractClientIp } from "@/lib/iyzico-helpers";
+import { buildBuyer, extractClientIp, publicOrigin } from "@/lib/iyzico-helpers";
 import { track, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
@@ -69,7 +69,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "user not found" }, { status: 401 });
   }
 
-  const origin = new URL(req.url).origin;
+  // Use NEXTAUTH_URL as the canonical public origin — req.url reflects the
+  // internal URL behind the reverse proxy (often http://localhost:3000), which
+  // would make iyzico unable to call us back in production.
+  const origin = publicOrigin(req);
   const callbackUrl = `${origin}/api/payments/iyzico/callback`;
 
   const buyer = buildBuyer({

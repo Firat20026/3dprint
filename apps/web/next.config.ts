@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**" },
     ],
   },
+  webpack: (config, { dev }) => {
+    // Disable HMR in production to prevent WebSocket connection failures
+    if (!dev) {
+      config.optimization.minimize = true;
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

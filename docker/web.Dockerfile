@@ -22,7 +22,10 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm --filter @frint3d/web exec prisma generate
 
+# Build Next.js app for production
+RUN pnpm --filter @frint3d/web build
+
 EXPOSE 3000
 ENV NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app/apps/web
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "start"]

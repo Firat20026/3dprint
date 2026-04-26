@@ -45,7 +45,7 @@ services:
     environment:
       DATABASE_URL: postgresql://frint3d:frint3d@postgres:5432/frint3d
       REDIS_URL: redis://redis:6379
-      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       UPLOAD_DIR: /data/uploads
       SLICE_DIR: /data/slices
     ports:

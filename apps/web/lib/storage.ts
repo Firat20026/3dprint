@@ -22,12 +22,22 @@ export const KINDS = {
 export type StorageKind = keyof typeof KINDS;
 
 function absolutePath(key: string): string {
-  // Path traversal koruması
+  // Path traversal koruması — defense in depth:
+  // 1. Reject absolute paths and anything that resolves above the upload dir.
+  // 2. After joining, verify the final resolved path is still inside UPLOAD_DIR.
   const normalized = path.posix.normalize(key);
   if (normalized.startsWith("..") || path.isAbsolute(normalized)) {
     throw new Error("invalid storage key");
   }
-  return path.join(UPLOAD_DIR, normalized);
+  const baseResolved = path.resolve(UPLOAD_DIR);
+  const fullResolved = path.resolve(baseResolved, normalized);
+  if (
+    fullResolved !== baseResolved &&
+    !fullResolved.startsWith(baseResolved + path.sep)
+  ) {
+    throw new Error("invalid storage key — escapes upload dir");
+  }
+  return fullResolved;
 }
 
 export async function saveUpload(

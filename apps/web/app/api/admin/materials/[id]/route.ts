@@ -1,9 +1,43 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+// Allow-list of fields admins may edit. Anything else (createdAt, id, etc.)
+// is silently dropped by Zod's default strip behaviour.
+const UpdateMaterialSchema = z
+  .object({
+    name: z.string().min(1).max(120).optional(),
+    type: z
+      .enum([
+        "PLA",
+        "PETG",
+        "TPU",
+        "PVA",
+        "PCTG",
+        "ABS",
+        "ASA",
+        "PA",
+        "PC",
+        "PET",
+        "CARBON_FIBER",
+      ])
+      .optional(),
+    colorHex: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/, "renk #RRGGBB formatında olmalı")
+      .optional(),
+    densityGcm3: z.number().positive().max(10).optional(),
+    diameterMm: z.number().positive().max(5).optional(),
+    stockGrams: z.number().min(0).optional(),
+    pricePerGramTRY: z.number().min(0).optional(),
+    isActive: z.boolean().optional(),
+    notes: z.string().max(500).nullable().optional(),
+  })
+  .strict();
 
 // DELETE /api/admin/materials/:id
 export async function DELETE(
@@ -57,6 +91,14 @@ export async function PATCH(
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "body required" }, { status: 400 });
 
-  await prisma.material.update({ where: { id }, data: body });
+  const parsed = UpdateMaterialSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "invalid body", issues: parsed.error.issues },
+      { status: 400 },
+    );
+  }
+
+  await prisma.material.update({ where: { id }, data: parsed.data });
   return NextResponse.json({ ok: true });
 }

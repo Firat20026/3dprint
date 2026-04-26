@@ -41,22 +41,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "profile not found" }, { status: 400 });
   }
 
+  // Verify the referenced file actually belongs to an existing SliceJob row with
+  // the same hash AND check ownership BEFORE doing cache lookup — otherwise an
+  // attacker could submit someone else's (fileHash, materialId, profileId) and
+  // receive cached pricing without ever proving they own the source.
+  const sourceOk = await prisma.sliceJob.findFirst({
+    where: { fileHash, sourceFileKey },
+    select: { id: true, userId: true },
+  });
+  if (!sourceOk) {
+    return NextResponse.json({ error: "source file not recognized" }, { status: 400 });
+  }
+
+  if (sourceOk.userId) {
+    const isOwner = session?.user?.id === sourceOk.userId;
+    const isAdmin = session?.user?.role === "ADMIN";
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: "source file not recognized" }, { status: 400 });
+    }
+  }
+
+  // Cache lookup AFTER auth check.
   const cached = await prisma.sliceJob.findFirst({
     where: { fileHash, materialId, profileId, status: "DONE" },
     orderBy: { createdAt: "desc" },
   });
   if (cached) {
     return NextResponse.json({ jobId: cached.id, cached: true });
-  }
-
-  // Verify the referenced file actually belongs to an existing SliceJob row with
-  // the same hash — prevents arbitrary key injection from clients.
-  const sourceOk = await prisma.sliceJob.findFirst({
-    where: { fileHash, sourceFileKey },
-    select: { id: true },
-  });
-  if (!sourceOk) {
-    return NextResponse.json({ error: "source file not recognized" }, { status: 400 });
   }
 
   const job = await prisma.sliceJob.create({

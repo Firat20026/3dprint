@@ -10,6 +10,7 @@ export const authConfig: NextAuthConfig = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [], // real providers added in lib/auth.ts
+  trustHost: true,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {

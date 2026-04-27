@@ -13,7 +13,7 @@ import { prisma } from "@/lib/db";
 import { createOrderDraft } from "@/lib/orders";
 import { initializePayment } from "@/lib/iyzico";
 import { buildBuyer, extractClientIp, publicOrigin } from "@/lib/iyzico-helpers";
-import { track, EVENTS } from "@/lib/observability";
+import { track, logError, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -87,30 +87,60 @@ export async function POST(req: Request) {
     },
   });
 
-  const init = await initializePayment({
-    orderId: order.id,
-    conversationId: order.iyzicoConvId!,
-    priceTRY: Number(order.totalTRY),
-    paidPriceTRY: Number(order.totalTRY),
-    buyer,
-    shippingAddress: {
-      contactName: body.shipping.fullName,
-      city: body.shipping.city,
-      country: "Türkiye",
-      address: `${body.shipping.address}, ${body.shipping.district}`,
-      zipCode: body.shipping.zipCode,
-    },
-    basketItems: order.items.map((it) => ({
-      id: it.id,
-      name:
-        (it.snapshot as { title?: string } | null)?.title ??
-        (it.sliceJobId ? "Özel Baskı" : "Tasarım"),
-      category1: "3D Print",
-      itemType: "PHYSICAL",
-      price: Number(it.totalPriceTRY),
-    })),
-    callbackUrl,
-  });
+  // Wrap in try/catch — getClient() can throw if iyzipay SDK fails to load,
+  // and we'd rather return a JSON error (so the client can show a real
+  // message) than crash the route handler and let the proxy serve 502.
+  let init: Awaited<ReturnType<typeof initializePayment>>;
+  try {
+    init = await initializePayment({
+      orderId: order.id,
+      conversationId: order.iyzicoConvId!,
+      priceTRY: Number(order.totalTRY),
+      paidPriceTRY: Number(order.totalTRY),
+      buyer,
+      shippingAddress: {
+        contactName: body.shipping.fullName,
+        city: body.shipping.city,
+        country: "Türkiye",
+        address: `${body.shipping.address}, ${body.shipping.district}`,
+        zipCode: body.shipping.zipCode,
+      },
+      basketItems: order.items.map((it) => ({
+        id: it.id,
+        name:
+          (it.snapshot as { title?: string } | null)?.title ??
+          (it.sliceJobId ? "Özel Baskı" : "Tasarım"),
+        category1: "3D Print",
+        itemType: "PHYSICAL",
+        price: Number(it.totalPriceTRY),
+      })),
+      callbackUrl,
+    });
+  } catch (e) {
+    await logError(e, {
+      source: "api:checkout:iyzico-init",
+      severity: "HIGH",
+      userId: session.user.id,
+      metadata: {
+        orderId: order.id,
+        totalTRY: Number(order.totalTRY),
+        itemCount: order.items.length,
+      },
+    });
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: "CANCELED",
+        notes: `iyzico SDK threw: ${e instanceof Error ? e.message : String(e)}`,
+      },
+    });
+    return NextResponse.json(
+      {
+        error: "Ödeme servisi başlatılamadı. Lütfen tekrar deneyin.",
+      },
+      { status: 502 },
+    );
+  }
 
   if (!init.ok) {
     await prisma.order.update({
@@ -121,6 +151,12 @@ export async function POST(req: Request) {
       orderId: order.id,
       reason: "init-failed",
       error: init.error,
+    });
+    void logError(new Error(`iyzico init: ${init.error}`), {
+      source: "api:checkout:iyzico-init-failed",
+      severity: "HIGH",
+      userId: session.user.id,
+      metadata: { orderId: order.id, iyzicoError: init.error },
     });
     return NextResponse.json({ error: init.error }, { status: 502 });
   }

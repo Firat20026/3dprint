@@ -16,7 +16,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { initializePayment } from "@/lib/iyzico";
 import { buildBuyer, extractClientIp, publicOrigin } from "@/lib/iyzico-helpers";
-import { track, EVENTS } from "@/lib/observability";
+import { track, logError, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -89,37 +89,61 @@ export async function POST(req: Request) {
     ip: extractClientIp(req),
   });
 
-  const init = await initializePayment({
-    orderId: purchase.id,
-    conversationId,
-    priceTRY: Number(pack.priceTRY),
-    paidPriceTRY: Number(pack.priceTRY),
-    buyer,
-    shippingAddress: {
-      // Virtual purchase but iyzico still wants a shippingAddress object.
-      // Reuse buyer's known city/address so the data shown in iyzico merchant
-      // panel matches the actual customer.
-      contactName: `${buyer.name} ${buyer.surname}`.trim(),
-      city: buyer.city,
-      country: buyer.country,
-      address: buyer.registrationAddress,
-    },
-    basketItems: [
-      {
-        id: pack.id,
-        name: `${pack.name} (${pack.credits} kredi)`,
-        category1: "Credits",
-        itemType: "VIRTUAL",
-        price: Number(pack.priceTRY),
+  let init: Awaited<ReturnType<typeof initializePayment>>;
+  try {
+    init = await initializePayment({
+      orderId: purchase.id,
+      conversationId,
+      priceTRY: Number(pack.priceTRY),
+      paidPriceTRY: Number(pack.priceTRY),
+      buyer,
+      shippingAddress: {
+        // Virtual purchase but iyzico still wants a shippingAddress object.
+        // Reuse buyer's known city/address so the data shown in iyzico merchant
+        // panel matches the actual customer.
+        contactName: `${buyer.name} ${buyer.surname}`.trim(),
+        city: buyer.city,
+        country: buyer.country,
+        address: buyer.registrationAddress,
       },
-    ],
-    callbackUrl,
-  });
+      basketItems: [
+        {
+          id: pack.id,
+          name: `${pack.name} (${pack.credits} kredi)`,
+          category1: "Credits",
+          itemType: "VIRTUAL",
+          price: Number(pack.priceTRY),
+        },
+      ],
+      callbackUrl,
+    });
+  } catch (e) {
+    await logError(e, {
+      source: "api:credits-checkout:iyzico-init",
+      severity: "HIGH",
+      userId: user.id,
+      metadata: { purchaseId: purchase.id, packId: pack.id },
+    });
+    await prisma.creditPurchase.update({
+      where: { id: purchase.id },
+      data: { status: "CANCELED" },
+    });
+    return NextResponse.json(
+      { error: "Ödeme servisi başlatılamadı. Lütfen tekrar deneyin." },
+      { status: 502 },
+    );
+  }
 
   if (!init.ok) {
     await prisma.creditPurchase.update({
       where: { id: purchase.id },
       data: { status: "CANCELED" },
+    });
+    void logError(new Error(`iyzico init: ${init.error}`), {
+      source: "api:credits-checkout:iyzico-init-failed",
+      severity: "HIGH",
+      userId: user.id,
+      metadata: { purchaseId: purchase.id, iyzicoError: init.error },
     });
     return NextResponse.json({ error: init.error }, { status: 502 });
   }

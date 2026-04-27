@@ -22,6 +22,7 @@ import { prisma } from "@/lib/db";
 import { retrievePayment } from "@/lib/iyzico";
 import { publicOrigin } from "@/lib/iyzico-helpers";
 import { track, logError, EVENTS } from "@/lib/observability";
+import { notify, TEMPLATES } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -115,6 +116,38 @@ async function handle(token: string | null, origin: string) {
       },
       { userId: order.userId },
     );
+
+    // Order confirmation email — best-effort.
+    const detail = await prisma.order.findUnique({
+      where: { id: order.id },
+      select: {
+        user: { select: { email: true } },
+        items: {
+          select: {
+            quantity: true,
+            snapshot: true,
+            sliceJobId: true,
+            designId: true,
+          },
+        },
+      },
+    });
+    if (detail?.user.email) {
+      void notify({
+        to: detail.user.email,
+        template: TEMPLATES.ORDER_CONFIRMED,
+        data: {
+          orderId: order.id,
+          totalTRY: Number(order.totalTRY),
+          items: detail.items.map((it) => ({
+            title:
+              (it.snapshot as { title?: string } | null)?.title ??
+              (it.sliceJobId ? "Özel Baskı" : "Tasarım"),
+            quantity: it.quantity,
+          })),
+        },
+      });
+    }
   }
 
   return seeOther(`${origin}/account/orders/${order.id}?paid=1`);

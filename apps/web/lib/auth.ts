@@ -68,12 +68,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers,
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
+      // First-time issuance (after authorize()): copy id+role into the token.
       if (user) {
         token.id = user.id;
         token.role = (user as { role?: Role }).role ?? "USER";
-      } else if (token.id) {
-        // refresh role/credits from DB on subsequent calls
+        return token;
+      }
+      // Optional manual refresh: when the client calls update() (e.g. after
+      // promoting a user from /admin), re-read the role from DB. Otherwise
+      // we trust the role baked into the JWT — no per-request DB hit.
+      if (trigger === "update" && token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: { role: true },

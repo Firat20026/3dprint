@@ -16,6 +16,8 @@ const guestOnlyLinks = [
 ];
 
 export async function Nav() {
+  // Single auth() call shared with UserMenu — both used to call it
+  // independently, doubling JWT verification on every page render.
   const session = await auth();
   const loggedIn = !!session?.user;
   const links = loggedIn ? baseLinks : [...baseLinks, ...guestOnlyLinks];
@@ -37,7 +39,7 @@ export async function Nav() {
             ))}
           </nav>
         </div>
-        <UserMenu />
+        <UserMenu session={session} />
       </Container>
     </header>
   );

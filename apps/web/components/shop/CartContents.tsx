@@ -114,13 +114,29 @@ function CartLine({
   return (
     <li className="flex gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
       <div className="size-20 shrink-0 overflow-hidden rounded-[10px] bg-[var(--color-surface-2)]">
-        {thumbUrl && (
+        {thumbUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={thumbUrl}
             alt={item.title}
             className="h-full w-full object-cover"
           />
+        ) : (
+          // Fallback: stylized placeholder (used when designer didn't upload a
+          // thumbnail or for slice-job items which never have one).
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--color-surface-2)] to-[var(--color-surface-3)]">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="size-8 text-[var(--color-text-subtle)]"
+              aria-hidden="true"
+            >
+              <path d="M12 2 4 6.5v11L12 22l8-4.5v-11L12 2Z" />
+              <path d="M4.5 6.5 12 11l7.5-4.5M12 11v11" />
+            </svg>
+          </div>
         )}
       </div>
       <div className="flex flex-1 flex-col justify-between">

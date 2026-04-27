@@ -14,6 +14,7 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { track, EVENTS } from "@/lib/observability";
+import { notify, TEMPLATES } from "@/lib/notifications";
 
 export type RefundResult =
   | { refunded: true; amount: number }
@@ -27,6 +28,8 @@ export async function refundMeshyJob(jobId: string): Promise<RefundResult> {
       userId: true,
       creditsCharged: true,
       status: true,
+      errorText: true,
+      user: { select: { email: true } },
     },
   });
 
@@ -77,6 +80,18 @@ export async function refundMeshyJob(jobId: string): Promise<RefundResult> {
     { source: "meshy", refId: job.id, amount: job.creditsCharged },
     { userId: job.userId },
   );
+
+  if (job.user?.email) {
+    void notify({
+      to: job.user.email,
+      template: TEMPLATES.MESHY_REFUND_ISSUED,
+      data: {
+        jobId: job.id,
+        creditsRefunded: job.creditsCharged,
+        error: job.errorText ?? "Bilinmeyen hata",
+      },
+    });
+  }
 
   return { refunded: true, amount: job.creditsCharged };
 }

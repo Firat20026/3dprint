@@ -16,6 +16,7 @@ import { getSettings } from "@/lib/settings";
 import { saveUpload } from "@/lib/storage";
 import { scheduleMockCompletion } from "@/lib/meshy/mock";
 import { track, EVENTS } from "@/lib/observability";
+import { rateLimit, clientKey, tooManyRequests } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,6 +29,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "login required" }, { status: 401 });
   }
   const userId = session.user.id;
+
+  // 20 generations / 5 min per user — credits already gate this but a
+  // tight loop could otherwise burn the user's wallet in seconds.
+  const rl = await rateLimit({
+    key: `meshy:${clientKey(req, userId)}`,
+    limit: 20,
+    windowSec: 300,
+  });
+  if (!rl.allowed) return tooManyRequests(rl.resetSec);
 
   const form = await req.formData().catch(() => null);
   if (!form) {

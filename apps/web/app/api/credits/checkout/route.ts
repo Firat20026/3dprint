@@ -17,6 +17,7 @@ import { prisma } from "@/lib/db";
 import { initializePayment } from "@/lib/iyzico";
 import { buildBuyer, extractClientIp, publicOrigin } from "@/lib/iyzico-helpers";
 import { track, logError, EVENTS } from "@/lib/observability";
+import { rateLimit, clientKey, tooManyRequests } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,6 +27,15 @@ export async function POST(req: Request) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "login required" }, { status: 401 });
   }
+
+  // Rate limit per user: 10 credit-checkout attempts / minute is plenty
+  // for legit retries; abuse / loops are caught.
+  const rl = await rateLimit({
+    key: `credits-checkout:${clientKey(req, session.user.id)}`,
+    limit: 10,
+    windowSec: 60,
+  });
+  if (!rl.allowed) return tooManyRequests(rl.resetSec);
 
   const body = (await req.json().catch(() => null)) as { packId?: string } | null;
   const packId = body?.packId;

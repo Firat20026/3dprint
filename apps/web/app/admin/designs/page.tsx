@@ -9,6 +9,7 @@ import { Input, Label } from "@/components/ui/input";
 import { saveUpload } from "@/lib/storage";
 import { slugify } from "@/lib/designs";
 import { track, EVENTS } from "@/lib/observability";
+import { notify, TEMPLATES } from "@/lib/notifications";
 import type { DesignStatus } from "@prisma/client";
 
 const ALLOWED_EXT = [".stl", ".3mf"] as const;
@@ -96,7 +97,7 @@ async function approveDesign(formData: FormData) {
   const admin = await requireAdmin();
   const id = String(formData.get("id") ?? "");
   if (!id) throw new Error("id gerekli");
-  await prisma.design.update({
+  const updated = await prisma.design.update({
     where: { id },
     data: {
       status: "PUBLISHED",
@@ -104,12 +105,24 @@ async function approveDesign(formData: FormData) {
       reviewedById: admin.id,
       rejectionReason: null,
     },
+    select: {
+      title: true,
+      slug: true,
+      uploader: { select: { email: true } },
+    },
   });
   void track(
     EVENTS.DESIGN_APPROVED,
     { designId: id, reviewerId: admin.id },
     { userId: admin.id },
   );
+  if (updated.uploader?.email) {
+    void notify({
+      to: updated.uploader.email,
+      template: TEMPLATES.DESIGN_APPROVED,
+      data: { designTitle: updated.title, designSlug: updated.slug },
+    });
+  }
   revalidatePath("/admin/designs");
   revalidatePath("/account/my-designs");
   revalidatePath("/designs");
@@ -123,7 +136,7 @@ async function rejectDesign(formData: FormData) {
   if (!id) throw new Error("id gerekli");
   if (reason.length < 3) throw new Error("Red sebebi gerekli (en az 3 karakter)");
   if (reason.length > 500) throw new Error("Red sebebi en fazla 500 karakter");
-  await prisma.design.update({
+  const updated = await prisma.design.update({
     where: { id },
     data: {
       status: "REJECTED",
@@ -131,12 +144,23 @@ async function rejectDesign(formData: FormData) {
       reviewedById: admin.id,
       rejectionReason: reason,
     },
+    select: {
+      title: true,
+      uploader: { select: { email: true } },
+    },
   });
   void track(
     EVENTS.DESIGN_REJECTED,
     { designId: id, reviewerId: admin.id, reason: reason.slice(0, 200) },
     { userId: admin.id },
   );
+  if (updated.uploader?.email) {
+    void notify({
+      to: updated.uploader.email,
+      template: TEMPLATES.DESIGN_REJECTED,
+      data: { designTitle: updated.title, rejectionReason: reason },
+    });
+  }
   revalidatePath("/admin/designs");
   revalidatePath("/account/my-designs");
 }

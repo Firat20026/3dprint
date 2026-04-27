@@ -22,6 +22,7 @@ import { saveUpload } from "@/lib/storage";
 import { enqueueSlice } from "@/lib/queue";
 import { validateModelFile, type ValidExt } from "@/lib/file-validators";
 import { track, EVENTS } from "@/lib/observability";
+import { rateLimit, clientKey, tooManyRequests } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +32,16 @@ const ALLOWED = new Set(["stl", "3mf"]);
 
 export async function POST(req: Request) {
   const session = await auth();
+
+  // Anonymous + authenticated uploads share the same limit. 30 uploads /
+  // 5 min is generous for legitimate use, blocks slow-loris uploads and
+  // storage-burn loops.
+  const rl = await rateLimit({
+    key: `slice-upload:${clientKey(req, session?.user?.id ?? null)}`,
+    limit: 30,
+    windowSec: 300,
+  });
+  if (!rl.allowed) return tooManyRequests(rl.resetSec);
 
   const form = await req.formData().catch(() => null);
   if (!form) {

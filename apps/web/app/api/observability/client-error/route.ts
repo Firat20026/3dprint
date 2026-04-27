@@ -8,6 +8,7 @@
 import { NextResponse } from "next/server";
 import { logError } from "@/lib/observability";
 import { auth } from "@/lib/auth";
+import { rateLimit, clientKey, tooManyRequests } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,6 +23,15 @@ const ALLOWED_SOURCES = new Set([
 ]);
 
 export async function POST(req: Request) {
+  // Hard cap on client error spam — 30 / minute per IP. Bug loops on a
+  // single client otherwise hammer ErrorLog and crowd out real signal.
+  const rl = await rateLimit({
+    key: `client-error:${clientKey(req)}`,
+    limit: 30,
+    windowSec: 60,
+  });
+  if (!rl.allowed) return tooManyRequests(rl.resetSec);
+
   let body: {
     message?: string;
     stack?: string;

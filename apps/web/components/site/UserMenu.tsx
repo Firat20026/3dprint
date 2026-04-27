@@ -1,11 +1,17 @@
 import Link from "next/link";
+import type { Session } from "next-auth";
 import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { CartButton } from "@/components/site/CartButton";
 import { ProfileMenu } from "@/components/site/ProfileMenu";
 
-export async function UserMenu() {
-  const session = await auth();
+// Accepts session as a prop to avoid a duplicate auth() call. If omitted
+// (legacy callers), falls back to its own auth() — but Nav now passes it
+// and Nav is the only call-site.
+export async function UserMenu({
+  session: sessionProp,
+}: { session?: Session | null } = {}) {
+  const session = sessionProp ?? (await auth());
 
   if (!session?.user) {
     return (

@@ -21,6 +21,7 @@ import { prisma } from "@/lib/db";
 import { retrievePayment } from "@/lib/iyzico";
 import { publicOrigin } from "@/lib/iyzico-helpers";
 import { track, logError, EVENTS } from "@/lib/observability";
+import { notify, TEMPLATES } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -154,6 +155,23 @@ async function handle(token: string | null, origin: string) {
       },
       { userId: purchase.userId },
     );
+
+    // Receipt email — best-effort, fire and forget.
+    const buyer = await prisma.user.findUnique({
+      where: { id: purchase.userId },
+      select: { email: true },
+    });
+    if (buyer?.email) {
+      void notify({
+        to: buyer.email,
+        template: TEMPLATES.CREDIT_PURCHASE_COMPLETED,
+        data: {
+          purchaseId: purchase.id,
+          credits: purchase.credits,
+          priceTRY: Number(purchase.priceTRY),
+        },
+      });
+    }
   }
 
   return seeOther(`${origin}/account/credits?purchased=1`);

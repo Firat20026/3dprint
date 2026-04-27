@@ -14,6 +14,7 @@ import { createOrderDraft } from "@/lib/orders";
 import { initializePayment } from "@/lib/iyzico";
 import { buildBuyer, extractClientIp, publicOrigin } from "@/lib/iyzico-helpers";
 import { track, logError, EVENTS } from "@/lib/observability";
+import { rateLimit, clientKey, tooManyRequests } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,6 +24,13 @@ export async function POST(req: Request) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "login required" }, { status: 401 });
   }
+
+  const rl = await rateLimit({
+    key: `checkout:${clientKey(req, session.user.id)}`,
+    limit: 10,
+    windowSec: 60,
+  });
+  if (!rl.allowed) return tooManyRequests(rl.resetSec);
 
   const body = await req.json().catch(() => null);
   if (!body || !Array.isArray(body.items) || !body.shipping) {

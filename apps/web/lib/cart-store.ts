@@ -25,6 +25,12 @@ export type DesignCartItem = {
   profileName: string;
   quantity: number;
   unitPriceTRY: number;
+  /**
+   * 1-based plate index for multi-plate 3MF designs. Single-plate items leave
+   * this as 1. When a user adds plate 2 of the same design with a different
+   * material, it's a separate cart line (different id, different price).
+   */
+  plateIndex?: number;
 };
 
 export type SliceCartItem = {
@@ -60,7 +66,8 @@ type CartItemInput = Omit<DesignCartItem, "id"> | Omit<SliceCartItem, "id">;
 
 function itemId(item: CartItemInput): string {
   if (item.kind === "design") {
-    return `d:${item.designId}:${item.materialId}:${item.profileId}`;
+    const plate = item.plateIndex ?? 1;
+    return `d:${item.designId}:${item.materialId}:${item.profileId}:p${plate}`;
   }
   return `s:${item.sliceJobId}`;
 }
@@ -103,10 +110,12 @@ export const useCart = create<CartState>()(
     {
       name: "frint3d-cart",
       storage: createJSONStorage(() => localStorage),
-      version: 2,
+      version: 3,
       migrate: (persisted, version) => {
-        // v1 → v2: id formatı değişti (prefix'li). Eski item'ları drop ederek temiz başla.
-        if (version < 2) return { items: [] };
+        // v1 → v2: id formatı değişti (prefix'li). Eski item'ları drop.
+        // v2 → v3: design id includes plateIndex; old design lines need
+        //          rehashing. Easiest is to drop and let the user re-add.
+        if (version < 3) return { items: [] };
         return persisted as { items: CartItem[] };
       },
     },

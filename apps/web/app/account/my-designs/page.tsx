@@ -10,6 +10,9 @@ import { prisma } from "@/lib/db";
 import { saveUpload } from "@/lib/storage";
 import { slugify } from "@/lib/designs";
 import { track, EVENTS } from "@/lib/observability";
+import { parse3mfMetadata } from "@/lib/3mf-parser";
+import { enqueueDesignThumbnail } from "@/lib/queue";
+import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +49,14 @@ async function submitDesign(formData: FormData) {
   const modelBytes = Buffer.from(await modelFile.arrayBuffer());
   const { key: modelKey } = await saveUpload("design", modelFile.name, modelBytes);
 
+  let plateCount = 1;
+  let materialGroups: Prisma.InputJsonValue = [];
+  if (ext === ".3mf") {
+    const meta = await parse3mfMetadata(modelBytes);
+    plateCount = meta.plateCount;
+    materialGroups = meta.materialGroups as unknown as Prisma.InputJsonValue;
+  }
+
   let thumbnailKey: string | null = null;
   if (thumbnailFile && thumbnailFile.size > 0) {
     if (thumbnailFile.size > MAX_IMG) throw new Error("Thumbnail 5MB üstü");
@@ -79,6 +90,9 @@ async function submitDesign(formData: FormData) {
       source: "USER_MARKETPLACE",
       basePriceMarkupPercent: markup,
       uploaderId: session.user.id,
+      plateCount,
+      materialGroups,
+      thumbnailGeneratedAt: thumbnailKey ? new Date() : null,
     },
     select: { id: true, title: true },
   });
@@ -88,6 +102,10 @@ async function submitDesign(formData: FormData) {
     { designId: created.id, title: created.title, markup },
     { userId: session.user.id },
   );
+
+  if (!thumbnailKey) {
+    await enqueueDesignThumbnail(created.id).catch(() => void 0);
+  }
 
   revalidatePath("/account/my-designs");
   revalidatePath("/admin/designs");

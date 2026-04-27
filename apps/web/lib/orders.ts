@@ -15,6 +15,8 @@ export type CartItemPayload =
       title: string;
       materialName: string;
       profileName: string;
+      /** 1-based plate index for multi-plate designs. Defaults to 1. */
+      plateIndex?: number;
     }
   | {
       kind: "slice";
@@ -141,14 +143,16 @@ export async function createOrderDraft(input: CreateOrderInput) {
       const unit = new Prisma.Decimal(item.unitPriceTRY);
       const total = unit.mul(qty);
       subtotal = subtotal.add(total);
+      const plateIndex = item.plateIndex ?? 1;
       lines.push({
         designId: design.id,
         quantity: qty,
         unitPriceTRY: unit,
         totalPriceTRY: total,
         snapshot: {
-          title: design.title,
+          title: plateIndex > 1 ? `${design.title} — Plate ${plateIndex}` : design.title,
           slug: design.slug,
+          plateIndex,
           material: { id: material.id, name: material.name, colorHex: material.colorHex, type: material.type },
           profile: { id: profile.id, name: profile.name, layerHeightMm: profile.layerHeightMm, infillPercent: profile.infillPercent },
         },

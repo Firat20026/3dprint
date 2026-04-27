@@ -166,6 +166,7 @@ model Design {
   title                  String
   description            String?      @db.Text
   thumbnailUrl           String?
+  thumbnailGeneratedAt   DateTime?    // set when server-rendered thumbnail lands
   modelFileKey           String       // path under /data/designs
   fileFormat             String       // stl|3mf
   source                 DesignSource @default(ADMIN)
@@ -175,6 +176,10 @@ model Design {
   basePriceMarkupPercent Int          @default(0) // marketplace seller markup
   defaultProfileId       String?
   uploaderId             String?
+
+  // Multi-plate / multi-material (parsed from 3MF on upload)
+  plateCount      Int  @default(1) // number of build plates in the model file
+  materialGroups  Json @default("[]") // [{ extruderId, name, colorHex }, ...]
 
   // Review workflow
   rejectionReason String?   @db.Text
@@ -214,6 +219,7 @@ model SliceJob {
   fileHash        String      // sha256 of input — for cache lookups
   materialId      String
   profileId       String
+  plateIndex      Int         @default(1)  // which plate of a multi-plate 3MF
   status          SliceStatus @default(QUEUED)
   errorText       String?     @db.Text
   filamentGrams   Float?
@@ -234,7 +240,7 @@ model SliceJob {
   orderItems OrderItem[]
 
   @@index([userId, status])
-  @@index([fileHash, materialId, profileId]) // cache lookup
+  @@index([fileHash, materialId, profileId, plateIndex]) // cache lookup
 }
 
 // =====================================================

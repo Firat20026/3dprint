@@ -20,6 +20,7 @@ import { runSlicer } from "./slicer.js";
 import { getSettings } from "./settings.js";
 import { calculatePrice } from "./pricing.js";
 import { track, logError } from "./observability.js";
+import { handleThumbnailJob } from "./thumbnail.js";
 
 const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 const QUEUE_NAME = "slice";
@@ -140,9 +141,36 @@ worker.on("failed", (job, err) => {
   console.warn(`[worker] bullmq failed ${job?.id}: ${err.message}`);
 });
 
+// ── Thumbnail worker ────────────────────────────────────────────────────────
+// Separate Worker instance so thumbnail rendering (Puppeteer) doesn't
+// stall slice jobs and vice versa. Concurrency 1 — Puppeteer is heavy.
+const THUMB_QUEUE = "design-thumbnail";
+const thumbnailWorker = new Worker<{ designId: string }>(
+  THUMB_QUEUE,
+  async (job: Job<{ designId: string }>) => {
+    const { designId } = job.data;
+    console.log(`[worker:thumbnail] rendering ${designId}`);
+    const started = Date.now();
+    await handleThumbnailJob(designId);
+    console.log(
+      `[worker:thumbnail] done ${designId} in ${Date.now() - started}ms`,
+    );
+  },
+  { connection, concurrency: 1 },
+);
+
+thumbnailWorker.on("ready", () =>
+  console.log(`[worker] listening on "${THUMB_QUEUE}"`),
+);
+thumbnailWorker.on("failed", (job, err) => {
+  console.warn(
+    `[worker:thumbnail] failed ${job?.id}: ${err.message}`,
+  );
+});
+
 async function shutdown(signal: string) {
   console.log(`[worker] ${signal} → shutting down...`);
-  await worker.close();
+  await Promise.all([worker.close(), thumbnailWorker.close()]);
   await connection.quit();
   await prisma.$disconnect();
   process.exit(0);

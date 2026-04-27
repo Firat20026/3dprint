@@ -8,7 +8,14 @@ FROM node:20-bookworm-slim
 #   ADD https://github.com/SoftFever/OrcaSlicer/releases/download/v2.x.x/OrcaSlicer_Linux.AppImage /opt/
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl ca-certificates \
+    chromium fonts-liberation \
+    libnss3 libxss1 libasound2 libatk-bridge2.0-0 libgbm1 libgtk-3-0 \
+    libxcomposite1 libxdamage1 libxrandr2 libdrm2 libpangocairo-1.0-0 \
   && rm -rf /var/lib/apt/lists/*
+
+# Puppeteer-core uses the system chromium (no bundled download).
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 
 RUN corepack enable && corepack prepare pnpm@10.7.1 --activate
 ENV PNPM_HOME=/pnpm

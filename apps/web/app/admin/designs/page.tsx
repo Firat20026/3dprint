@@ -10,7 +10,9 @@ import { saveUpload } from "@/lib/storage";
 import { slugify } from "@/lib/designs";
 import { track, EVENTS } from "@/lib/observability";
 import { notify, TEMPLATES } from "@/lib/notifications";
-import type { DesignStatus } from "@prisma/client";
+import { parse3mfMetadata } from "@/lib/3mf-parser";
+import { enqueueDesignThumbnail } from "@/lib/queue";
+import type { DesignStatus, Prisma } from "@prisma/client";
 
 const ALLOWED_EXT = [".stl", ".3mf"] as const;
 const ALLOWED_IMG = [".jpg", ".jpeg", ".png", ".webp"] as const;
@@ -46,6 +48,16 @@ async function createDesign(formData: FormData) {
   const modelBytes = Buffer.from(await modelFile.arrayBuffer());
   const { key: modelKey } = await saveUpload("design", modelFile.name, modelBytes);
 
+  // For 3MF inputs we extract plate count + material groups so the catalog
+  // page can render a richer preview without re-parsing on every request.
+  let plateCount = 1;
+  let materialGroups: Prisma.InputJsonValue = [];
+  if (modelExt === ".3mf") {
+    const meta = await parse3mfMetadata(modelBytes);
+    plateCount = meta.plateCount;
+    materialGroups = meta.materialGroups as unknown as Prisma.InputJsonValue;
+  }
+
   let thumbnailKey: string | null = null;
   if (thumbnailFile && thumbnailFile.size > 0) {
     if (thumbnailFile.size > MAX_IMG_BYTES)
@@ -72,7 +84,7 @@ async function createDesign(formData: FormData) {
 
   const status: DesignStatus = publish ? "PUBLISHED" : "DRAFT";
 
-  await prisma.design.create({
+  const created = await prisma.design.create({
     data: {
       slug,
       title,
@@ -85,8 +97,18 @@ async function createDesign(formData: FormData) {
       source: "ADMIN",
       defaultProfileId: profileId || null,
       uploaderId: user.id,
+      plateCount,
+      materialGroups,
+      thumbnailGeneratedAt: thumbnailKey ? new Date() : null,
     },
+    select: { id: true },
   });
+
+  // Auto-render a thumbnail if the admin didn't upload one. Fire-and-forget;
+  // worker picks it up asynchronously.
+  if (!thumbnailKey) {
+    await enqueueDesignThumbnail(created.id).catch(() => void 0);
+  }
 
   revalidatePath("/admin/designs");
   revalidatePath("/designs");

@@ -12,6 +12,7 @@ const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 // Singleton — Next.js dev HMR'da duplicate bağlantı önleme.
 const globalForQueue = globalThis as unknown as {
   __sliceQueue?: Queue;
+  __thumbQueue?: Queue;
   __sliceConnection?: IORedis;
 };
 
@@ -42,7 +43,37 @@ export async function enqueueSlice(sliceJobId: string): Promise<void> {
       jobId: sliceJobId,
       removeOnComplete: { count: 100 },
       removeOnFail: { count: 100 },
-      attempts: 1, // slicing deterministik; retry Faz 2'de config edilecek
+      attempts: 1,
+    },
+  );
+}
+
+/**
+ * Thumbnail render queue — runs in the same worker process as slicing,
+ * but as a separate queue so thumbnail rendering (Puppeteer) doesn't
+ * stall the slicing pipeline.
+ */
+export function thumbnailQueue(): Queue<{ designId: string }> {
+  if (!globalForQueue.__thumbQueue) {
+    globalForQueue.__thumbQueue = new Queue("design-thumbnail", {
+      connection: getConnection(),
+    });
+  }
+  return globalForQueue.__thumbQueue as Queue<{ designId: string }>;
+}
+
+export async function enqueueDesignThumbnail(
+  designId: string,
+): Promise<void> {
+  await thumbnailQueue().add(
+    "render",
+    { designId },
+    {
+      jobId: `thumb:${designId}`, // dedupe re-enqueues for the same design
+      removeOnComplete: { count: 200 },
+      removeOnFail: { count: 200 },
+      attempts: 2,
+      backoff: { type: "fixed", delay: 30_000 },
     },
   );
 }

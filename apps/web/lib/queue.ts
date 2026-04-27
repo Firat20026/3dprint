@@ -69,7 +69,9 @@ export async function enqueueDesignThumbnail(
     "render",
     { designId },
     {
-      jobId: `thumb:${designId}`, // dedupe re-enqueues for the same design
+      // BullMQ rejects ":" in custom job ids; use "-" so re-enqueues for the
+      // same design dedupe correctly. (designId is a cuid, no ":" itself.)
+      jobId: `thumb-${designId}`,
       removeOnComplete: { count: 200 },
       removeOnFail: { count: 200 },
       attempts: 2,

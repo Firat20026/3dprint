@@ -48,6 +48,9 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       UPLOAD_DIR: /data/uploads
       SLICE_DIR: /data/slices
+      # Same INTERNAL_RENDERER_TOKEN as worker — web validates the bearer
+      # on /api/internal/thumbnail/[id] and on /_render/design/[id].
+      INTERNAL_RENDERER_TOKEN: ${INTERNAL_RENDERER_TOKEN}
     ports:
       - "3000:3000"
     depends_on:
@@ -71,6 +74,13 @@ services:
       UPLOAD_DIR: /data/uploads
       SLICE_DIR: /data/slices
       ORCA_SLICER_BIN: /usr/local/bin/orca-slicer
+      # Internal renderer (Puppeteer reaches the web container by service name)
+      WEB_INTERNAL_URL: http://web:3000
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
+      INTERNAL_RENDERER_TOKEN: ${INTERNAL_RENDERER_TOKEN}
+      # Real Meshy provider (no-op when key absent — keeps mock mode safe)
+      MESHY_PROVIDER: ${MESHY_PROVIDER:-mock}
+      MESHY_API_KEY: ${MESHY_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy

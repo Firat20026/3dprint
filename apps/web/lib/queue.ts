@@ -65,15 +65,17 @@ export function thumbnailQueue(): Queue<{ designId: string }> {
 export async function enqueueDesignThumbnail(
   designId: string,
 ): Promise<void> {
+  // No custom jobId — BullMQ silently no-ops a re-add when a job with that id
+  // already exists (even in `failed` state), which means a stale failed job
+  // would block every subsequent backfill enqueue. The save endpoint is
+  // idempotent and skips re-saves when a manual thumbnail is in place, so
+  // letting BullMQ generate ids and even running concurrent renders is safe.
   await thumbnailQueue().add(
     "render",
     { designId },
     {
-      // BullMQ rejects ":" in custom job ids; use "-" so re-enqueues for the
-      // same design dedupe correctly. (designId is a cuid, no ":" itself.)
-      jobId: `thumb-${designId}`,
-      removeOnComplete: { count: 200 },
-      removeOnFail: { count: 200 },
+      removeOnComplete: { count: 50 },
+      removeOnFail: { count: 50 },
       attempts: 2,
       backoff: { type: "fixed", delay: 30_000 },
     },

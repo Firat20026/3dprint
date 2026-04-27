@@ -9,10 +9,13 @@
  *   2. Navigate to ${WEB_INTERNAL_URL}/_render/design/[id]?token=${TOKEN}
  *   3. The page renders the model and POSTs the PNG to the save endpoint
  *      itself, then sets window.__RENDER_STATUS__
- *   4. We poll for the status flag (max 60s)
+ *   4. We poll for the status flag (max RENDER_TIMEOUT_MS)
  *   5. Close the page (browser stays warm)
+ *
+ * Diagnostics: page console + page errors + failed sub-requests are logged
+ * to the worker's stdout so 60s timeouts don't leave us guessing.
  */
-import puppeteer, { type Browser } from "puppeteer-core";
+import puppeteer, { type Browser, type ConsoleMessage } from "puppeteer-core";
 import { logError, track } from "./observability.js";
 
 const WEB_URL = (process.env.WEB_INTERNAL_URL ?? "http://web:3000").replace(
@@ -22,7 +25,8 @@ const WEB_URL = (process.env.WEB_INTERNAL_URL ?? "http://web:3000").replace(
 const TOKEN = process.env.INTERNAL_RENDERER_TOKEN ?? "";
 const EXEC_PATH = process.env.PUPPETEER_EXECUTABLE_PATH ?? "/usr/bin/chromium";
 
-const RENDER_TIMEOUT_MS = 60_000;
+const RENDER_TIMEOUT_MS = 90_000; // bumped — model load + WebGL init + upload
+const NAV_TIMEOUT_MS = 30_000;
 const IDLE_CLOSE_MS = 5 * 60 * 1000;
 
 let browser: Browser | null = null;
@@ -32,17 +36,25 @@ async function getBrowser(): Promise<Browser> {
   if (browser && browser.connected) return browser;
   browser = await puppeteer.launch({
     executablePath: EXEC_PATH,
+    // SwiftShader gives software WebGL inside headless Chromium without a
+    // physical GPU. `--disable-gpu` was conflicting on some hosts; dropped.
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
-      "--disable-gpu",
-      "--use-gl=swiftshader",
-      "--enable-webgl",
-      "--ignore-gpu-blocklist",
       "--disable-dev-shm-usage",
+      "--enable-unsafe-swiftshader",
+      "--use-gl=angle",
+      "--use-angle=swiftshader",
+      "--ignore-gpu-blocklist",
+      "--enable-webgl",
+      "--hide-scrollbars",
+      "--mute-audio",
     ],
     headless: true,
   });
+  console.log(
+    `[worker:thumbnail] browser launched (chromium=${EXEC_PATH}, web=${WEB_URL})`,
+  );
   return browser;
 }
 
@@ -66,18 +78,65 @@ export async function renderDesignThumbnail(designId: string): Promise<void> {
   const b = await getBrowser();
   const page = await b.newPage();
 
+  // Forward useful diagnostics to worker stdout so we can debug 60s timeouts.
+  const tag = `[worker:thumbnail:${designId}]`;
+  page.on("console", (msg: ConsoleMessage) => {
+    const t = msg.type();
+    if (t === "error" || t === "warn") {
+      console.warn(`${tag} page.${t}: ${msg.text()}`);
+    }
+  });
+  page.on("pageerror", (err: unknown) => {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`${tag} page error: ${msg}`);
+  });
+  page.on("requestfailed", (req) => {
+    const f = req.failure();
+    console.warn(
+      `${tag} request failed: ${req.method()} ${req.url()} — ${f?.errorText ?? "?"}`,
+    );
+  });
+  page.on("response", (res) => {
+    if (res.status() >= 400) {
+      console.warn(`${tag} response ${res.status()} ${res.url()}`);
+    }
+  });
+
   try {
     await page.setViewport({ width: 1024, height: 1024, deviceScaleFactor: 1 });
-    await page.goto(url, { waitUntil: "networkidle0", timeout: RENDER_TIMEOUT_MS });
 
-    // Wait for the page-side render + upload to finish.
-    const status = await page.waitForFunction(
-      "window.__RENDER_STATUS__",
-      { timeout: RENDER_TIMEOUT_MS },
+    // Pre-set a sentinel before navigation so we can tell "page didn't load
+    // at all" from "page loaded but render hasn't finished" if it ever times
+    // out — page replaces this with "pending" / "ok" / "error:..." itself.
+    await page.evaluateOnNewDocument(`
+      (function () {
+        try { window.__RENDER_STATUS__ = "loading"; } catch (_) {}
+      })();
+    `);
+
+    const navStart = Date.now();
+    const resp = await page.goto(url, {
+      waitUntil: "domcontentloaded",
+      timeout: NAV_TIMEOUT_MS,
+    });
+    const navMs = Date.now() - navStart;
+    console.log(
+      `${tag} nav ${resp?.status() ?? "?"} in ${navMs}ms → ${resp?.url() ?? url}`,
     );
-    const value = (await status.jsonValue()) as string;
-    if (!value || value === "pending") {
-      throw new Error("renderer did not finish");
+    if (!resp || !resp.ok()) {
+      throw new Error(`render page returned ${resp?.status() ?? "no-response"}`);
+    }
+
+    // Wait for the page-side render + upload to finish (status flips off
+    // "loading" / "pending" to "ok" or "error:...").
+    const handle = await page.waitForFunction(
+      'window.__RENDER_STATUS__ && window.__RENDER_STATUS__ !== "loading" && window.__RENDER_STATUS__ !== "pending"',
+      { timeout: RENDER_TIMEOUT_MS, polling: 500 },
+    );
+    const value = (await handle.jsonValue()) as string;
+
+    if (typeof value !== "string" || value === "loading" || value === "pending") {
+      throw new Error(`renderer did not finish (status=${String(value)})`);
     }
     if (value.startsWith("error:")) {
       throw new Error(value.slice("error:".length));
@@ -94,8 +153,8 @@ export async function renderDesignThumbnail(designId: string): Promise<void> {
 }
 
 /**
- * Best-effort failure handler — logs but never throws so the BullMQ retry
- * counter advances normally.
+ * Best-effort failure handler — logs but rethrows so BullMQ records the
+ * failure and retries per queue config.
  */
 export async function handleThumbnailJob(designId: string): Promise<void> {
   try {
@@ -106,6 +165,6 @@ export async function handleThumbnailJob(designId: string): Promise<void> {
       severity: "MEDIUM",
       metadata: { designId },
     });
-    throw e; // BullMQ records as failed and retries per queue config
+    throw e;
   }
 }

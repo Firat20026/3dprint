@@ -1,23 +1,51 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
+import type { OrderStatus, Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 50;
+
+const STATUS_VALUES = new Set<OrderStatus>([
+  "PENDING_PAYMENT",
+  "PAID",
+  "IN_QUEUE",
+  "PRINTING",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELED",
+  "REFUNDED",
+]);
 
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }) {
-  const { status } = await searchParams;
-  const where = status && status !== "ALL" ? { status: status as never } : {};
+  const sp = await searchParams;
+  const statusFilter =
+    sp.status && STATUS_VALUES.has(sp.status as OrderStatus)
+      ? (sp.status as OrderStatus)
+      : null;
+  const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
 
-  const orders = await prisma.order.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: { items: true, user: { select: { email: true, name: true } } },
-    take: 100,
-  });
+  const where: Prisma.OrderWhereInput = statusFilter
+    ? { status: statusFilter }
+    : {};
+
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: { items: true, user: { select: { email: true, name: true } } },
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
+    }),
+    prisma.order.count({ where }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const filters = [
     { label: "Tümü", value: "ALL" },
@@ -28,11 +56,25 @@ export default async function AdminOrdersPage({
     { label: "İptal", value: "CANCELED" },
   ];
 
+  function pageUrl(p: number) {
+    const params = new URLSearchParams();
+    if (statusFilter) params.set("status", statusFilter);
+    if (p > 1) params.set("page", String(p));
+    const qs = params.toString();
+    return qs ? `/admin/orders?${qs}` : "/admin/orders";
+  }
+
   return (
     <div>
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-sm text-[var(--color-text-muted)]">
+          Toplam {total} sipariş · Sayfa {page}/{totalPages}
+        </p>
+      </div>
+
       <div className="mb-6 flex flex-wrap gap-2">
         {filters.map((f) => {
-          const active = (status ?? "ALL") === f.value;
+          const active = (statusFilter ?? "ALL") === f.value;
           return (
             <Link
               key={f.value}
@@ -98,6 +140,30 @@ export default async function AdminOrdersPage({
             </tbody>
           </table>
         </div>
+      )}
+
+      {totalPages > 1 && (
+        <nav className="mt-5 flex items-center justify-center gap-2 text-sm">
+          {page > 1 && (
+            <Link
+              href={pageUrl(page - 1)}
+              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+            >
+              ← Önceki
+            </Link>
+          )}
+          <span className="text-[var(--color-text-muted)]">
+            {page} / {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link
+              href={pageUrl(page + 1)}
+              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+            >
+              Sonraki →
+            </Link>
+          )}
+        </nav>
       )}
     </div>
   );

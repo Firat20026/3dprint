@@ -8,6 +8,13 @@
  *   - User.credits += credits  (cache)
  *
  * Idempotency: koşullu updateMany; eş zamanlı 2 callback iki kez yazamaz.
+ *
+ * Redirect status: ALL responses use 303 See Other so that the browser
+ * follows up with a GET (not a POST). NextResponse.redirect()'s default 307
+ * preserves the HTTP method, which would re-POST to /account/credits — and
+ * because that's a cross-site POST chain (iyzico → us → /account/credits),
+ * sameSite=lax cookies (NextAuth session) wouldn't be sent and the user
+ * would land on /login looking "logged out". 303 fixes this by forcing GET.
  */
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -17,6 +24,13 @@ import { track, logError, EVENTS } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+// 303 See Other: tells the browser to GET the next URL even if it arrived
+// here via POST. Critical for preserving the user's session cookie when the
+// callback was POSTed cross-site by iyzico.
+function seeOther(url: string) {
+  return NextResponse.redirect(url, 303);
+}
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -37,7 +51,7 @@ async function handle(token: string | null, origin: string) {
   });
 
   if (!token) {
-    return NextResponse.redirect(`${origin}/account/credits?error=no-token`);
+    return seeOther(`${origin}/account/credits?error=no-token`);
   }
 
   const purchase = await prisma.creditPurchase.findUnique({
@@ -48,7 +62,7 @@ async function handle(token: string | null, origin: string) {
       kind: "credits",
       reason: "purchase-not-found",
     });
-    return NextResponse.redirect(`${origin}/account/credits?error=not-found`);
+    return seeOther(`${origin}/account/credits?error=not-found`);
   }
 
   if (purchase.status !== "PENDING_PAYMENT") {
@@ -57,7 +71,7 @@ async function handle(token: string | null, origin: string) {
       purchaseId: purchase.id,
       currentStatus: purchase.status,
     });
-    return NextResponse.redirect(`${origin}/account/credits?purchased=1`);
+    return seeOther(`${origin}/account/credits?purchased=1`);
   }
 
   const result = await retrievePayment(token);
@@ -79,7 +93,7 @@ async function handle(token: string | null, origin: string) {
       purchaseId: purchase.id,
       reason: "error" in result ? result.error : "declined",
     });
-    return NextResponse.redirect(`${origin}/account/credits?error=declined`);
+    return seeOther(`${origin}/account/credits?error=declined`);
   }
 
   // Atomic block: flip CreditPurchase status conditionally; if we won the race
@@ -121,7 +135,7 @@ async function handle(token: string | null, origin: string) {
       userId: purchase.userId,
       metadata: { purchaseId: purchase.id },
     });
-    return NextResponse.redirect(`${origin}/account/credits?error=internal`);
+    return seeOther(`${origin}/account/credits?error=internal`);
   }
 
   if (!credited) {
@@ -142,5 +156,5 @@ async function handle(token: string | null, origin: string) {
     );
   }
 
-  return NextResponse.redirect(`${origin}/account/credits?purchased=1`);
+  return seeOther(`${origin}/account/credits?purchased=1`);
 }

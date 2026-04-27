@@ -172,7 +172,7 @@ export function AddToCartForm({
             ₺{estimatedUnitPrice.toFixed(2)}
           </p>
           <p className="text-[10px] text-[var(--color-text-subtle)]">
-            Kesin fiyat slice sonrası (Faz 2) netleşir
+            Kesin fiyat slicing sonrası netleşir
           </p>
         </div>
       </div>

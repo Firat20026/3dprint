@@ -94,7 +94,7 @@ export function CartContents() {
           </Button>
         </Link>
         <p className="mt-3 text-center text-[10px] text-[var(--color-text-subtle)]">
-          Ödeme iyzico ile güvenli — Faz 3&apos;te aktif olacak.
+          Ödeme iyzico ile güvenli alınır.
         </p>
       </aside>
     </div>

@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { AIGenerateForm } from "@/components/ai/AIGenerateForm";
+import { isRealMeshyEnabled } from "@/lib/meshy/client";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export default async function AIPage() {
   ]);
 
   const balance = user?.credits ?? 0;
+  const realMeshy = isRealMeshyEnabled();
 
   return (
     <Container className="py-12 animate-fade-in">
@@ -44,12 +46,21 @@ export default async function AIPage() {
         </Link>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
-        <Badge tone="brand">Mock mode</Badge>
-        <span>
-          Şu an gerçek Meshy API bağlı değil — 3 sn sonra örnek bir model döner.
-        </span>
-      </div>
+      {realMeshy ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
+          <Badge tone="success">Meshy API bağlı</Badge>
+          <span>
+            Üretim süresi 1–10 dk arası değişebilir (Meshy queue'una bağlı).
+          </span>
+        </div>
+      ) : (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
+          <Badge tone="brand">Mock mode</Badge>
+          <span>
+            Şu an gerçek Meshy API bağlı değil — 3 sn sonra örnek bir model döner.
+          </span>
+        </div>
+      )}
 
       <div className="mt-10">
         <AIGenerateForm

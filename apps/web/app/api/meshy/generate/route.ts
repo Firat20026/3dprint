@@ -14,7 +14,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { saveUpload } from "@/lib/storage";
-import { scheduleMockCompletion } from "@/lib/meshy/mock";
+import { scheduleCompletion } from "@/lib/meshy/client";
 import { track, EVENTS } from "@/lib/observability";
 import { rateLimit, clientKey, tooManyRequests } from "@/lib/rate-limit";
 
@@ -147,7 +147,9 @@ export async function POST(req: Request) {
     { userId },
   );
 
-  scheduleMockCompletion(job.id);
+  // Routes to real Meshy if MESHY_PROVIDER=real + MESHY_API_KEY are set,
+  // otherwise to the bundled-sample mock.
+  scheduleCompletion(job.id);
 
   return NextResponse.json({
     jobId: job.id,

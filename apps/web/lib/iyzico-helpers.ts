@@ -5,8 +5,12 @@
  * Checkout Form, which requires a normalized buyer object (gsmNumber prefixed
  * with +90, identityNumber as TCKN, etc.). This module centralizes that
  * normalization so the rules don't drift between routes.
+ *
+ * Note: not marked "server-only" so the tests under lib/*.test.ts can import
+ * the helpers without Next.js's RSC guard tripping. The functions are pure
+ * (string-in / string-out) and would be harmless if accidentally imported
+ * client-side; nothing here touches DB, env-only secrets, or filesystem.
  */
-import "server-only";
 
 const SANDBOX_TCKN = "11111111111";
 const SANDBOX_PHONE = "+905555555555";

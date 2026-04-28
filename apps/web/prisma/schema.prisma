@@ -122,6 +122,11 @@ model Material {
 
   sliceJobs SliceJob[]
   cartItems CartItem[]
+
+  // Prevent admin from accidentally seeding two "PLA Mat Siyah" rows. Names
+  // are unique within a type so we can still have e.g. "PLA Beyaz" and
+  // "PETG Beyaz" side by side.
+  @@unique([name, type])
 }
 
 model PrintProfile {

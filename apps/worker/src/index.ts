@@ -21,6 +21,7 @@ import { getSettings } from "./settings.js";
 import { calculatePrice } from "./pricing.js";
 import { track, logError } from "./observability.js";
 import { handleThumbnailJob } from "./thumbnail.js";
+import { startCron } from "./cron.js";
 
 const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 const QUEUE_NAME = "slice";
@@ -163,6 +164,11 @@ const thumbnailWorker = new Worker<{ designId: string }>(
 thumbnailWorker.on("ready", () =>
   console.log(`[worker] listening on "${THUMB_QUEUE}"`),
 );
+
+// In-process scheduler — fires fail-stuck-jobs / backfill-thumbnails /
+// observability-cleanup so the operator doesn't have to set up a host
+// crontab. Disable with WORKER_CRON_DISABLED=1.
+startCron();
 thumbnailWorker.on("failed", (job, err) => {
   console.warn(
     `[worker:thumbnail] failed ${job?.id}: ${err.message}`,

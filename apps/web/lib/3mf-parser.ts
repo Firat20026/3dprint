@@ -11,8 +11,11 @@
  * documented at https://3mf.io/specification/. We only read the parts we
  * need — light-touch regex parsing is enough; full XML schema validation
  * isn't worth the dependency cost.
+ *
+ * Not marked "server-only" — yauzl is Node-only so accidental client
+ * imports already fail at bundle time, and the inner countPlates /
+ * extractMaterialGroups string helpers want to stay testable.
  */
-import "server-only";
 import yauzl from "yauzl";
 
 export type MaterialGroup = {

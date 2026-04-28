@@ -1,8 +1,14 @@
 /**
- * Lightweight tests for the pricing engine. Run with `tsx pricing.test.ts`
- * (no test runner dependency yet — vitest will be added in Faz 2).
+ * Lightweight tests for the pricing engine. Run with:
+ *   pnpm exec tsx lib/pricing.test.ts
  */
-import { calculatePrice, shippingFee, lineTotal } from "./pricing";
+import {
+  calculatePrice,
+  shippingFee,
+  lineTotal,
+  estimateDesignUnitPrice,
+  DESIGN_ESTIMATE_GRAMS,
+} from "./pricing";
 
 const settings = {
   machineCostPerHourTRY: 30,
@@ -47,3 +53,29 @@ const z = calculatePrice({
   settings,
 });
 assertEq("zero unit (only setup * 1.4)", z.unitPriceTRY, 21);
+
+// ── estimateDesignUnitPrice ──────────────────────────────────────────────────
+// 40g placeholder × 2.5/g = 100 material + 15 setup = 115 subtotal
+// + 40% platform margin = 161; no designer markup → 161
+const designAdmin = estimateDesignUnitPrice({
+  pricePerGramTRY: 2.5,
+  designerMarkupPercent: 0,
+  settings: { marginPercent: 40, setupFeeTRY: 15 },
+});
+assertEq("design admin (40g × 2.5 + 15 + 40%)", designAdmin, 161);
+
+// Same numbers + 20% designer markup → 115 + 0.40·115 + 0.20·115 = 115 + 46 + 23 = 184
+const designUser = estimateDesignUnitPrice({
+  pricePerGramTRY: 2.5,
+  designerMarkupPercent: 20,
+  settings: { marginPercent: 40, setupFeeTRY: 15 },
+});
+assertEq("design user (+20% markup)", designUser, 184);
+
+// 0 setup, 0 margin → just material cost
+const designBare = estimateDesignUnitPrice({
+  pricePerGramTRY: 1,
+  designerMarkupPercent: 0,
+  settings: { marginPercent: 0, setupFeeTRY: 0 },
+});
+assertEq("bare estimate (40 × 1)", designBare, DESIGN_ESTIMATE_GRAMS);

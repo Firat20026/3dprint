@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 const sections = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/designs", label: "Tasarımlar" },
+  { href: "/admin/reviews", label: "Yorumlar" },
   { href: "/admin/orders", label: "Siparişler" },
   { href: "/admin/queue", label: "Baskı Kuyruğu" },
   { href: "/admin/users", label: "Kullanıcılar" },

@@ -4,11 +4,14 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { ModelViewer } from "@/components/viewer/ModelViewer";
 import { AddToCartForm } from "@/components/shop/AddToCartForm";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
+import { StarRating } from "@/components/reviews/StarRating";
 import {
   getDesignBySlug,
   listActiveProfiles,
   listMaterialsInStock,
 } from "@/lib/designs";
+import { getDesignRatingSummary } from "@/lib/reviews";
 import { publicUrlFor } from "@/lib/urls";
 import { getSettings } from "@/lib/settings";
 
@@ -69,10 +72,11 @@ export default async function DesignDetailPage({
   const design = await getDesignBySlug(slug);
   if (!design || design.status !== "PUBLISHED") notFound();
 
-  const [materials, profiles, settings] = await Promise.all([
+  const [materials, profiles, settings, ratingSummary] = await Promise.all([
     listMaterialsInStock(),
     listActiveProfiles(),
     getSettings(),
+    getDesignRatingSummary(design.id),
   ]);
 
   const modelUrl = publicUrlFor(design.modelFileKey);
@@ -146,6 +150,16 @@ export default async function DesignDetailPage({
           <h1 className="mt-3 h-display text-4xl md:text-5xl">
             {design.title}
           </h1>
+
+          {ratingSummary.count > 0 && (
+            <div className="mt-3">
+              <StarRating
+                value={ratingSummary.average}
+                count={ratingSummary.count}
+                size={16}
+              />
+            </div>
+          )}
 
           {/* Plate / multi-mat badges right under the title */}
           {(plateCount > 1 || materialGroups.length > 1) && (
@@ -231,6 +245,8 @@ export default async function DesignDetailPage({
           </div>
         </div>
       </div>
+
+      <ReviewSection designId={design.id} slug={design.slug} />
     </Container>
   );
 }

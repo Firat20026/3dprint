@@ -5,6 +5,7 @@ import {
   searchPublishedDesigns,
   listPublishedDesignCategories,
 } from "@/lib/designs";
+import { getDesignRatingSummaries } from "@/lib/reviews";
 import type { DesignSource } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +52,8 @@ export default async function DesignsPage({
     }),
     listPublishedDesignCategories(),
   ]);
+
+  const ratings = await getDesignRatingSummaries(designs.map((d) => d.id));
 
   const hasActiveFilter =
     q.length > 0 || category || source || multiPlate || multiMaterial;
@@ -211,7 +214,7 @@ export default async function DesignsPage({
           data-stagger
         >
           {designs.map((d) => (
-            <DesignCard key={d.id} design={d} />
+            <DesignCard key={d.id} design={d} rating={ratings.get(d.id)} />
           ))}
         </div>
       )}

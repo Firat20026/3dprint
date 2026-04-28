@@ -52,6 +52,7 @@ model User {
   analyticsEvents     AnalyticsEvent[]
   errorLogs           ErrorLog[]
   passwordResetTokens PasswordResetToken[]
+  designReviews       DesignReview[]
 }
 
 model Account {
@@ -215,9 +216,40 @@ model Design {
   sliceJobs       SliceJob[]
   cartItems       CartItem[]
   orderItems      OrderItem[]
+  reviews         DesignReview[]
 
   @@index([status, source])
   @@index([category])
+}
+
+// =====================================================
+// Design reviews (1-5 stars + body, one per user per design)
+// =====================================================
+
+enum ReviewStatus {
+  APPROVED // visible (default — auto-approved on submit)
+  HIDDEN   // moderator hid it; not shown publicly but kept for audit
+}
+
+model DesignReview {
+  id            String       @id @default(cuid())
+  designId      String
+  userId        String
+  rating        Int          // 1..5 — validated at the application layer
+  title         String?
+  body          String?      @db.Text
+  verifiedBuyer Boolean      @default(false) // true when user has a PAID+ order containing this design
+  status        ReviewStatus @default(APPROVED)
+  hiddenReason  String?      @db.Text        // admin moderation note
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  design Design @relation(fields: [designId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([designId, userId])         // one review per user per design
+  @@index([designId, status, createdAt])
+  @@index([userId])
 }
 
 // =====================================================

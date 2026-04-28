@@ -1,10 +1,19 @@
 import Link from "next/link";
 import { publicUrlFor } from "@/lib/urls";
 import type { Design } from "@prisma/client";
+import { StarRating } from "@/components/reviews/StarRating";
 
 type MaterialGroup = { extruderId: number; name: string | null; colorHex: string | null };
 
-export function DesignCard({ design }: { design: Design }) {
+type RatingSummary = { average: number; count: number };
+
+export function DesignCard({
+  design,
+  rating,
+}: {
+  design: Design;
+  rating?: RatingSummary;
+}) {
   const thumbUrl = publicUrlFor(design.thumbnailUrl);
   const materialGroups = (design.materialGroups ?? []) as MaterialGroup[];
   const plateCount = design.plateCount ?? 1;
@@ -65,6 +74,11 @@ export function DesignCard({ design }: { design: Design }) {
           <p className="mt-1 line-clamp-2 text-xs text-[var(--color-text-muted)]">
             {design.description}
           </p>
+        )}
+        {rating && rating.count > 0 && (
+          <div className="mt-2">
+            <StarRating value={rating.average} count={rating.count} size={12} />
+          </div>
         )}
         <p className="mt-3 inline-flex items-center gap-1 text-xs uppercase tracking-wider text-[var(--color-brand-2)]">
           Detayı Gör

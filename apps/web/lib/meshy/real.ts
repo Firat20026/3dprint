@@ -182,7 +182,7 @@ async function run(jobId: string) {
     data: { status: "RUNNING", externalJobId },
   });
   void track(
-    "MESHY_TASK_SUBMITTED",
+    EVENTS.MESHY_TASK_SUBMITTED,
     { jobId, externalJobId, mode: job.mode },
     { userId: job.userId },
   );

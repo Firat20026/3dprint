@@ -8,7 +8,7 @@ import { AuthError } from "next-auth";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; error?: string }>;
+  searchParams: Promise<{ from?: string; error?: string; reset?: string }>;
 }) {
   const session = await auth();
   const params = await searchParams;
@@ -68,7 +68,15 @@ export default async function LoginPage({
           />
         </div>
         <div>
-          <Label htmlFor="password">Şifre</Label>
+          <div className="flex items-baseline justify-between">
+            <Label htmlFor="password">Şifre</Label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-brand-2)]"
+            >
+              Şifremi unuttum
+            </Link>
+          </div>
           <Input
             id="password"
             name="password"
@@ -83,6 +91,11 @@ export default async function LoginPage({
         {params.error === "invalid" && (
           <div className="rounded-[10px] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-3.5 py-2.5 text-xs text-[var(--color-danger)]">
             Email veya şifre hatalı.
+          </div>
+        )}
+        {params.reset === "ok" && (
+          <div className="rounded-[10px] border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 px-3.5 py-2.5 text-xs text-[var(--color-success)]">
+            ✓ Şifren güncellendi. Yeni şifrenle giriş yapabilirsin.
           </div>
         )}
 

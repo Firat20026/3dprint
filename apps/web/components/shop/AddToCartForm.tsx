@@ -132,14 +132,21 @@ export function AddToCartForm({
     <div className="space-y-5">
       {plateCount > 1 && (
         <div>
-          <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <p
+            id="atc-plate-label"
+            className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]"
+          >
             Plate Seçimi
           </p>
           <p className="mt-1 text-[10px] text-[var(--color-text-subtle)]">
             Bu tasarım {plateCount} plate'ten oluşuyor. Tek plate seç veya
             hepsini birden ayrı satır olarak ekle.
           </p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div
+            role="radiogroup"
+            aria-labelledby="atc-plate-label"
+            className="mt-2 flex flex-wrap gap-1.5"
+          >
             <PlateChip
               label="Hepsi"
               active={selectedPlate === null}
@@ -158,74 +165,115 @@ export function AddToCartForm({
       )}
 
       <div>
-        <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+        <p
+          id="atc-material-label"
+          className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]"
+        >
           Materyal
         </p>
-        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {materials.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => setMaterialId(m.id)}
-              className={
-                "flex items-center gap-2 rounded-[10px] border px-3 py-2 text-left text-xs transition-colors " +
-                (m.id === materialId
-                  ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-text)]"
-                  : "border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:border-[var(--color-border)]/80 hover:text-[var(--color-text)]")
-              }
-            >
-              <span
-                className="size-4 shrink-0 rounded-full border border-white/10"
-                style={{ backgroundColor: m.colorHex }}
-              />
-              <span className="flex-1 truncate">{m.name}</span>
-            </button>
-          ))}
+        <div
+          role="radiogroup"
+          aria-labelledby="atc-material-label"
+          className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3"
+        >
+          {materials.map((m) => {
+            const checked = m.id === materialId;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                role="radio"
+                aria-checked={checked}
+                aria-label={`${m.name} (${m.type})`}
+                onClick={() => setMaterialId(m.id)}
+                className={
+                  "flex items-center gap-2 rounded-[10px] border px-3 py-2 text-left text-xs transition-colors " +
+                  (checked
+                    ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-text)]"
+                    : "border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:border-[var(--color-border)]/80 hover:text-[var(--color-text)]")
+                }
+              >
+                <span
+                  className="size-4 shrink-0 rounded-full border border-white/10"
+                  style={{ backgroundColor: m.colorHex }}
+                  aria-hidden="true"
+                />
+                <span className="flex-1 truncate">{m.name}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+        <p
+          id="atc-profile-label"
+          className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]"
+        >
           Baskı Kalitesi
         </p>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          {profiles.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setProfileId(p.id)}
-              className={
-                "rounded-[10px] border px-3 py-2.5 text-left text-xs transition-colors " +
-                (p.id === profileId
-                  ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10"
-                  : "border-[var(--color-border)] bg-[var(--color-surface-2)] hover:border-[var(--color-border)]/80")
-              }
-            >
-              <p className="font-medium text-[var(--color-text)]">{p.name}</p>
-              <p className="mt-0.5 text-[10px] text-[var(--color-text-muted)]">
-                {p.layerHeightMm}mm · %{p.infillPercent}
-              </p>
-            </button>
-          ))}
+        <div
+          role="radiogroup"
+          aria-labelledby="atc-profile-label"
+          className="mt-2 grid grid-cols-3 gap-2"
+        >
+          {profiles.map((p) => {
+            const checked = p.id === profileId;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                role="radio"
+                aria-checked={checked}
+                aria-label={`${p.name}, ${p.layerHeightMm}mm layer, %${p.infillPercent} infill`}
+                onClick={() => setProfileId(p.id)}
+                className={
+                  "rounded-[10px] border px-3 py-2.5 text-left text-xs transition-colors " +
+                  (checked
+                    ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10"
+                    : "border-[var(--color-border)] bg-[var(--color-surface-2)] hover:border-[var(--color-border)]/80")
+                }
+              >
+                <p className="font-medium text-[var(--color-text)]">{p.name}</p>
+                <p className="mt-0.5 text-[10px] text-[var(--color-text-muted)]">
+                  {p.layerHeightMm}mm · %{p.infillPercent}
+                </p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div className="flex items-end gap-4">
         <div>
-          <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <p
+            id="atc-qty-label"
+            className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]"
+          >
             Adet
           </p>
-          <div className="mt-2 inline-flex items-center overflow-hidden rounded-[var(--radius-button)] border border-[var(--color-border)]">
+          <div
+            role="spinbutton"
+            aria-labelledby="atc-qty-label"
+            aria-valuemin={1}
+            aria-valuemax={20}
+            aria-valuenow={quantity}
+            className="mt-2 inline-flex items-center overflow-hidden rounded-[var(--radius-button)] border border-[var(--color-border)]"
+          >
             <button
               type="button"
+              aria-label="Adeti azalt"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
               className="px-3 py-2 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
             >
               −
             </button>
-            <span className="w-10 text-center font-medium">{quantity}</span>
+            <span className="w-10 text-center font-medium" aria-hidden="true">
+              {quantity}
+            </span>
             <button
               type="button"
+              aria-label="Adeti artır"
               onClick={() => setQuantity(Math.min(20, quantity + 1))}
               className="px-3 py-2 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
             >
@@ -283,6 +331,9 @@ function PlateChip({
   return (
     <button
       type="button"
+      role="radio"
+      aria-checked={active}
+      aria-label={label}
       onClick={onClick}
       className={
         "rounded-full border px-3 py-1 text-xs transition-colors " +

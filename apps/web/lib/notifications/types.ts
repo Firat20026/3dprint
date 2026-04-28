@@ -13,6 +13,7 @@ export const TEMPLATES = {
   DESIGN_APPROVED: "DESIGN_APPROVED",
   DESIGN_REJECTED: "DESIGN_REJECTED",
   MESHY_REFUND_ISSUED: "MESHY_REFUND_ISSUED",
+  PASSWORD_RESET: "PASSWORD_RESET",
 } as const;
 
 export type TemplateName = (typeof TEMPLATES)[keyof typeof TEMPLATES];
@@ -45,6 +46,10 @@ export type TemplatePayloads = {
     jobId: string;
     creditsRefunded: number;
     error: string;
+  };
+  PASSWORD_RESET: {
+    resetUrl: string;
+    expiresInMinutes: number;
   };
 };
 

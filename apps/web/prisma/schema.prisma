@@ -38,19 +38,20 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts          Account[]
-  sessions          Session[]
-  designs           Design[]         @relation("UserDesigns")
-  reviewedDesigns   Design[]         @relation("DesignReviewer")
-  sliceJobs         SliceJob[]
-  cartItems         CartItem[]
-  orders            Order[]
-  creditPurchases   CreditPurchase[]
-  creditLedger      CreditLedger[]
-  meshyJobs         MeshyJob[]
-  shippingAddresses ShippingAddress[]
-  analyticsEvents   AnalyticsEvent[]
-  errorLogs         ErrorLog[]
+  accounts            Account[]
+  sessions            Session[]
+  designs             Design[]             @relation("UserDesigns")
+  reviewedDesigns     Design[]             @relation("DesignReviewer")
+  sliceJobs           SliceJob[]
+  cartItems           CartItem[]
+  orders              Order[]
+  creditPurchases     CreditPurchase[]
+  creditLedger        CreditLedger[]
+  meshyJobs           MeshyJob[]
+  shippingAddresses   ShippingAddress[]
+  analyticsEvents     AnalyticsEvent[]
+  errorLogs           ErrorLog[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Account {
@@ -86,6 +87,20 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 // =====================================================

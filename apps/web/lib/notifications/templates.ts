@@ -121,6 +121,23 @@ export function render<T extends TemplateName>(
         ].join("\n"),
       };
     }
+    case "PASSWORD_RESET": {
+      const d = data as TemplatePayloads["PASSWORD_RESET"];
+      return {
+        subject: `${APP_NAME} · Şifre sıfırlama bağlantısı`,
+        textBody: [
+          "Merhaba,",
+          "",
+          `${APP_NAME} hesabın için bir şifre sıfırlama isteği aldık. Bağlantı ${d.expiresInMinutes} dakika boyunca geçerli:`,
+          "",
+          d.resetUrl,
+          "",
+          "Bu isteği sen yapmadıysan, bu maili görmezden gelebilirsin — şifren değişmez.",
+          "",
+          `${APP_NAME} ekibi`,
+        ].join("\n"),
+      };
+    }
   }
   // Exhaustiveness: TS will flag unhandled cases.
   const _exhaustive: never = template;

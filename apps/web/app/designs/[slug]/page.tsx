@@ -158,6 +158,18 @@ export default async function DesignDetailPage({
             {design.title}
           </h1>
 
+          {design.source === "USER_MARKETPLACE" && design.uploader && (
+            <p className="mt-3 text-xs text-[var(--color-text-muted)]">
+              Tasarımcı:{" "}
+              <Link
+                href={`/designers/${design.uploader.id}`}
+                className="text-[var(--color-brand-2)] hover:underline"
+              >
+                {design.uploader.name ?? "Anonim Tasarımcı"}
+              </Link>
+            </p>
+          )}
+
           {ratingSummary.count > 0 && (
             <div className="mt-3">
               <StarRating

@@ -33,6 +33,8 @@ async function updateProfile(formData: FormData) {
   const tcknRaw = String(formData.get("identityNumber") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim();
   const address = String(formData.get("registrationAddress") ?? "").trim();
+  const bio = String(formData.get("bio") ?? "").trim();
+  const websiteUrlRaw = String(formData.get("websiteUrl") ?? "").trim();
 
   if (name.length > 80) {
     redirect("/account/settings?err=name-long");
@@ -42,6 +44,27 @@ async function updateProfile(formData: FormData) {
   }
   if (address.length > 240) {
     redirect("/account/settings?err=address-long");
+  }
+  if (bio.length > 600) {
+    redirect("/account/settings?err=bio-long");
+  }
+
+  let websiteUrl: string | null = null;
+  if (websiteUrlRaw) {
+    try {
+      const parsed = new URL(
+        /^https?:\/\//i.test(websiteUrlRaw) ? websiteUrlRaw : `https://${websiteUrlRaw}`,
+      );
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        redirect("/account/settings?err=website-invalid");
+      }
+      websiteUrl = parsed.toString();
+      if (websiteUrl.length > 240) {
+        redirect("/account/settings?err=website-long");
+      }
+    } catch {
+      redirect("/account/settings?err=website-invalid");
+    }
   }
 
   // Optional but if provided must be valid
@@ -72,6 +95,8 @@ async function updateProfile(formData: FormData) {
       identityNumber: tckn,
       city: city || null,
       registrationAddress: address || null,
+      bio: bio || null,
+      websiteUrl,
     },
   });
 
@@ -133,6 +158,9 @@ const ERR_MESSAGES: Record<string, string> = {
   "name-long": "Ad en fazla 80 karakter olabilir",
   "city-long": "Şehir en fazla 80 karakter olabilir",
   "address-long": "Adres en fazla 240 karakter olabilir",
+  "bio-long": "Tasarımcı tanıtımı en fazla 600 karakter olabilir",
+  "website-invalid": "Geçersiz web sitesi adresi",
+  "website-long": "Web sitesi adresi çok uzun",
   "phone-invalid": "Telefon +90 ve 10 rakam olmalı (örn. +905551234567)",
   "tckn-invalid": "TCKN 11 hane olmalı",
   "password-short": "Yeni şifre en az 8 karakter olmalı",
@@ -160,14 +188,21 @@ export default async function SettingsPage({
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: session.user.id },
     select: {
+      id: true,
       email: true,
       name: true,
       phone: true,
       identityNumber: true,
       city: true,
       registrationAddress: true,
+      bio: true,
+      websiteUrl: true,
     },
   });
+
+  const hasPublishedDesign = (await prisma.design.count({
+    where: { uploaderId: session.user.id, status: "PUBLISHED" },
+  })) > 0;
 
   const params = await searchParams;
   const okMsg = params.ok ? OK_MESSAGES[params.ok] : null;
@@ -274,6 +309,60 @@ export default async function SettingsPage({
                 className="mt-1.5 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
               />
             </div>
+
+            {/* Public designer fields — shown to everyone but only useful for
+                people who upload designs. We always render them so a user
+                can prep their profile before publishing the first design. */}
+            <div className="border-t border-[var(--color-border)] pt-4">
+              <p className="text-xs uppercase tracking-wider text-[var(--color-accent)]">
+                Tasarımcı Profili (herkese açık)
+              </p>
+              <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+                Tasarımların yayındaysa{" "}
+                {hasPublishedDesign ? (
+                  <Link
+                    href={`/designers/${user.id}`}
+                    target="_blank"
+                    className="text-[var(--color-brand-2)] hover:underline"
+                  >
+                    /designers/{user.id.slice(0, 8)}…
+                  </Link>
+                ) : (
+                  <span className="text-[var(--color-text-muted)]">
+                    /designers sayfanda
+                  </span>
+                )}{" "}
+                görünür.
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="bio">Tasarımcı Tanıtımı</Label>
+              <textarea
+                id="bio"
+                name="bio"
+                defaultValue={user.bio ?? ""}
+                rows={3}
+                maxLength={600}
+                placeholder="Kısa bir tanıtım — uzmanlık, hangi tarz tasarımlar yapıyorsun, vs."
+                className="mt-1.5 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+              />
+              <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+                En fazla 600 karakter.
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="websiteUrl">Web Sitesi</Label>
+              <Input
+                id="websiteUrl"
+                name="websiteUrl"
+                type="url"
+                defaultValue={user.websiteUrl ?? ""}
+                placeholder="https://portfolyom.com"
+                maxLength={240}
+                className="mt-1.5"
+              />
+            </div>
+
             <div>
               <SubmitButton pendingLabel="Kaydediliyor...">
                 Profili Kaydet

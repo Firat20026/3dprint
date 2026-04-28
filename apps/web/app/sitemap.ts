@@ -32,15 +32,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Belt-and-suspenders: even if the DB hiccups at request time we still
   // serve the static pages instead of returning a 500.
   let designs: Array<{ slug: string; updatedAt: Date }> = [];
+  let designers: Array<{ id: string; updatedAt: Date }> = [];
   try {
-    designs = await prisma.design.findMany({
-      where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true },
-      orderBy: { updatedAt: "desc" },
-      take: 1000,
-    });
+    [designs, designers] = await Promise.all([
+      prisma.design.findMany({
+        where: { status: "PUBLISHED" },
+        select: { slug: true, updatedAt: true },
+        orderBy: { updatedAt: "desc" },
+        take: 1000,
+      }),
+      // Only designers who have at least one PUBLISHED design — we don't
+      // expose profile pages for plain customers.
+      prisma.user.findMany({
+        where: { designs: { some: { status: "PUBLISHED" } } },
+        select: { id: true, updatedAt: true },
+        orderBy: { updatedAt: "desc" },
+        take: 1000,
+      }),
+    ]);
   } catch {
     designs = [];
+    designers = [];
   }
 
   const designPages: MetadataRoute.Sitemap = designs.map((d) => ({
@@ -50,5 +62,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...designPages];
+  const designerPages: MetadataRoute.Sitemap = designers.map((u) => ({
+    url: `${SITE_URL}/designers/${u.id}`,
+    lastModified: u.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+  }));
+
+  return [...staticPages, ...designPages, ...designerPages];
 }

@@ -35,6 +35,10 @@ model User {
   city                String?
   registrationAddress String?
 
+  // Public designer profile fields — shown on /designers/[id]
+  bio                 String?  @db.Text  // short markdown-free blurb
+  websiteUrl          String?            // optional personal site/portfolio
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

@@ -97,7 +97,12 @@ export async function listPublishedDesignCategories() {
 export async function getDesignBySlug(slug: string) {
   return prisma.design.findUnique({
     where: { slug },
-    include: { defaultProfile: true },
+    include: {
+      defaultProfile: true,
+      uploader: {
+        select: { id: true, name: true, image: true },
+      },
+    },
   });
 }
 

@@ -14,6 +14,7 @@ export const TEMPLATES = {
   DESIGN_REJECTED: "DESIGN_REJECTED",
   MESHY_REFUND_ISSUED: "MESHY_REFUND_ISSUED",
   PASSWORD_RESET: "PASSWORD_RESET",
+  TEST_EMAIL: "TEST_EMAIL",
 } as const;
 
 export type TemplateName = (typeof TEMPLATES)[keyof typeof TEMPLATES];
@@ -50,6 +51,9 @@ export type TemplatePayloads = {
   PASSWORD_RESET: {
     resetUrl: string;
     expiresInMinutes: number;
+  };
+  TEST_EMAIL: {
+    sentAt: string;
   };
 };
 

@@ -138,6 +138,20 @@ export function render<T extends TemplateName>(
         ].join("\n"),
       };
     }
+    case "TEST_EMAIL": {
+      const d = data as TemplatePayloads["TEST_EMAIL"];
+      return {
+        subject: `${APP_NAME} · E-posta test mesajı`,
+        textBody: [
+          "Bu bir test e-postasıdır.",
+          "",
+          `Gönderim zamanı: ${d.sentAt}`,
+          `Resend entegrasyonu başarıyla çalışıyor.`,
+          "",
+          `${APP_NAME} ekibi`,
+        ].join("\n"),
+      };
+    }
   }
   // Exhaustiveness: TS will flag unhandled cases.
   const _exhaustive: never = template;

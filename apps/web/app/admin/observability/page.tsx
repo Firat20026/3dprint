@@ -9,14 +9,34 @@
  * once those are wired up.
  */
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { notify, TEMPLATES } from "@/lib/notifications";
+import { isResendEnabled } from "@/lib/notifications/providers/resend";
 import type { ErrorSeverity } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 100;
+
+async function sendTestEmail(formData: FormData) {
+  "use server";
+  await requireAdmin();
+  const to = String(formData.get("to") ?? "").trim();
+  if (!to || !to.includes("@")) redirect("/admin/observability?emailResult=invalid");
+  try {
+    await notify({
+      to,
+      template: TEMPLATES.TEST_EMAIL,
+      data: { sentAt: new Date().toLocaleString("tr-TR") },
+    });
+    redirect("/admin/observability?emailResult=ok");
+  } catch {
+    redirect("/admin/observability?emailResult=error");
+  }
+}
 
 async function markResolved(formData: FormData) {
   "use server";
@@ -54,6 +74,7 @@ type SearchParams = Promise<{
   errorFilter?: string;
   eventFilter?: string;
   showResolved?: string;
+  emailResult?: string;
 }>;
 
 export default async function ObservabilityPage({
@@ -66,6 +87,7 @@ export default async function ObservabilityPage({
   const showResolved = params.showResolved === "1";
   const errorFilter = params.errorFilter ?? "";
   const eventFilter = params.eventFilter ?? "";
+  const emailResult = params.emailResult;
 
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // last 7 days
 
@@ -129,6 +151,56 @@ export default async function ObservabilityPage({
         />
         <StatCard label="Olay (7g)" value={eventCount} tone="ok" />
       </div>
+
+      {/* ── Email test ── */}
+      <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-display text-base uppercase tracking-tight">
+              E-posta Testi
+            </h2>
+            <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+              Resend:{" "}
+              {isResendEnabled() ? (
+                <span className="text-[var(--color-success)]">
+                  ● Aktif ({process.env.RESEND_FROM_EMAIL})
+                </span>
+              ) : (
+                <span className="text-[var(--color-danger)]">
+                  ● Pasif — RESEND_API_KEY veya RESEND_FROM_EMAIL eksik
+                </span>
+              )}
+            </p>
+          </div>
+          {emailResult === "ok" && (
+            <span className="rounded-full bg-[var(--color-success)]/15 px-3 py-1 text-sm text-[var(--color-success)]">
+              ✓ Email gönderildi
+            </span>
+          )}
+          {emailResult === "error" && (
+            <span className="rounded-full bg-[var(--color-danger)]/15 px-3 py-1 text-sm text-[var(--color-danger)]">
+              ✗ Gönderim başarısız — docker logs web ile kontrol et
+            </span>
+          )}
+          {emailResult === "invalid" && (
+            <span className="rounded-full bg-[var(--color-accent)]/15 px-3 py-1 text-sm text-[var(--color-accent)]">
+              Geçerli bir email adresi gir
+            </span>
+          )}
+        </div>
+        <form action={sendTestEmail} className="mt-4 flex flex-wrap gap-2">
+          <input
+            type="email"
+            name="to"
+            required
+            placeholder="test@example.com"
+            className="h-9 flex-1 min-w-48 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+          />
+          <SubmitButton size="sm" pendingLabel="Gönderiliyor...">
+            Test Gönder
+          </SubmitButton>
+        </form>
+      </section>
 
       <section>
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">

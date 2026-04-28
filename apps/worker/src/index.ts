@@ -70,6 +70,7 @@ const worker = new Worker<SliceJobPayload>(
         infillPercent: sj.profile.infillPercent,
         supportsEnabled: sj.profile.supportsEnabled,
         filamentDensity: density,
+        plateIndex: sj.plateIndex,
       });
 
       const settings = await getSettings();

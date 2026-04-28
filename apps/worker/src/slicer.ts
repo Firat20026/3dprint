@@ -29,6 +29,9 @@ export type SliceInput = {
   supportsEnabled: boolean;
   /** PLA=1.24, PETG=1.27, TPU=1.21 — grams/cm³. OrcaSlicer uses this for used_g. */
   filamentDensity: number;
+  /** 1-based plate to slice. 1 = first/only plate (default). When the input
+   *  is a multi-plate 3MF, set this to the plate the user added to the cart. */
+  plateIndex?: number;
 };
 
 export type SliceOutput = SliceResult & {
@@ -109,14 +112,22 @@ async function runOrcaSlicer(input: SliceInput): Promise<SliceOutput> {
     }),
   );
 
+  // OrcaSlicer's --slice flag: 0 = all plates, 1..N = specific plate.
+  // Cart's per-plate items already create one SliceJob per plate, so we
+  // ask the slicer to render exactly that plate.
+  const plate = input.plateIndex && input.plateIndex > 0 ? input.plateIndex : 1;
+
   const args = [
     "--load-settings", `${printerProfile};${processJson}`,
     "--load-filaments", filamentJson,
-    "--slice", "0",
+    "--slice", String(plate),
     "--export-3mf", outPath,
     input.inputStlPath,
   ];
 
+  console.log(
+    `[slicer] orca-slicer plate=${plate} layer=${input.layerHeightMm} infill=${input.infillPercent}% input=${path.basename(input.inputStlPath)}`,
+  );
   await spawnWithTimeout(ORCA_BIN, args, SLICE_TIMEOUT_MS);
 
   if (!existsSync(outPath)) {
@@ -140,7 +151,13 @@ function spawnWithTimeout(
   return new Promise((resolve, reject) => {
     const proc = spawn(bin, args, { stdio: "pipe" });
     let stderr = "";
-    proc.stderr.on("data", (d) => { stderr += d.toString(); });
+    let stdout = "";
+    proc.stderr.on("data", (d) => {
+      stderr += d.toString();
+    });
+    proc.stdout.on("data", (d) => {
+      stdout += d.toString();
+    });
 
     const timer = setTimeout(() => {
       proc.kill("SIGKILL");
@@ -149,8 +166,15 @@ function spawnWithTimeout(
 
     proc.on("exit", (code) => {
       clearTimeout(timer);
-      if (code === 0) resolve();
-      else reject(new Error(`slicer exited ${code}: ${stderr.slice(-500)}`));
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      // Combine stdout + stderr so OrcaSlicer's "[ERROR]" lines (which it
+      // sometimes prints to stdout) aren't lost. Keep the tail because
+      // most exit details land in the last few hundred bytes.
+      const tail = (stdout + "\n" + stderr).slice(-1500);
+      reject(new Error(`OrcaSlicer exited ${code}: ${tail.trim()}`));
     });
     proc.on("error", (err) => {
       clearTimeout(timer);

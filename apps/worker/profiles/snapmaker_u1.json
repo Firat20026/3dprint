@@ -1,0 +1,42 @@
+{
+  "type": "machine",
+  "name": "Snapmaker U1",
+  "from": "User",
+  "_comment": "Conservative starter profile for the Snapmaker U1 multi-extruder. Replace with a real OrcaSlicer-exported profile for production accuracy. Build volume from official spec; speeds and accelerations are sane defaults — verify against the printer's recommended values before relying on print time estimates.",
+
+  "printer_model": "Snapmaker U1",
+  "printer_variant": "0.4",
+  "nozzle_diameter": ["0.4", "0.4", "0.4", "0.4"],
+  "extruder_count": "4",
+
+  "printable_height": "270",
+  "printable_area": [
+    "0x0",
+    "230x0",
+    "230x230",
+    "0x230"
+  ],
+
+  "machine_max_speed_x": ["300"],
+  "machine_max_speed_y": ["300"],
+  "machine_max_speed_z": ["12"],
+  "machine_max_speed_e": ["50"],
+
+  "machine_max_acceleration_x": ["3000"],
+  "machine_max_acceleration_y": ["3000"],
+  "machine_max_acceleration_z": ["500"],
+  "machine_max_acceleration_e": ["5000"],
+  "machine_max_acceleration_extruding": ["3000"],
+  "machine_max_acceleration_retracting": ["5000"],
+
+  "machine_max_jerk_x": ["8"],
+  "machine_max_jerk_y": ["8"],
+  "machine_max_jerk_z": ["0.4"],
+  "machine_max_jerk_e": ["2.5"],
+
+  "default_print_profile": "frint3d-dyn",
+  "default_filament_profile": ["frint3d-dyn"],
+
+  "machine_start_gcode": "M104 S[first_layer_temperature] ; set extruder temp\nM140 S[first_layer_bed_temperature] ; set bed temp\nG28 ; home all\nG1 Z5 F5000 ; lift\nM109 S[first_layer_temperature] ; wait extruder\nM190 S[first_layer_bed_temperature] ; wait bed",
+  "machine_end_gcode": "M104 S0 ; turn off extruder\nM140 S0 ; turn off bed\nG91 ; relative\nG1 Z10 F600 ; lift\nG90 ; absolute\nG28 X Y ; park\nM84 ; disable motors"
+}

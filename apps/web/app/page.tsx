@@ -1,6 +1,7 @@
 import { Hero } from "@/components/site/Hero";
 import { HowItWorks } from "@/components/site/HowItWorks";
-import { Features, Showcase } from "@/components/site/Features";
+import { Features } from "@/components/site/Features";
+import { TrendingDesigns } from "@/components/site/TrendingDesigns";
 import { AISection } from "@/components/site/AISection";
 import { CTA } from "@/components/site/CTA";
 
@@ -9,7 +10,7 @@ export default function Home() {
     <>
       <Hero />
       <HowItWorks />
-      <Showcase />
+      <TrendingDesigns />
       <Features />
       <AISection />
       <CTA />

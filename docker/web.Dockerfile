@@ -11,6 +11,12 @@ ENV PATH=$PNPM_HOME:$PATH
 
 WORKDIR /app
 
+# Skip @sentry/cli binary download during install — the CLI is only needed
+# for source-map uploads at build time (handled separately via SENTRY_AUTH_TOKEN
+# at next build). Without this the postinstall fetches a GitHub binary and can
+# fail in restricted build environments.
+ENV SENTRYCLI_SKIP_DOWNLOADER=1
+
 # Monorepo manifestlerini önce kopyala → dependency cache stabil
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/package.json

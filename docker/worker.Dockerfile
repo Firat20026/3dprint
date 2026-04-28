@@ -54,6 +54,9 @@ RUN corepack enable && corepack prepare pnpm@10.7.1 --activate
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
+# Skip @sentry/cli binary download — same reason as web.Dockerfile.
+ENV SENTRYCLI_SKIP_DOWNLOADER=1
+
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./

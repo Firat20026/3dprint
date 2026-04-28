@@ -49,7 +49,10 @@ function buildTimeline(order: {
   status: OrderStatus;
   createdAt: Date;
   paidAt: Date | null;
+  printingStartedAt: Date | null;
   shippedAt: Date | null;
+  deliveredAt: Date | null;
+  canceledAt: Date | null;
 }): TimelineStep[] {
   if (order.status === "CANCELED") {
     return [
@@ -65,7 +68,7 @@ function buildTimeline(order: {
         key: "CANCELED",
         label: "İptal edildi",
         description: "Sipariş iptal edildi",
-        date: null,
+        date: order.canceledAt,
         icon: Ban,
         state: "current",
       },
@@ -111,7 +114,7 @@ function buildTimeline(order: {
       key: "PRINTING",
       label: "Baskıda",
       description: "Yazıcılarımızda üretiliyor",
-      date: null,
+      date: order.printingStartedAt,
       icon: Package,
       state: stateOf(3),
     },
@@ -127,7 +130,7 @@ function buildTimeline(order: {
       key: "DELIVERED",
       label: "Teslim edildi",
       description: "Siparişin elinde",
-      date: null,
+      date: order.deliveredAt,
       icon: CheckCircle2,
       state: stateOf(5),
     },

@@ -428,7 +428,10 @@ model Order {
   cargoCarrier      String?
   notes             String?     @db.Text
   paidAt            DateTime?
+  printingStartedAt DateTime?
   shippedAt         DateTime?
+  deliveredAt       DateTime?
+  canceledAt        DateTime?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 

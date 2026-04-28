@@ -214,7 +214,10 @@ type OrderForTimeline = {
   status: OrderStatus;
   createdAt: Date;
   paidAt: Date | null;
+  printingStartedAt: Date | null;
   shippedAt: Date | null;
+  deliveredAt: Date | null;
+  canceledAt: Date | null;
   cargoTrackingNo: string | null;
   cargoCarrier: string | null;
 };
@@ -242,7 +245,9 @@ function OrderTimeline({ order }: { order: OrderForTimeline }) {
   const timestamps: Partial<Record<OrderStatus, Date>> = {
     PENDING_PAYMENT: order.createdAt,
     PAID: order.paidAt ?? undefined,
+    PRINTING: order.printingStartedAt ?? undefined,
     SHIPPED: order.shippedAt ?? undefined,
+    DELIVERED: order.deliveredAt ?? undefined,
   };
 
   return (

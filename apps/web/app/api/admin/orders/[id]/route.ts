@@ -9,6 +9,8 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { OrderStatus } from "@prisma/client";
+import { track, EVENTS, logError } from "@/lib/observability";
+import { notify, TEMPLATES } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,20 +51,65 @@ export async function PATCH(
     );
   }
 
+  const now = new Date();
   const updates: Parameters<typeof prisma.order.update>[0]["data"] = {
     status: newStatus,
   };
 
+  if (newStatus === "PRINTING") {
+    updates.printingStartedAt = now;
+  }
   if (newStatus === "SHIPPED") {
     if (!body.cargoTrackingNo) {
       return NextResponse.json({ error: "cargoTrackingNo required" }, { status: 400 });
     }
     updates.cargoCarrier = body.cargoCarrier ?? null;
     updates.cargoTrackingNo = body.cargoTrackingNo;
-    updates.shippedAt = new Date();
+    updates.shippedAt = now;
+  }
+  if (newStatus === "DELIVERED") {
+    updates.deliveredAt = now;
+  }
+  if (newStatus === "CANCELED") {
+    updates.canceledAt = now;
   }
 
-  await prisma.order.update({ where: { id }, data: updates });
+  const updated = await prisma.order.update({
+    where: { id },
+    data: updates,
+    select: {
+      id: true,
+      userId: true,
+      cargoCarrier: true,
+      cargoTrackingNo: true,
+      user: { select: { email: true } },
+    },
+  });
+
+  void track(
+    EVENTS.ORDER_STATUS_CHANGED,
+    { orderId: id, from: order.status, to: newStatus },
+    { userId: updated.userId, level: "INFO" },
+  );
+
+  // Customer-facing emails — best-effort, never block the response.
+  if (newStatus === "SHIPPED" && updated.user.email) {
+    void notify({
+      to: updated.user.email,
+      template: TEMPLATES.ORDER_SHIPPED,
+      data: {
+        orderId: id,
+        cargoCarrier: updated.cargoCarrier,
+        cargoTrackingNo: updated.cargoTrackingNo,
+      },
+    }).catch((e) =>
+      logError(e, {
+        source: "api:admin:orders:notify-shipped",
+        severity: "LOW",
+        metadata: { orderId: id },
+      }),
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }

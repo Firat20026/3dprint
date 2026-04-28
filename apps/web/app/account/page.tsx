@@ -14,7 +14,9 @@ import {
   ShieldCheck,
   Mail,
   CalendarDays,
+  Wallet,
 } from "lucide-react";
+import { getDesignerSummary, userHasDesigns } from "@/lib/earnings";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +40,7 @@ export default async function AccountPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?redirect=/account");
 
-  const [user, orderCount, designCount] = await Promise.all([
+  const [user, orderCount, designCount, hasDesigns] = await Promise.all([
     prisma.user.findUniqueOrThrow({
       where: { id: session.user.id },
       select: {
@@ -54,7 +56,12 @@ export default async function AccountPage() {
     prisma.design.count({
       where: { uploaderId: session.user.id, source: "USER_MARKETPLACE" },
     }),
+    userHasDesigns(session.user.id),
   ]);
+
+  const earningsSummary = hasDesigns
+    ? await getDesignerSummary(session.user.id)
+    : null;
 
   const initial = (user.name ?? user.email).charAt(0).toUpperCase();
   const joined = user.createdAt.toLocaleDateString("tr-TR", {
@@ -193,6 +200,35 @@ export default async function AccountPage() {
               <p className="text-xs text-[var(--color-text-muted)]">Tasarımım</p>
             </Link>
           </div>
+
+          {earningsSummary && (
+            <Link
+              href="/account/earnings"
+              className="group hover-lift rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 hover:border-[var(--color-brand)]/40"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="eyebrow">Bekleyen Kazanç</p>
+                  <p className="mt-2 font-display text-3xl text-[var(--color-text)]">
+                    {earningsSummary.pendingTRY.toLocaleString("tr-TR", {
+                      style: "currency",
+                      currency: "TRY",
+                      maximumFractionDigits: 2,
+                    })}
+                  </p>
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+                    {earningsSummary.pendingCount} satış · ödeme bekliyor
+                  </p>
+                </div>
+                <span className="inline-flex size-11 items-center justify-center rounded-full bg-[var(--color-brand)]/10 text-[var(--color-brand-2)] transition-transform duration-300 group-hover:scale-110">
+                  <Wallet className="size-5" />
+                </span>
+              </div>
+              <span className="mt-3 inline-flex text-xs font-medium text-[var(--color-brand-2)] hover:underline">
+                Tüm kazançları gör →
+              </span>
+            </Link>
+          )}
         </aside>
       </div>
     </Container>

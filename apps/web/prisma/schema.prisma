@@ -53,6 +53,7 @@ model User {
   errorLogs           ErrorLog[]
   passwordResetTokens PasswordResetToken[]
   designReviews       DesignReview[]
+  designerEarnings    DesignerEarning[]    @relation("DesignerEarnings")
 }
 
 model Account {
@@ -217,6 +218,7 @@ model Design {
   cartItems       CartItem[]
   orderItems      OrderItem[]
   reviews         DesignReview[]
+  earnings        DesignerEarning[]
 
   @@index([status, source])
   @@index([category])
@@ -250,6 +252,43 @@ model DesignReview {
   @@unique([designId, userId])         // one review per user per design
   @@index([designId, status, createdAt])
   @@index([userId])
+}
+
+// =====================================================
+// Designer earnings (marketplace payouts)
+// =====================================================
+//
+// One row per OrderItem whose design has uploaderId + basePriceMarkupPercent
+// > 0, created when the parent Order transitions to PAID. amountTRY is the
+// designer's cut snapshotted at sale time so future markup edits don't
+// rewrite history. Status starts PENDING_PAYOUT — admin flips to PAID_OUT
+// once the manual transfer is done.
+
+enum DesignerEarningStatus {
+  PENDING_PAYOUT
+  PAID_OUT
+}
+
+model DesignerEarning {
+  id            String                @id @default(cuid())
+  designerId    String
+  designId      String
+  orderItemId   String                @unique // idempotency: 1 OrderItem ↔ 1 earning
+  orderId       String
+  amountTRY     Decimal               @db.Decimal(10, 2)
+  markupPercent Int                   // snapshot of Design.basePriceMarkupPercent at sale time
+  status        DesignerEarningStatus @default(PENDING_PAYOUT)
+  paidOutAt     DateTime?
+  paidOutNote   String?               @db.Text
+  createdAt     DateTime              @default(now())
+
+  designer  User      @relation("DesignerEarnings", fields: [designerId], references: [id])
+  design    Design    @relation(fields: [designId], references: [id])
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  @@index([designerId, status])
+  @@index([orderId])
 }
 
 // =====================================================
@@ -373,6 +412,7 @@ model Order {
   user            User             @relation(fields: [userId], references: [id])
   shippingAddress ShippingAddress? @relation(fields: [shippingAddressId], references: [id])
   items           OrderItem[]
+  designerEarnings DesignerEarning[]
 
   @@index([userId, status])
   @@index([status, createdAt])
@@ -392,6 +432,7 @@ model OrderItem {
   order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   sliceJob SliceJob? @relation(fields: [sliceJobId], references: [id])
   design   Design?   @relation(fields: [designId], references: [id])
+  earning  DesignerEarning?
 
   @@index([orderId])
 }

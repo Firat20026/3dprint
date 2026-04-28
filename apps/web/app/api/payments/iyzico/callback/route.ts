@@ -23,6 +23,7 @@ import { retrievePayment } from "@/lib/iyzico";
 import { publicOrigin } from "@/lib/iyzico-helpers";
 import { track, logError, EVENTS } from "@/lib/observability";
 import { notify, TEMPLATES } from "@/lib/notifications";
+import { attributeOrderEarnings } from "@/lib/earnings";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -115,6 +116,15 @@ async function handle(token: string | null, origin: string) {
         paymentId: result.paymentId,
       },
       { userId: order.userId },
+    );
+
+    // Attribute marketplace earnings — idempotent via unique(orderItemId).
+    void attributeOrderEarnings(order.id).catch((e) =>
+      logError(e, {
+        source: "api:payments:order-callback:earnings",
+        severity: "MEDIUM",
+        metadata: { orderId: order.id },
+      }),
     );
 
     // Order confirmation email — best-effort.

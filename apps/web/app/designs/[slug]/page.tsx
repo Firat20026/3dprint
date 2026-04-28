@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { ModelViewer } from "@/components/viewer/ModelViewer";
 import { AddToCartForm } from "@/components/shop/AddToCartForm";
@@ -9,8 +10,55 @@ import {
   listMaterialsInStock,
 } from "@/lib/designs";
 import { publicUrlFor } from "@/lib/urls";
+import { getSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
+
+type MaterialGroup = {
+  extruderId: number;
+  name: string | null;
+  colorHex: string | null;
+};
+
+const SITE_URL = process.env.NEXTAUTH_URL?.replace(/\/$/, "") ?? "";
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> },
+): Promise<Metadata> {
+  const { slug } = await params;
+  const design = await getDesignBySlug(slug).catch(() => null);
+  if (!design || design.status !== "PUBLISHED") {
+    return { title: "Tasarım bulunamadı — frint3d" };
+  }
+
+  const ogImage = design.thumbnailUrl
+    ? (SITE_URL
+        ? `${SITE_URL}${publicUrlFor(design.thumbnailUrl)}`
+        : (publicUrlFor(design.thumbnailUrl) ?? undefined))
+    : undefined;
+
+  const description =
+    design.description?.slice(0, 200) ??
+    `${design.title} — Snapmaker U1 ile profesyonel 3D baskı, kapına kadar.`;
+
+  return {
+    title: `${design.title} — frint3d`,
+    description,
+    openGraph: {
+      title: design.title,
+      description,
+      type: "website",
+      url: SITE_URL ? `${SITE_URL}/designs/${design.slug}` : undefined,
+      images: ogImage ? [{ url: ogImage, width: 1024, height: 1024 }] : undefined,
+    },
+    twitter: {
+      card: ogImage ? "summary_large_image" : "summary",
+      title: design.title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
+  };
+}
 
 export default async function DesignDetailPage({
   params,
@@ -21,12 +69,15 @@ export default async function DesignDetailPage({
   const design = await getDesignBySlug(slug);
   if (!design || design.status !== "PUBLISHED") notFound();
 
-  const [materials, profiles] = await Promise.all([
+  const [materials, profiles, settings] = await Promise.all([
     listMaterialsInStock(),
     listActiveProfiles(),
+    getSettings(),
   ]);
 
   const modelUrl = publicUrlFor(design.modelFileKey);
+  const materialGroups = (design.materialGroups ?? []) as MaterialGroup[];
+  const plateCount = design.plateCount ?? 1;
 
   return (
     <Container className="py-12">
@@ -51,6 +102,34 @@ export default async function DesignDetailPage({
               Model bulunamadı
             </div>
           )}
+
+          {/* Material legend (3MF only, when multiple extruders detected) */}
+          {materialGroups.length > 1 && (
+            <div className="mt-5 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+              <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+                Tasarım Materyalleri ({materialGroups.length})
+              </p>
+              <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {materialGroups.map((g) => (
+                  <li
+                    key={`${g.extruderId}-${g.name ?? ""}-${g.colorHex ?? ""}`}
+                    className="flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2.5 py-1.5 text-xs"
+                  >
+                    <span
+                      className="size-3.5 shrink-0 rounded-full border border-white/15"
+                      style={{ backgroundColor: g.colorHex ?? "#888" }}
+                    />
+                    <span className="truncate">{g.name ?? `Ekstruder ${g.extruderId}`}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-[10px] text-[var(--color-text-subtle)]">
+                Tasarımcının tercih ettiği renk şeması — sepette istediğin
+                materyali seçebilirsin.
+              </p>
+            </div>
+          )}
+
           {design.description && (
             <p className="mt-5 text-sm leading-relaxed text-[var(--color-text-muted)]">
               {design.description}
@@ -68,6 +147,22 @@ export default async function DesignDetailPage({
             {design.title}
           </h1>
 
+          {/* Plate / multi-mat badges right under the title */}
+          {(plateCount > 1 || materialGroups.length > 1) && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {plateCount > 1 && (
+                <span className="rounded-full border border-[var(--color-brand)]/30 bg-[var(--color-brand)]/10 px-2.5 py-1 text-[10px] uppercase tracking-wider text-[var(--color-brand-2)]">
+                  {plateCount} plate
+                </span>
+              )}
+              {materialGroups.length > 1 && (
+                <span className="rounded-full border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/10 px-2.5 py-1 text-[10px] uppercase tracking-wider text-[var(--color-accent)]">
+                  {materialGroups.length} renk / materyal
+                </span>
+              )}
+            </div>
+          )}
+
           {materials.length === 0 ? (
             <div className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 p-5 text-sm text-[var(--color-danger)]">
               Şu an stokta aktif materyal bulunmuyor. Admin&apos;in stok
@@ -81,6 +176,10 @@ export default async function DesignDetailPage({
                 title={design.title}
                 thumbnailUrl={design.thumbnailUrl}
                 defaultProfileId={design.defaultProfileId}
+                plateCount={plateCount}
+                designerMarkupPercent={design.basePriceMarkupPercent ?? 0}
+                marginPercent={settings.marginPercent}
+                setupFeeTRY={settings.setupFeeTRY}
                 materials={materials.map((m) => ({
                   id: m.id,
                   name: m.name,
@@ -135,3 +234,4 @@ export default async function DesignDetailPage({
     </Container>
   );
 }
+

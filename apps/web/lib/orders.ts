@@ -2,7 +2,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
-import { shippingFee } from "@/lib/pricing";
+import { shippingFee, estimateDesignUnitPrice } from "@/lib/pricing";
 
 export type CartItemPayload =
   | {
@@ -136,11 +136,34 @@ export async function createOrderDraft(input: CreateOrderInput) {
       const design = designById.get(item.designId);
       const material = materialById.get(item.materialId);
       const profile = profileById.get(item.profileId);
-      if (!design || !material || !profile) {
-        throw new Error(`design/material/profile not resolvable for item`);
+      // More precise errors so the cart UI can suggest the right fix instead
+      // of a generic "checkout failed".
+      if (!design) {
+        throw new Error(
+          `Bir tasarım yayından kaldırılmış: "${item.title}". Sepetinden çıkar.`,
+        );
       }
-      // Cart snapshot fiyatını kabul ediyoruz (Faz 5'te admin pre-slice ile replace).
-      const unit = new Prisma.Decimal(item.unitPriceTRY);
+      if (!material) {
+        throw new Error(
+          `Materyal artık aktif değil: ${item.materialName}. Farklı bir materyal seç.`,
+        );
+      }
+      if (!profile) {
+        throw new Error(`Baskı profili bulunamadı: ${item.profileName}.`);
+      }
+
+      // SERVER-SIDE PRICE — recompute from fresh material/settings/design.
+      // The client-supplied item.unitPriceTRY is treated as a hint only;
+      // localStorage manipulation can't lower the order total.
+      const computedUnit = estimateDesignUnitPrice({
+        pricePerGramTRY: material.pricePerGramTRY,
+        designerMarkupPercent: design.basePriceMarkupPercent,
+        settings: {
+          marginPercent: settings.marginPercent,
+          setupFeeTRY: settings.setupFeeTRY,
+        },
+      });
+      const unit = new Prisma.Decimal(computedUnit);
       const total = unit.mul(qty);
       subtotal = subtotal.add(total);
       const plateIndex = item.plateIndex ?? 1;

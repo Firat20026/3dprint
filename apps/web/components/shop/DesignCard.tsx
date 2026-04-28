@@ -2,8 +2,13 @@ import Link from "next/link";
 import { publicUrlFor } from "@/lib/urls";
 import type { Design } from "@prisma/client";
 
+type MaterialGroup = { extruderId: number; name: string | null; colorHex: string | null };
+
 export function DesignCard({ design }: { design: Design }) {
   const thumbUrl = publicUrlFor(design.thumbnailUrl);
+  const materialGroups = (design.materialGroups ?? []) as MaterialGroup[];
+  const plateCount = design.plateCount ?? 1;
+
   return (
     <Link
       href={`/designs/${design.slug}`}
@@ -26,6 +31,30 @@ export function DesignCard({ design }: { design: Design }) {
           <span className="absolute left-3 top-3 rounded-full bg-black/40 px-2 py-1 text-[10px] uppercase tracking-wider text-white backdrop-blur">
             {design.category}
           </span>
+        )}
+
+        {/* Multi-plate / multi-material badges — bottom-right corner so they
+            don't fight the category chip on the top-left. */}
+        {(plateCount > 1 || materialGroups.length > 1) && (
+          <div className="absolute bottom-3 right-3 flex gap-1.5">
+            {plateCount > 1 && (
+              <span className="rounded-full bg-[var(--color-brand)]/85 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white backdrop-blur">
+                {plateCount} plate
+              </span>
+            )}
+            {materialGroups.length > 1 && (
+              <span className="flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">
+                {materialGroups.slice(0, 4).map((g, i) => (
+                  <span
+                    key={i}
+                    className="size-2 rounded-full border border-white/30"
+                    style={{ backgroundColor: g.colorHex ?? "#888" }}
+                  />
+                ))}
+                {materialGroups.length > 4 && <span>+{materialGroups.length - 4}</span>}
+              </span>
+            )}
+          </div>
         )}
       </div>
       <div className="p-4">

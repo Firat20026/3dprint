@@ -1,5 +1,36 @@
 import type { AppSettings } from "@/lib/settings";
 
+/**
+ * Pre-slice estimate for a CATALOG design.
+ *
+ * Used in two places that MUST agree:
+ *   - Client-side preview (AddToCartForm) — shows "Tahmini fiyat" before
+ *     a real slice job exists.
+ *   - Server-side validation (createOrderDraft) — recomputes from fresh
+ *     material/settings/design, ignoring whatever number the client put in
+ *     the cart payload. The client number is treated as a hint, not truth.
+ *
+ * Until per-design pre-slicing lands, we use a flat 40g placeholder and a
+ * single setup fee. Design.basePriceMarkupPercent stacks on top for
+ * marketplace items (the designer's cut). Platform margin from settings
+ * applies to everything.
+ */
+export const DESIGN_ESTIMATE_GRAMS = 40;
+
+export type DesignPriceInputs = {
+  pricePerGramTRY: number;
+  designerMarkupPercent: number; // Design.basePriceMarkupPercent (0 for ADMIN)
+  settings: Pick<AppSettings, "marginPercent" | "setupFeeTRY">;
+};
+
+export function estimateDesignUnitPrice(input: DesignPriceInputs): number {
+  const materialCost = DESIGN_ESTIMATE_GRAMS * input.pricePerGramTRY;
+  const subtotal = materialCost + input.settings.setupFeeTRY;
+  const platform = subtotal * (input.settings.marginPercent / 100);
+  const designer = subtotal * (input.designerMarkupPercent / 100);
+  return round2(subtotal + platform + designer);
+}
+
 export type PriceInputs = {
   filamentGrams: number;
   printSeconds: number;

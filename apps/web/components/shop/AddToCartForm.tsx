@@ -1,9 +1,22 @@
 "use client";
 
+/**
+ * AddToCartForm — material + profile + (optional) plate picker for catalog
+ * design pages.
+ *
+ * Key design choices:
+ *  - For multi-plate designs (plateCount > 1) we show a plate selector with
+ *    a "Hepsi" option. Selecting a single plate adds one cart line; "Hepsi"
+ *    adds N lines (one per plate, all with the currently-chosen material).
+ *  - Estimated price uses the SAME helper the server uses
+ *    (`estimateDesignUnitPrice`) so the preview matches the order total.
+ *    Server still recomputes at checkout — preview is just a hint.
+ */
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-store";
 import { Button } from "@/components/ui/button";
+import { estimateDesignUnitPrice } from "@/lib/pricing";
 
 type MaterialOption = {
   id: string;
@@ -28,7 +41,14 @@ type Props = {
   materials: MaterialOption[];
   profiles: ProfileOption[];
   defaultProfileId?: string | null;
-  estimatedGrams?: number; // Faz 2 slice sonuçsuz bir placeholder estimate
+  /** Multi-plate 3MF: 1 means single-plate (default). */
+  plateCount?: number;
+  /** Marketplace seller markup % from Design.basePriceMarkupPercent. */
+  designerMarkupPercent?: number;
+  /** Platform pricing knobs from app settings. Required for an honest
+   *  preview that matches the server-side computation. */
+  marginPercent: number;
+  setupFeeTRY: number;
 };
 
 export function AddToCartForm({
@@ -39,7 +59,10 @@ export function AddToCartForm({
   materials,
   profiles,
   defaultProfileId,
-  estimatedGrams = 40,
+  plateCount = 1,
+  designerMarkupPercent = 0,
+  marginPercent,
+  setupFeeTRY,
 }: Props) {
   const router = useRouter();
   const addItem = useCart((s) => s.addItem);
@@ -49,6 +72,11 @@ export function AddToCartForm({
     defaultProfileId ?? profiles.find((p) => p.name === "Standart")?.id ?? profiles[0]?.id ?? "",
   );
   const [quantity, setQuantity] = useState(1);
+  // null → "Hepsi" (add every plate as its own line). 1-based plate id when
+  // a specific plate is selected.
+  const [selectedPlate, setSelectedPlate] = useState<number | null>(
+    plateCount > 1 ? null : 1,
+  );
 
   const material = useMemo(
     () => materials.find((m) => m.id === materialId) ?? materials[0],
@@ -59,35 +87,76 @@ export function AddToCartForm({
     [profiles, profileId],
   );
 
-  // Faz 1 placeholder fiyat — Faz 2'de slice sonucu + pricing engine ile gerçeğe dönecek.
-  // Şimdilik: ~40g estimate × pricePerGramTRY + setup (15) × margin (1.40)
   const estimatedUnitPrice = material
-    ? Math.round(
-        (estimatedGrams * material.pricePerGramTRY + 15) * 1.4 * 100,
-      ) / 100
+    ? estimateDesignUnitPrice({
+        pricePerGramTRY: material.pricePerGramTRY,
+        designerMarkupPercent,
+        settings: { marginPercent, setupFeeTRY },
+      })
     : 0;
+
+  // What the cart total preview shows depending on plate selection.
+  const platesToAdd = selectedPlate === null ? plateCount : 1;
+  const previewTotal = estimatedUnitPrice * platesToAdd * quantity;
 
   function handleAdd(goToCart: boolean) {
     if (!material || !profile) return;
-    addItem({
-      kind: "design",
-      designId,
-      designSlug,
-      title,
-      thumbnailUrl,
-      materialId: material.id,
-      materialName: material.name,
-      materialColorHex: material.colorHex,
-      profileId: profile.id,
-      profileName: profile.name,
-      quantity,
-      unitPriceTRY: estimatedUnitPrice,
-    });
+
+    const plateIndices: number[] =
+      selectedPlate === null
+        ? Array.from({ length: plateCount }, (_, i) => i + 1)
+        : [selectedPlate];
+
+    for (const plateIndex of plateIndices) {
+      addItem({
+        kind: "design",
+        designId,
+        designSlug,
+        title,
+        thumbnailUrl,
+        materialId: material.id,
+        materialName: material.name,
+        materialColorHex: material.colorHex,
+        profileId: profile.id,
+        profileName: profile.name,
+        quantity,
+        unitPriceTRY: estimatedUnitPrice,
+        plateIndex,
+      });
+    }
+
     if (goToCart) router.push("/cart");
   }
 
   return (
     <div className="space-y-5">
+      {plateCount > 1 && (
+        <div>
+          <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            Plate Seçimi
+          </p>
+          <p className="mt-1 text-[10px] text-[var(--color-text-subtle)]">
+            Bu tasarım {plateCount} plate'ten oluşuyor. Tek plate seç veya
+            hepsini birden ayrı satır olarak ekle.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <PlateChip
+              label="Hepsi"
+              active={selectedPlate === null}
+              onClick={() => setSelectedPlate(null)}
+            />
+            {Array.from({ length: plateCount }, (_, i) => i + 1).map((p) => (
+              <PlateChip
+                key={p}
+                label={`Plate ${p}`}
+                active={selectedPlate === p}
+                onClick={() => setSelectedPlate(p)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <div>
         <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
           Materyal
@@ -169,10 +238,12 @@ export function AddToCartForm({
             Tahmini fiyat
           </p>
           <p className="mt-2 font-display text-2xl uppercase tracking-tight text-[var(--color-text)]">
-            ₺{estimatedUnitPrice.toFixed(2)}
+            ₺{previewTotal.toFixed(2)}
           </p>
           <p className="text-[10px] text-[var(--color-text-subtle)]">
-            Kesin fiyat slicing sonrası netleşir
+            {platesToAdd > 1
+              ? `${platesToAdd} plate × ₺${estimatedUnitPrice.toFixed(2)} (kalite: tahmini)`
+              : "Kesin fiyat slicing sonrası netleşir"}
           </p>
         </div>
       </div>
@@ -184,7 +255,7 @@ export function AddToCartForm({
           onClick={() => handleAdd(false)}
           disabled={!material || !profile}
         >
-          Sepete Ekle
+          {platesToAdd > 1 ? `${platesToAdd} Plate'i Sepete Ekle` : "Sepete Ekle"}
         </Button>
         <Button
           size="lg"
@@ -197,5 +268,30 @@ export function AddToCartForm({
         </Button>
       </div>
     </div>
+  );
+}
+
+function PlateChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        "rounded-full border px-3 py-1 text-xs transition-colors " +
+        (active
+          ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-brand-2)]"
+          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-brand)]/40 hover:text-[var(--color-text)]")
+      }
+    >
+      {label}
+    </button>
   );
 }

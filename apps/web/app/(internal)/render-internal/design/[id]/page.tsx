@@ -1,13 +1,13 @@
 /**
- * /_render/design/[id] — internal-only thumbnail render page.
+ * /render-internal/design/[id] — internal-only thumbnail render page.
  *
  * Loaded by the worker's headless browser. Renders the model on a clean
  * isometric stage, captures the canvas as PNG, and POSTs it to the save
  * endpoint. The page exposes `window.__RENDER_STATUS__` so the worker can
  * await completion or detect a failure.
  *
- * Authorization: a shared secret in `?token=` matches INTERNAL_RENDERER_TOKEN.
- * No user session is involved. Layout strips header/footer for a clean shot.
+ * Auth: shared secret in `?token=` matches INTERNAL_RENDERER_TOKEN.
+ * Layout: see ../../layout.tsx — strips Nav/Footer for a clean capture.
  */
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -28,8 +28,6 @@ export default async function RenderDesignThumbnailPage({
   const { id } = await params;
   const sp = await searchParams;
 
-  // Hard guard — without a valid token the page won't even fetch the model.
-  // Keeps casual scrapers out and keeps us honest about it being internal.
   if (!TOKEN || sp.token !== TOKEN) {
     notFound();
   }
@@ -44,24 +42,11 @@ export default async function RenderDesignThumbnailPage({
   if (!modelUrl) notFound();
 
   return (
-    <html lang="tr">
-      <body
-        style={{
-          margin: 0,
-          padding: 0,
-          background: "#0d0d10",
-          width: "100vw",
-          height: "100vh",
-          overflow: "hidden",
-        }}
-      >
-        <ThumbnailCapture
-          designId={design.id}
-          url={modelUrl}
-          format={(design.fileFormat ?? "stl").toLowerCase()}
-          token={TOKEN}
-        />
-      </body>
-    </html>
+    <ThumbnailCapture
+      designId={design.id}
+      url={modelUrl}
+      format={(design.fileFormat ?? "stl").toLowerCase()}
+      token={TOKEN}
+    />
   );
 }

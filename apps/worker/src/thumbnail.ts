@@ -130,15 +130,21 @@ export async function renderDesignThumbnail(designId: string): Promise<void> {
       throw new Error(`render page returned ${resp?.status() ?? "no-response"}`);
     }
 
-    // Wait for the page-side render + upload to finish (status flips off
-    // "loading" / "pending" to "ok" or "error:...").
+    // Wait for the page-side render + upload to finish, returning the
+    // status STRING when ready (the previous expression returned `true`
+    // from the &&-chain, so jsonValue() came back as the boolean).
     const handle = await page.waitForFunction(
-      'window.__RENDER_STATUS__ && window.__RENDER_STATUS__ !== "loading" && window.__RENDER_STATUS__ !== "pending"',
+      `(function () {
+        var s = window.__RENDER_STATUS__;
+        if (typeof s !== 'string') return null;
+        if (s === 'loading' || s === 'pending') return null;
+        return s;
+      })()`,
       { timeout: RENDER_TIMEOUT_MS, polling: 500 },
     );
-    const value = (await handle.jsonValue()) as string;
+    const value = (await handle.jsonValue()) as string | null;
 
-    if (typeof value !== "string" || value === "loading" || value === "pending") {
+    if (typeof value !== "string") {
       throw new Error(`renderer did not finish (status=${String(value)})`);
     }
     if (value.startsWith("error:")) {

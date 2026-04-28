@@ -54,6 +54,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   designReviews       DesignReview[]
   designerEarnings    DesignerEarning[]    @relation("DesignerEarnings")
+  wishlist            WishlistItem[]
 }
 
 model Account {
@@ -219,6 +220,7 @@ model Design {
   orderItems      OrderItem[]
   reviews         DesignReview[]
   earnings        DesignerEarning[]
+  wishlistedBy    WishlistItem[]
 
   @@index([status, source])
   @@index([category])
@@ -289,6 +291,23 @@ model DesignerEarning {
 
   @@index([designerId, status])
   @@index([orderId])
+}
+
+// =====================================================
+// Wishlist (favorites)
+// =====================================================
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  designId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  design Design @relation(fields: [designId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, designId])
+  @@index([userId, createdAt])
 }
 
 // =====================================================

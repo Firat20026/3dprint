@@ -2,6 +2,7 @@ import Link from "next/link";
 import { publicUrlFor } from "@/lib/urls";
 import type { Design } from "@prisma/client";
 import { StarRating } from "@/components/reviews/StarRating";
+import { WishlistButton } from "./WishlistButton";
 
 type MaterialGroup = { extruderId: number; name: string | null; colorHex: string | null };
 
@@ -10,9 +11,13 @@ type RatingSummary = { average: number; count: number };
 export function DesignCard({
   design,
   rating,
+  wishlisted,
+  showWishlist = true,
 }: {
   design: Design;
   rating?: RatingSummary;
+  wishlisted?: boolean;
+  showWishlist?: boolean;
 }) {
   const thumbUrl = publicUrlFor(design.thumbnailUrl);
   const materialGroups = (design.materialGroups ?? []) as MaterialGroup[];
@@ -40,6 +45,12 @@ export function DesignCard({
           <span className="absolute left-3 top-3 rounded-full bg-black/40 px-2 py-1 text-[10px] uppercase tracking-wider text-white backdrop-blur">
             {design.category}
           </span>
+        )}
+
+        {showWishlist && (
+          <div className="absolute right-3 top-3">
+            <WishlistButton designId={design.id} initial={!!wishlisted} />
+          </div>
         )}
 
         {/* Multi-plate / multi-material badges — bottom-right corner so they

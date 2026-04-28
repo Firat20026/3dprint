@@ -6,6 +6,9 @@ import { ModelViewer } from "@/components/viewer/ModelViewer";
 import { AddToCartForm } from "@/components/shop/AddToCartForm";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { StarRating } from "@/components/reviews/StarRating";
+import { WishlistButton } from "@/components/shop/WishlistButton";
+import { auth } from "@/lib/auth";
+import { getWishlistedDesignIds } from "@/lib/wishlist";
 import {
   getDesignBySlug,
   listActiveProfiles,
@@ -72,12 +75,16 @@ export default async function DesignDetailPage({
   const design = await getDesignBySlug(slug);
   if (!design || design.status !== "PUBLISHED") notFound();
 
-  const [materials, profiles, settings, ratingSummary] = await Promise.all([
-    listMaterialsInStock(),
-    listActiveProfiles(),
-    getSettings(),
-    getDesignRatingSummary(design.id),
-  ]);
+  const session = await auth();
+  const [materials, profiles, settings, ratingSummary, wishlistedIds] =
+    await Promise.all([
+      listMaterialsInStock(),
+      listActiveProfiles(),
+      getSettings(),
+      getDesignRatingSummary(design.id),
+      getWishlistedDesignIds(session?.user?.id),
+    ]);
+  const isWishlisted = wishlistedIds.has(design.id);
 
   const modelUrl = publicUrlFor(design.modelFileKey);
   const materialGroups = (design.materialGroups ?? []) as MaterialGroup[];
@@ -160,6 +167,14 @@ export default async function DesignDetailPage({
               />
             </div>
           )}
+
+          <div className="mt-4">
+            <WishlistButton
+              designId={design.id}
+              initial={isWishlisted}
+              variant="full"
+            />
+          </div>
 
           {/* Plate / multi-mat badges right under the title */}
           {(plateCount > 1 || materialGroups.length > 1) && (

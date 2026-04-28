@@ -15,8 +15,10 @@ import {
   Mail,
   CalendarDays,
   Wallet,
+  Heart,
 } from "lucide-react";
 import { getDesignerSummary, userHasDesigns } from "@/lib/earnings";
+import { getWishlistCount } from "@/lib/wishlist";
 
 export const dynamic = "force-dynamic";
 
@@ -40,24 +42,26 @@ export default async function AccountPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?redirect=/account");
 
-  const [user, orderCount, designCount, hasDesigns] = await Promise.all([
-    prisma.user.findUniqueOrThrow({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        credits: true,
-        createdAt: true,
-      },
-    }),
-    prisma.order.count({ where: { userId: session.user.id } }),
-    prisma.design.count({
-      where: { uploaderId: session.user.id, source: "USER_MARKETPLACE" },
-    }),
-    userHasDesigns(session.user.id),
-  ]);
+  const [user, orderCount, designCount, hasDesigns, wishlistCount] =
+    await Promise.all([
+      prisma.user.findUniqueOrThrow({
+        where: { id: session.user.id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          credits: true,
+          createdAt: true,
+        },
+      }),
+      prisma.order.count({ where: { userId: session.user.id } }),
+      prisma.design.count({
+        where: { uploaderId: session.user.id, source: "USER_MARKETPLACE" },
+      }),
+      userHasDesigns(session.user.id),
+      getWishlistCount(session.user.id),
+    ]);
 
   const earningsSummary = hasDesigns
     ? await getDesignerSummary(session.user.id)
@@ -174,7 +178,7 @@ export default async function AccountPage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Link
               href="/account/orders"
               className="group hover-lift rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 hover:border-[var(--color-brand)]/40"
@@ -198,6 +202,18 @@ export default async function AccountPage() {
                 {designCount}
               </p>
               <p className="text-xs text-[var(--color-text-muted)]">Tasarımım</p>
+            </Link>
+            <Link
+              href="/account/wishlist"
+              className="group hover-lift rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 hover:border-[var(--color-danger)]/40"
+            >
+              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-[var(--color-surface-2)] text-[var(--color-danger)] transition-transform duration-300 group-hover:scale-110">
+                <Heart className="size-4" />
+              </span>
+              <p className="mt-3 font-display text-2xl text-[var(--color-text)]">
+                {wishlistCount}
+              </p>
+              <p className="text-xs text-[var(--color-text-muted)]">Favori</p>
             </Link>
           </div>
 

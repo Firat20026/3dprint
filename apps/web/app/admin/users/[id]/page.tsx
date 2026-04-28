@@ -378,7 +378,7 @@ export default async function AdminUserDetailPage({
         <h2 className="mb-3 font-display text-xl uppercase tracking-tight">
           Kredi Geçmişi ({ledger.length})
         </h2>
-        <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
           <table className="w-full text-sm">
             <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
               <tr>
@@ -436,7 +436,7 @@ export default async function AdminUserDetailPage({
         <h2 className="mb-3 font-display text-xl uppercase tracking-tight">
           Son Siparişler ({orders.length})
         </h2>
-        <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
           <table className="w-full text-sm">
             <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
               <tr>

@@ -428,7 +428,7 @@ export default async function AdminDesignsPage() {
             Tüm Tasarımlar ({designs.length})
           </h2>
         </div>
-        <div className="mt-4 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="mt-4 overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
           <table className="w-full text-sm">
             <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
               <tr>

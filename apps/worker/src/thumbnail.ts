@@ -74,7 +74,10 @@ export async function renderDesignThumbnail(designId: string): Promise<void> {
     throw new Error("INTERNAL_RENDERER_TOKEN missing");
   }
 
-  const url = `${WEB_URL}/_render/design/${designId}?token=${encodeURIComponent(TOKEN)}`;
+  // Path uses /render-internal/... rather than /_render/... — Next.js
+  // treats folders prefixed with `_` as private (excluded from routing),
+  // so the underscore version returned 404.
+  const url = `${WEB_URL}/render-internal/design/${designId}?token=${encodeURIComponent(TOKEN)}`;
   const b = await getBrowser();
   const page = await b.newPage();
 

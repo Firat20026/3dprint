@@ -1,9 +1,6 @@
 "use client";
 
-/**
- * Root-level error boundary. Renders when the root layout itself fails.
- * Must include <html> and <body>.
- */
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
 export default function GlobalError({
@@ -14,6 +11,8 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
+    Sentry.captureException(error);
+
     fetch("/api/observability/client-error", {
       method: "POST",
       headers: { "content-type": "application/json" },

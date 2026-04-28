@@ -1,13 +1,9 @@
-/**
- * Next.js global instrumentation hook.
- *
- * Runs once when the server boots (Node.js or Edge runtime). We use it to:
- *   - Wire up an unhandled-error capture hook (server side) that funnels into
- *     our observability ErrorLog.
- *   - Reserve a place for future SDK init (Sentry.init, PostHog.init, etc.)
- */
+import * as Sentry from "@sentry/nextjs";
+
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    await import("./sentry.server.config");
+
     const { logError } = await import("@/lib/observability");
 
     process.on("unhandledRejection", (reason) => {
@@ -24,4 +20,10 @@ export async function register() {
       });
     });
   }
+
+  if (process.env.NEXT_RUNTIME === "edge") {
+    await import("./sentry.edge.config");
+  }
 }
+
+export const onRequestError = Sentry.captureRequestError;

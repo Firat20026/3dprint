@@ -15,6 +15,9 @@ export const TEMPLATES = {
   MESHY_REFUND_ISSUED: "MESHY_REFUND_ISSUED",
   PASSWORD_RESET: "PASSWORD_RESET",
   TEST_EMAIL: "TEST_EMAIL",
+  MESHY_JOB_DONE: "MESHY_JOB_DONE",
+  ORDER_PAYMENT_FAILED: "ORDER_PAYMENT_FAILED",
+  CREDIT_PAYMENT_FAILED: "CREDIT_PAYMENT_FAILED",
 } as const;
 
 export type TemplateName = (typeof TEMPLATES)[keyof typeof TEMPLATES];
@@ -54,6 +57,20 @@ export type TemplatePayloads = {
   };
   TEST_EMAIL: {
     sentAt: string;
+  };
+  MESHY_JOB_DONE: {
+    jobId: string;
+    mode: "TEXT" | "IMAGE";
+    prompt: string | null;
+  };
+  ORDER_PAYMENT_FAILED: {
+    orderId: string;
+    reason: string;
+  };
+  CREDIT_PAYMENT_FAILED: {
+    purchaseId: string;
+    credits: number;
+    priceTRY: number;
   };
 };
 

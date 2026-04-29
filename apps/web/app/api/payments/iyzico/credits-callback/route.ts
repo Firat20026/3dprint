@@ -94,6 +94,21 @@ async function handle(token: string | null, origin: string) {
       purchaseId: purchase.id,
       reason: "error" in result ? result.error : "declined",
     });
+    // Best-effort failure notification
+    const failUser = await prisma.user
+      .findUnique({ where: { id: purchase.userId }, select: { email: true } })
+      .catch(() => null);
+    if (failUser?.email) {
+      void notify({
+        to: failUser.email,
+        template: TEMPLATES.CREDIT_PAYMENT_FAILED,
+        data: {
+          purchaseId: purchase.id,
+          credits: purchase.credits,
+          priceTRY: Number(purchase.priceTRY),
+        },
+      });
+    }
     return seeOther(`${origin}/account/credits?error=declined`);
   }
 

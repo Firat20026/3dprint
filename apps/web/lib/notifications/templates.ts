@@ -152,6 +152,62 @@ export function render<T extends TemplateName>(
         ].join("\n"),
       };
     }
+    case "MESHY_JOB_DONE": {
+      const d = data as TemplatePayloads["MESHY_JOB_DONE"];
+      const modeLabel = d.mode === "TEXT" ? "metin" : "görsel";
+      const promptLine = d.prompt ? `"${d.prompt.slice(0, 120)}"` : "";
+      return {
+        subject: `${APP_NAME} · AI modeliniz hazır`,
+        textBody: [
+          "Merhaba,",
+          "",
+          `${modeLabel} tabanlı 3D modeliniz${promptLine ? ` (${promptLine})` : ""} başarıyla oluşturuldu.`,
+          "",
+          `Modeli görüntülemek ve indirmek için:`,
+          appLink(`/account/ai/${d.jobId}`),
+          "",
+          `${APP_NAME} ekibi`,
+        ].join("\n"),
+      };
+    }
+    case "ORDER_PAYMENT_FAILED": {
+      const d = data as TemplatePayloads["ORDER_PAYMENT_FAILED"];
+      return {
+        subject: `${APP_NAME} · Ödeme alınamadı`,
+        textBody: [
+          "Merhaba,",
+          "",
+          "Siparişin için ödeme işlemi tamamlanamadı.",
+          "",
+          `Sebep: ${d.reason}`,
+          "",
+          "Yeniden sipariş oluşturmak için kataloğu ziyaret edebilirsin:",
+          appLink("/designs"),
+          "",
+          "Sorun devam ederse banka veya kart sağlayıcını arayabilirsin.",
+          "",
+          `${APP_NAME} ekibi`,
+        ].join("\n"),
+      };
+    }
+    case "CREDIT_PAYMENT_FAILED": {
+      const d = data as TemplatePayloads["CREDIT_PAYMENT_FAILED"];
+      return {
+        subject: `${APP_NAME} · Kredi satın alma başarısız`,
+        textBody: [
+          "Merhaba,",
+          "",
+          `${d.credits} kredi (₺${d.priceTRY.toFixed(2)}) satın alma işlemi tamamlanamadı.`,
+          "",
+          "Yeniden denemek için:",
+          appLink("/account/credits"),
+          "",
+          "Sorun devam ederse banka veya kart sağlayıcını arayabilirsin.",
+          "",
+          `${APP_NAME} ekibi`,
+        ].join("\n"),
+      };
+    }
   }
   // Exhaustiveness: TS will flag unhandled cases.
   const _exhaustive: never = template;

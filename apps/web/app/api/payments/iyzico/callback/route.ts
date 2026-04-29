@@ -71,13 +71,11 @@ async function handle(token: string | null, origin: string) {
 
   const result = await retrievePayment(token);
   if (!result.ok || !result.paid) {
+    const failReason = "error" in result ? result.error : "declined";
     await prisma.order
       .updateMany({
         where: { id: order.id, status: "PENDING_PAYMENT" },
-        data: {
-          status: "CANCELED",
-          notes: `payment not confirmed: ${"error" in result ? result.error : "declined"}`,
-        },
+        data: { status: "CANCELED", notes: `payment not confirmed: ${failReason}` },
       })
       .catch((e) =>
         logError(e, {
@@ -86,10 +84,18 @@ async function handle(token: string | null, origin: string) {
           metadata: { orderId: order.id },
         }),
       );
-    void track(EVENTS.PAYMENT_DENIED, {
-      orderId: order.id,
-      reason: "error" in result ? result.error : "declined",
-    });
+    void track(EVENTS.PAYMENT_DENIED, { orderId: order.id, reason: failReason });
+    // Best-effort failure notification
+    const failUser = await prisma.order
+      .findUnique({ where: { id: order.id }, select: { user: { select: { email: true } } } })
+      .catch(() => null);
+    if (failUser?.user?.email) {
+      void notify({
+        to: failUser.user.email,
+        template: TEMPLATES.ORDER_PAYMENT_FAILED,
+        data: { orderId: order.id, reason: "Ödeme reddedildi veya tamamlanamadı." },
+      });
+    }
     return seeOther(`${origin}/checkout/error?reason=declined`);
   }
 

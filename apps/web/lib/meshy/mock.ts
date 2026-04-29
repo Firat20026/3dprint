@@ -14,6 +14,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { prisma } from "@/lib/db";
 import { track, EVENTS } from "@/lib/observability";
+import { notify, TEMPLATES } from "@/lib/notifications";
 import { markMeshyJobFailed } from "./job-helpers";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR ?? "./data/uploads";
@@ -64,13 +65,20 @@ export function scheduleMockCompletion(jobId: string, delayMs = 3000): void {
           modelFileKey,
           thumbnailUrl: thumbnailUrl ?? undefined,
         },
-        select: { userId: true },
+        select: { userId: true, mode: true, prompt: true, user: { select: { email: true } } },
       });
       void track(
         EVENTS.MESHY_JOB_DONE,
         { jobId, modelFileKey },
         { userId: updated.userId },
       );
+      if (updated.user?.email) {
+        void notify({
+          to: updated.user.email,
+          template: TEMPLATES.MESHY_JOB_DONE,
+          data: { jobId, mode: updated.mode, prompt: updated.prompt },
+        });
+      }
     } catch (e) {
       await markMeshyJobFailed(jobId, e);
     }

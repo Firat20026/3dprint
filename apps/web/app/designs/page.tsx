@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { DesignCard } from "@/components/shop/DesignCard";
 import {
@@ -11,6 +12,16 @@ import { auth } from "@/lib/auth";
 import type { DesignSource } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Tasarım Kataloğu",
+  description:
+    "Yüzlerce hazır 3D tasarım arasından seçin — organizasyon, hediyelik, teknik parçalar ve daha fazlası. Snapmaker U1 ile çok renkli baskı.",
+  openGraph: {
+    title: "Tasarım Kataloğu — frint3d",
+    description: "Yüzlerce hazır 3D tasarım. Snapmaker U1 ile çok renkli baskı.",
+  },
+};
 
 const VALID_SOURCES: DesignSource[] = ["ADMIN", "USER_MARKETPLACE", "MESHY"];
 const VALID_SORTS = new Set(["newest", "oldest", "alpha"] as const);

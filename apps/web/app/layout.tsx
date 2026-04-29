@@ -17,10 +17,31 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXTAUTH_URL?.replace(/\/$/, "") ?? "";
+const TITLE = "frint3d — Türkiye'nin 3D Baskı Platformu";
+const DESCRIPTION =
+  "Hazır tasarımlardan, kendi yüklediğin dosyadan veya AI ile ürettiğin modelden 3 boyutlu baskıyı dakikalar içinde sipariş et. Snapmaker U1 ile çok renkli, çok materyalli üretim.";
+
 export const metadata: Metadata = {
-  title: "frint3d — Türkiye'nin 3D Baskı Platformu",
-  description:
-    "Hazır tasarımlardan, kendi yüklediğin dosyadan veya AI ile ürettiğin modelden 3 boyutlu baskıyı dakikalar içinde sipariş et. Snapmaker U1 ile çok renkli, çok materyalli üretim.",
+  metadataBase: SITE_URL ? new URL(SITE_URL) : undefined,
+  title: {
+    default: TITLE,
+    template: "%s — frint3d",
+  },
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    siteName: "frint3d",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

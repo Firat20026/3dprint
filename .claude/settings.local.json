@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git add *)",
-      "Bash(git commit -m 'fix: Switch to production build and fix NEXTAUTH_URL configuration *)"
+      "Bash(git commit -m 'fix: Switch to production build and fix NEXTAUTH_URL configuration *)",
+      "Bash(pnpm --filter @frint3d/web exec tsc --noEmit)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

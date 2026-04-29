@@ -26,6 +26,7 @@ import path from "node:path";
 import { prisma } from "@/lib/db";
 import { readStoredFile } from "@/lib/storage";
 import { track, logError, EVENTS } from "@/lib/observability";
+import { notify, TEMPLATES } from "@/lib/notifications";
 import { markMeshyJobFailed } from "./job-helpers";
 
 const API_BASE = "https://api.meshy.ai";
@@ -208,13 +209,20 @@ async function run(jobId: string) {
           modelFileKey: destKey,
           thumbnailUrl: task.thumbnail_url ?? undefined,
         },
-        select: { userId: true },
+        select: { userId: true, mode: true, prompt: true, user: { select: { email: true } } },
       });
       void track(
         EVENTS.MESHY_JOB_DONE,
         { jobId, externalJobId, modelFileKey: destKey },
         { userId: updated.userId },
       );
+      if (updated.user?.email) {
+        void notify({
+          to: updated.user.email,
+          template: TEMPLATES.MESHY_JOB_DONE,
+          data: { jobId, mode: updated.mode, prompt: updated.prompt },
+        });
+      }
       return;
     }
     if (task.status === "FAILED" || task.status === "CANCELED") {

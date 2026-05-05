@@ -87,30 +87,30 @@ export default async function ResetPasswordPage({
 
   return (
     <div>
-      <h1 className="h-display text-3xl text-[var(--color-text)]">
+      <h1 className="h-display text-3xl text-foreground">
         Yeni Şifre Belirle
       </h1>
 
       {tokenInvalid ? (
         <>
-          <div className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 p-4 text-sm text-[var(--color-danger)]">
+          <div className="mt-6 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
             Bu bağlantı geçersiz veya süresi dolmuş. Yeni bir sıfırlama
             bağlantısı talep et.
           </div>
           <Link
             href="/forgot-password"
-            className="mt-4 inline-block text-sm text-[var(--color-brand-2)] hover:underline"
+            className="mt-4 inline-block text-sm font-medium text-foreground hover:underline"
           >
             Şifre sıfırlama isteği gönder →
           </Link>
         </>
       ) : (
         <>
-          <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Hesabın için yeni bir şifre seç. En az 8 karakter.
           </p>
           {errMsg && (
-            <div className="mt-4 rounded-[var(--radius-card)] border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 p-3 text-sm text-[var(--color-danger)]">
+            <div className="mt-4 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
               ✗ {errMsg}
             </div>
           )}

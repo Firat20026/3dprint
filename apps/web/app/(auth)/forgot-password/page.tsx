@@ -64,15 +64,15 @@ export default async function ForgotPasswordPage({
 
   return (
     <div>
-      <h1 className="h-display text-3xl text-[var(--color-text)]">
+      <h1 className="h-display text-3xl text-foreground">
         Şifremi Unuttum
       </h1>
-      <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
+      <p className="mt-1.5 text-sm text-muted-foreground">
         E-posta adresini gir, sıfırlama bağlantısı yollayalım.
       </p>
 
       {sent ? (
-        <div className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-success)]/40 bg-[var(--color-success)]/10 p-4 text-sm text-[var(--color-success)]">
+        <div className="mt-6 rounded-xl border border-[hsl(var(--success))]/40 bg-[hsl(var(--success))]/10 p-4 text-sm text-[hsl(var(--success))]">
           Eğer bu e-posta hesabımıza kayıtlıysa birkaç dakika içinde
           sıfırlama bağlantısını aldın. Spam klasörünü de kontrol et.
         </div>
@@ -96,9 +96,9 @@ export default async function ForgotPasswordPage({
         </form>
       )}
 
-      <p className="mt-6 text-sm text-[var(--color-text-muted)]">
+      <p className="mt-6 text-sm text-muted-foreground">
         Şifreni hatırladın mı?{" "}
-        <Link href="/login" className="text-[var(--color-brand-2)] hover:underline">
+        <Link href="/login" className="font-medium text-foreground hover:underline">
           Giriş yap
         </Link>
       </p>

@@ -13,7 +13,9 @@ import {
   getDesignBySlug,
   listActiveProfiles,
   listMaterialsInStock,
+  listRelatedDesigns,
 } from "@/lib/designs";
+import { DesignCard } from "@/components/shop/DesignCard";
 import { getDesignRatingSummary } from "@/lib/reviews";
 import { publicUrlFor } from "@/lib/urls";
 import { getSettings } from "@/lib/settings";
@@ -76,15 +78,21 @@ export default async function DesignDetailPage({
   if (!design || design.status !== "PUBLISHED") notFound();
 
   const session = await auth();
-  const [materials, profiles, settings, ratingSummary, wishlistedIds] =
+  const [materials, profiles, settings, ratingSummary, wishlistedIds, relatedDesigns] =
     await Promise.all([
       listMaterialsInStock(),
       listActiveProfiles(),
       getSettings(),
       getDesignRatingSummary(design.id),
       getWishlistedDesignIds(session?.user?.id),
+      listRelatedDesigns(design.id, design.category, 4),
     ]);
   const isWishlisted = wishlistedIds.has(design.id);
+
+  // Fetch ratings for related designs in parallel
+  const relatedRatings = await Promise.all(
+    relatedDesigns.map((d) => getDesignRatingSummary(d.id)),
+  );
 
   const modelUrl = publicUrlFor(design.modelFileKey);
   const materialGroups = (design.materialGroups ?? []) as MaterialGroup[];
@@ -92,16 +100,16 @@ export default async function DesignDetailPage({
 
   return (
     <Container className="py-12">
-      <nav className="mb-6 text-xs text-[var(--color-text-muted)]">
-        <Link href="/" className="hover:text-[var(--color-text)]">
+      <nav className="mb-6 text-xs text-muted-foreground">
+        <Link href="/" className="hover:text-foreground">
           Ana Sayfa
         </Link>
         <span className="mx-2">/</span>
-        <Link href="/designs" className="hover:text-[var(--color-text)]">
+        <Link href="/designs" className="hover:text-foreground">
           Tasarımlar
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-[var(--color-text)]">{design.title}</span>
+        <span className="text-foreground">{design.title}</span>
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
@@ -109,22 +117,22 @@ export default async function DesignDetailPage({
           {modelUrl && (design.fileFormat === "stl" || design.fileFormat === "3mf") ? (
             <ModelViewer url={modelUrl} format={design.fileFormat} />
           ) : (
-            <div className="flex aspect-square items-center justify-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text-muted)]">
+            <div className="flex aspect-square items-center justify-center rounded-xl border border-border bg-card text-sm text-muted-foreground">
               Model bulunamadı
             </div>
           )}
 
           {/* Material legend (3MF only, when multiple extruders detected) */}
           {materialGroups.length > 1 && (
-            <div className="mt-5 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-              <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <div className="mt-5 rounded-xl border border-border bg-card p-4">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
                 Tasarım Materyalleri ({materialGroups.length})
               </p>
               <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {materialGroups.map((g) => (
                   <li
                     key={`${g.extruderId}-${g.name ?? ""}-${g.colorHex ?? ""}`}
-                    className="flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2.5 py-1.5 text-xs"
+                    className="flex items-center gap-2 rounded-[10px] border border-border bg-secondary px-2.5 py-1.5 text-xs"
                   >
                     <span
                       className="size-3.5 shrink-0 rounded-full border border-white/15"
@@ -134,7 +142,7 @@ export default async function DesignDetailPage({
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-[10px] text-[var(--color-text-subtle)]">
+              <p className="mt-3 text-[10px] text-muted-foreground/70">
                 Tasarımcının tercih ettiği renk şeması — sepette istediğin
                 materyali seçebilirsin.
               </p>
@@ -142,7 +150,7 @@ export default async function DesignDetailPage({
           )}
 
           {design.description && (
-            <p className="mt-5 text-sm leading-relaxed text-[var(--color-text-muted)]">
+            <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
               {design.description}
             </p>
           )}
@@ -150,7 +158,7 @@ export default async function DesignDetailPage({
 
         <div>
           {design.category && (
-            <p className="text-xs uppercase tracking-wider text-[var(--color-accent)]">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
               {design.category}
             </p>
           )}
@@ -159,11 +167,11 @@ export default async function DesignDetailPage({
           </h1>
 
           {design.source === "USER_MARKETPLACE" && design.uploader && (
-            <p className="mt-3 text-xs text-[var(--color-text-muted)]">
+            <p className="mt-3 text-xs text-muted-foreground">
               Tasarımcı:{" "}
               <Link
                 href={`/designers/${design.uploader.id}`}
-                className="text-[var(--color-brand-2)] hover:underline"
+                className="font-medium text-foreground hover:underline"
               >
                 {design.uploader.name ?? "Anonim Tasarımcı"}
               </Link>
@@ -192,12 +200,12 @@ export default async function DesignDetailPage({
           {(plateCount > 1 || materialGroups.length > 1) && (
             <div className="mt-3 flex flex-wrap gap-2">
               {plateCount > 1 && (
-                <span className="rounded-full border border-[var(--color-brand)]/30 bg-[var(--color-brand)]/10 px-2.5 py-1 text-[10px] uppercase tracking-wider text-[var(--color-brand-2)]">
+                <span className="rounded-full border border-border bg-secondary px-2.5 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
                   {plateCount} plate
                 </span>
               )}
               {materialGroups.length > 1 && (
-                <span className="rounded-full border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/10 px-2.5 py-1 text-[10px] uppercase tracking-wider text-[var(--color-accent)]">
+                <span className="rounded-full border border-border bg-secondary px-2.5 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
                   {materialGroups.length} renk / materyal
                 </span>
               )}
@@ -205,7 +213,7 @@ export default async function DesignDetailPage({
           )}
 
           {materials.length === 0 ? (
-            <div className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 p-5 text-sm text-[var(--color-danger)]">
+            <div className="mt-6 rounded-xl border border-destructive/30 bg-destructive/10 p-5 text-sm text-destructive">
               Şu an stokta aktif materyal bulunmuyor. Admin&apos;in stok
               eklemesi bekleniyor.
             </div>
@@ -238,34 +246,34 @@ export default async function DesignDetailPage({
             </div>
           )}
 
-          <div className="mt-8 grid grid-cols-2 gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-xs">
+          <div className="mt-8 grid grid-cols-2 gap-4 rounded-xl border border-border bg-card p-4 text-xs">
             <div>
-              <p className="uppercase tracking-wider text-[var(--color-text-muted)]">
+              <p className="uppercase tracking-wider text-muted-foreground">
                 Format
               </p>
-              <p className="mt-1 text-[var(--color-text)]">
+              <p className="mt-1 text-foreground">
                 {design.fileFormat.toUpperCase()}
               </p>
             </div>
             <div>
-              <p className="uppercase tracking-wider text-[var(--color-text-muted)]">
+              <p className="uppercase tracking-wider text-muted-foreground">
                 Printer
               </p>
-              <p className="mt-1 text-[var(--color-text)]">Snapmaker U1</p>
+              <p className="mt-1 text-foreground">Snapmaker U1</p>
             </div>
             <div>
-              <p className="uppercase tracking-wider text-[var(--color-text-muted)]">
+              <p className="uppercase tracking-wider text-muted-foreground">
                 Kargo
               </p>
-              <p className="mt-1 text-[var(--color-text)]">
+              <p className="mt-1 text-foreground">
                 2-4 iş günü · Türkiye
               </p>
             </div>
             <div>
-              <p className="uppercase tracking-wider text-[var(--color-text-muted)]">
+              <p className="uppercase tracking-wider text-muted-foreground">
                 Kaynak
               </p>
-              <p className="mt-1 text-[var(--color-text)]">
+              <p className="mt-1 text-foreground">
                 {design.source === "ADMIN" ? "frint3d resmi" : "Topluluk"}
               </p>
             </div>
@@ -274,6 +282,22 @@ export default async function DesignDetailPage({
       </div>
 
       <ReviewSection designId={design.id} slug={design.slug} />
+
+      {relatedDesigns.length > 0 && (
+        <section className="mt-16">
+          <h2 className="h-display text-2xl">Bunlara da bak</h2>
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {relatedDesigns.map((rd, i) => (
+              <DesignCard
+                key={rd.id}
+                design={rd}
+                rating={relatedRatings[i]}
+                wishlisted={wishlistedIds.has(rd.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </Container>
   );
 }

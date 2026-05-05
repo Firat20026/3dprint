@@ -58,13 +58,13 @@ export function OrderActions({
             placeholder="Kargo firması"
             value={carrier}
             onChange={(e) => setCarrier(e.target.value)}
-            className="w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-xs"
+            className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs"
           />
           <input
             placeholder="Takip no"
             value={trackingNo}
             onChange={(e) => setTrackingNo(e.target.value)}
-            className="w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-xs"
+            className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs"
           />
         </div>
       )}
@@ -86,7 +86,7 @@ export function OrderActions({
           {pending ? "Güncelleniyor…" : transition.label}
         </Button>
       ) : (
-        <p className="text-xs text-[var(--color-text-subtle)]">
+        <p className="text-xs text-muted-foreground/70">
           Bu durumda ilerletilecek aksiyon yok.
         </p>
       )}
@@ -104,7 +104,7 @@ export function OrderActions({
       )}
 
       {error && (
-        <p className="text-xs text-[var(--color-danger)]">{error}</p>
+        <p className="text-xs text-destructive">{error}</p>
       )}
     </div>
   );

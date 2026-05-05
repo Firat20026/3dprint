@@ -265,7 +265,7 @@ export function UploadFlow({
           <FilePreview file={file} onReset={() => setFile(null)} />
         )}
         {uploadError && (
-          <div className="mt-4 rounded-[var(--radius-card)] border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 p-4 text-sm text-[var(--color-danger)]">
+          <div className="mt-4 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
             {uploadError}
           </div>
         )}
@@ -273,7 +273,7 @@ export function UploadFlow({
 
       <div className="space-y-5">
         <div>
-          <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">
             Materyal
           </p>
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -285,8 +285,8 @@ export function UploadFlow({
                 className={
                   "flex items-center gap-2 rounded-[10px] border px-3 py-2 text-left text-xs transition-colors " +
                   (m.id === materialId
-                    ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-text)]"
-                    : "border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]")
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-border bg-secondary text-muted-foreground hover:text-foreground")
                 }
               >
                 <span
@@ -300,7 +300,7 @@ export function UploadFlow({
         </div>
 
         <div>
-          <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">
             Baskı Kalitesi
           </p>
           <div className="mt-2 grid grid-cols-3 gap-2">
@@ -312,12 +312,12 @@ export function UploadFlow({
                 className={
                   "rounded-[10px] border px-3 py-2.5 text-left text-xs transition-colors " +
                   (p.id === profileId
-                    ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10"
-                    : "border-[var(--color-border)] bg-[var(--color-surface-2)]")
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-secondary")
                 }
               >
-                <p className="font-medium text-[var(--color-text)]">{p.name}</p>
-                <p className="mt-0.5 text-[10px] text-[var(--color-text-muted)]">
+                <p className="font-medium text-foreground">{p.name}</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">
                   {p.layerHeightMm}mm · %{p.infillPercent}
                 </p>
               </button>
@@ -334,14 +334,14 @@ export function UploadFlow({
         {result?.status === "DONE" && (
           <div className="flex items-end gap-4">
             <div>
-              <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
                 Adet
               </p>
-              <div className="mt-2 inline-flex items-center overflow-hidden rounded-[var(--radius-button)] border border-[var(--color-border)]">
+              <div className="mt-2 inline-flex items-center overflow-hidden rounded-lg border border-border">
                 <button
                   type="button"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-2 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+                  className="px-3 py-2 text-muted-foreground hover:bg-secondary"
                 >
                   −
                 </button>
@@ -349,7 +349,7 @@ export function UploadFlow({
                 <button
                   type="button"
                   onClick={() => setQuantity(Math.min(20, quantity + 1))}
-                  className="px-3 py-2 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+                  className="px-3 py-2 text-muted-foreground hover:bg-secondary"
                 >
                   +
                 </button>
@@ -400,10 +400,10 @@ function DropZone({
       }}
       onClick={() => inputRef.current?.click()}
       className={
-        "flex aspect-square cursor-pointer flex-col items-center justify-center gap-3 rounded-[var(--radius-card)] border-2 border-dashed p-8 text-center transition-colors " +
+        "flex aspect-square cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-8 text-center transition-colors " +
         (dragOver
-          ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10"
-          : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand)]/60")
+          ? "border-primary bg-primary/10"
+          : "border-border bg-card hover:border-primary/60")
       }
     >
       <input
@@ -416,7 +416,7 @@ function DropZone({
           if (f) onFile(f);
         }}
       />
-      <div className="size-16 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4">
+      <div className="size-16 rounded-full border border-border bg-secondary p-4">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
           <path d="M12 16V4m0 0l-4 4m4-4l4 4M4 20h16" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
@@ -424,7 +424,7 @@ function DropZone({
       <p className="font-display text-xl uppercase tracking-tight">
         STL/3MF Bırak
       </p>
-      <p className="text-xs text-[var(--color-text-muted)]">
+      <p className="text-xs text-muted-foreground">
         veya tıkla — max 100MB
       </p>
     </div>
@@ -435,11 +435,11 @@ function MeshyPreview({ seed }: { seed: NonNullable<MeshySeed> }) {
   return (
     <div className="space-y-3">
       <ModelViewer url={seed.modelUrl} format="stl" />
-      <div className="flex items-center justify-between rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-xs">
-        <span className="uppercase tracking-wider text-[var(--color-accent)]">
+      <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-xs">
+        <span className="uppercase tracking-wider text-muted-foreground">
           AI modeli
         </span>
-        <span className="truncate text-[var(--color-text-muted)]" title={seed.title}>
+        <span className="truncate text-muted-foreground" title={seed.title}>
           {seed.title}
         </span>
       </div>
@@ -465,27 +465,27 @@ function FilePreview({ file, onReset }: { file: File; onReset: () => void }) {
       {canPreview && objectUrl ? (
         <ModelViewer url={objectUrl} format={format} />
       ) : (
-        <div className="flex aspect-square flex-col items-center justify-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center">
-          <div className="size-16 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4 text-[var(--color-brand)]">
+        <div className="flex aspect-square flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-8 text-center">
+          <div className="size-16 rounded-full border border-border bg-secondary p-4 text-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
               <path d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
           <p className="font-medium">{file.name}</p>
-          <p className="text-xs text-[var(--color-text-muted)]">
+          <p className="text-xs text-muted-foreground">
             {(file.size / 1024).toFixed(1)} KB
           </p>
         </div>
       )}
       {/* Info bar below the viewer — same pattern as design detail page */}
-      <div className="flex items-center justify-between rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-xs">
-        <span className="truncate text-[var(--color-text-muted)]" title={file.name}>
+      <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5 text-xs">
+        <span className="truncate text-muted-foreground" title={file.name}>
           {file.name}
         </span>
         <button
           type="button"
           onClick={onReset}
-          className="ml-3 shrink-0 uppercase tracking-wider text-[var(--color-text-subtle)] hover:text-[var(--color-danger)]"
+          className="ml-3 shrink-0 uppercase tracking-wider text-muted-foreground/70 hover:text-destructive"
         >
           Değiştir
         </button>
@@ -505,10 +505,10 @@ function PriceCard({
 }) {
   if (submitting || (result && (result.status === "QUEUED" || result.status === "RUNNING"))) {
     return (
-      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+      <div className="rounded-xl border border-border bg-card p-5">
         <div className="flex items-center gap-3">
-          <div className="size-4 animate-spin rounded-full border-2 border-[var(--color-brand)] border-t-transparent" />
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">
             {result?.status === "RUNNING" ? "Dilimleme sürüyor…" : "Kuyruğa alınıyor…"}
           </p>
         </div>
@@ -518,7 +518,7 @@ function PriceCard({
 
   if (result?.status === "FAILED") {
     return (
-      <div className="rounded-[var(--radius-card)] border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 p-5 text-sm text-[var(--color-danger)]">
+      <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-5 text-sm text-destructive">
         Slicer hatası: {result.errorText ?? "bilinmeyen hata"}
       </div>
     );
@@ -526,7 +526,7 @@ function PriceCard({
 
   if (!result || result.status !== "DONE") {
     return (
-      <div className="rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-sm text-[var(--color-text-muted)]">
+      <div className="rounded-xl border border-dashed border-border bg-card p-5 text-sm text-muted-foreground">
         Dosya bırak, fiyat burada görünecek.
       </div>
     );
@@ -539,29 +539,29 @@ function PriceCard({
   const mins = Math.floor((seconds % 3600) / 60);
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground">
           Birim fiyat
         </p>
         <p className="font-display text-3xl uppercase tracking-tight">
           ₺{unit.toFixed(2)}
         </p>
       </div>
-      <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-[var(--color-border)] pt-4 text-xs">
+      <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-4 text-xs">
         <div>
-          <dt className="text-[var(--color-text-muted)]">Filament</dt>
+          <dt className="text-muted-foreground">Filament</dt>
           <dd className="mt-1 font-medium">{grams.toFixed(1)} g</dd>
         </div>
         <div>
-          <dt className="text-[var(--color-text-muted)]">Süre</dt>
+          <dt className="text-muted-foreground">Süre</dt>
           <dd className="mt-1 font-medium">
             {hours > 0 ? `${hours}sa ` : ""}
             {mins}dk
           </dd>
         </div>
         <div>
-          <dt className="text-[var(--color-text-muted)]">₺/g</dt>
+          <dt className="text-muted-foreground">₺/g</dt>
           <dd className="mt-1 font-medium">
             {material ? material.pricePerGramTRY.toFixed(2) : "—"}
           </dd>

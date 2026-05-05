@@ -22,27 +22,27 @@ export default async function WishlistPage() {
       <p className="eyebrow">Hesap</p>
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
         <h1 className="h-display text-4xl md:text-5xl">Favorilerim</h1>
-        <p className="text-xs text-[var(--color-text-subtle)]">
+        <p className="text-xs text-muted-foreground/70">
           {visible.length} tasarım
         </p>
       </div>
-      <p className="mt-3 max-w-xl text-sm text-[var(--color-text-muted)]">
+      <p className="mt-3 max-w-xl text-sm text-muted-foreground">
         Beğendiğin tasarımları kalp ikonuyla buraya kaydedebilirsin. Yayından
         kaldırılan tasarımlar listende gizlenir.
       </p>
 
       {visible.length === 0 ? (
-        <div className="mt-10 rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-10 text-center">
-          <Heart className="mx-auto size-8 text-[var(--color-text-subtle)]" />
+        <div className="mt-10 rounded-xl border border-dashed border-border bg-card p-10 text-center">
+          <Heart className="mx-auto size-8 text-muted-foreground/70" />
           <p className="mt-3 font-display text-xl uppercase tracking-tight">
             Henüz favori yok
           </p>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-2 text-sm text-muted-foreground">
             Tasarımlara göz at, beğendiklerinin üzerindeki kalbe tıkla.
           </p>
           <Link
             href="/designs"
-            className="mt-5 inline-flex h-10 items-center rounded-[var(--radius-button)] bg-[var(--color-brand)] px-4 text-sm font-medium text-white hover:bg-[var(--color-brand-2)]"
+            className="mt-5 inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary/90"
           >
             Tasarımları Keşfet →
           </Link>

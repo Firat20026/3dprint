@@ -128,7 +128,7 @@ export default async function DesignReviewPage({
         <div>
           <Link
             href="/admin/designs"
-            className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             ← Tasarım listesi
           </Link>
@@ -148,7 +148,7 @@ export default async function DesignReviewPage({
           }
           className={
             design.status === "REJECTED"
-              ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/15 text-[var(--color-danger)]"
+              ? "border-destructive/40 bg-destructive/15 text-destructive"
               : ""
           }
         >
@@ -158,11 +158,11 @@ export default async function DesignReviewPage({
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <section className="space-y-4">
-          <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <div className="overflow-hidden rounded-xl border border-border bg-card">
             {modelUrl ? (
               <ModelViewer url={modelUrl} format={fileFormat} />
             ) : (
-              <div className="flex h-[420px] items-center justify-center text-sm text-[var(--color-text-muted)]">
+              <div className="flex h-[420px] items-center justify-center text-sm text-muted-foreground">
                 Model dosyası bulunamadı
               </div>
             )}
@@ -170,19 +170,19 @@ export default async function DesignReviewPage({
           <a
             href={modelUrl ?? "#"}
             download
-            className="inline-flex items-center gap-2 text-xs text-[var(--color-brand-2)] hover:underline"
+            className="inline-flex items-center gap-2 text-xs font-medium text-foreground hover:underline"
           >
             Dosyayı indir ({fileFormat.toUpperCase()})
           </a>
         </section>
 
         <aside className="space-y-5">
-          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+          <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="font-display text-lg uppercase tracking-tight">
               {design.title}
             </h2>
             {design.description && (
-              <p className="mt-2 whitespace-pre-line text-sm text-[var(--color-text-muted)]">
+              <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
                 {design.description}
               </p>
             )}
@@ -206,15 +206,15 @@ export default async function DesignReviewPage({
           </div>
 
           {design.uploader && (
-            <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+            <div className="rounded-xl border border-border bg-card p-5">
               <p className="eyebrow">Gönderen</p>
               <p className="mt-1 font-medium">
                 {design.uploader.name ?? design.uploader.email}
               </p>
-              <p className="text-xs text-[var(--color-text-muted)]">
+              <p className="text-xs text-muted-foreground">
                 {design.uploader.email}
               </p>
-              <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+              <p className="mt-1 text-xs text-muted-foreground/70">
                 Üyelik:{" "}
                 {design.uploader.createdAt.toLocaleDateString("tr-TR")}
               </p>
@@ -222,23 +222,23 @@ export default async function DesignReviewPage({
           )}
 
           {design.reviewedAt && (
-            <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface-2)] p-5">
+            <div className="rounded-xl border border-border bg-secondary p-5">
               <p className="eyebrow">Önceki İnceleme</p>
               <p className="mt-1 text-sm">
                 {design.reviewedBy?.name ?? design.reviewedBy?.email ?? "—"}
               </p>
-              <p className="text-xs text-[var(--color-text-muted)]">
+              <p className="text-xs text-muted-foreground">
                 {design.reviewedAt.toLocaleString("tr-TR")}
               </p>
               {design.rejectionReason && (
-                <p className="mt-2 rounded-[var(--radius-button)] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 p-2 text-xs text-[var(--color-danger)]">
+                <p className="mt-2 rounded-lg border border-destructive/30 bg-destructive/10 p-2 text-xs text-destructive">
                   {design.rejectionReason}
                 </p>
               )}
             </div>
           )}
 
-          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+          <div className="rounded-xl border border-border bg-card p-5">
             <p className="eyebrow">Karar</p>
             <form action={approveDesign} className="mt-3">
               <input type="hidden" name="id" value={design.id} />
@@ -261,7 +261,7 @@ export default async function DesignReviewPage({
                 rows={3}
                 defaultValue={design.rejectionReason ?? ""}
                 placeholder="Red sebebi (kullanıcı görecek) — örn. ölçeklendirme hatalı, kalite yetersiz"
-                className="w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-danger)] focus:outline-none"
+                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground focus:border-destructive focus:outline-none"
               />
               <SubmitButton
                 size="sm"
@@ -290,12 +290,12 @@ function Row({
 }) {
   return (
     <div>
-      <dt className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+      <dt className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
         {label}
       </dt>
       <dd
         className={
-          "mt-0.5 text-[var(--color-text)] " +
+          "mt-0.5 text-foreground " +
           (mono ? "font-mono text-[11px]" : "text-xs")
         }
       >

@@ -51,14 +51,14 @@ export function ReviewForm({ designId, slug, isVerifiedBuyer, initial }: Props) 
   return (
     <form
       action={onSubmit}
-      className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+      className="rounded-xl border border-border bg-card p-5"
     >
       <div className="flex items-center justify-between gap-4">
         <h3 className="font-display text-base uppercase tracking-tight">
           {initial ? "Yorumunu Güncelle" : "Bu Tasarıma Puan Ver"}
         </h3>
         {isVerifiedBuyer && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand)]/10 px-2.5 py-1 text-[10px] uppercase tracking-wider text-[var(--color-brand-2)]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] uppercase tracking-wider text-primary">
             <BadgeCheck className="size-3" />
             Doğrulanmış Alıcı
           </span>
@@ -80,7 +80,7 @@ export function ReviewForm({ designId, slug, isVerifiedBuyer, initial }: Props) 
             role="radio"
             aria-checked={rating === n}
             aria-label={`${n} yıldız`}
-            className="rounded p-1 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
+            className="rounded p-1 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <Star
               size={26}
@@ -94,7 +94,7 @@ export function ReviewForm({ designId, slug, isVerifiedBuyer, initial }: Props) 
             />
           </button>
         ))}
-        <span className="ml-2 text-xs text-[var(--color-text-muted)]">
+        <span className="ml-2 text-xs text-muted-foreground">
           {display > 0 ? `${display}/5` : "Yıldız seç"}
         </span>
       </div>
@@ -106,7 +106,7 @@ export function ReviewForm({ designId, slug, isVerifiedBuyer, initial }: Props) 
           defaultValue={initial?.title ?? ""}
           placeholder="Kısa başlık (ops.)"
           maxLength={80}
-          className="h-10 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+          className="h-10 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground focus:border-primary focus:outline-none"
         />
         <textarea
           name="body"
@@ -114,22 +114,22 @@ export function ReviewForm({ designId, slug, isVerifiedBuyer, initial }: Props) 
           placeholder="Bu tasarımı kullanırken neler yaşadın? Baskı kalitesi, montaj, kullanım… (ops.)"
           maxLength={2000}
           rows={4}
-          className="w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+          className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
         />
       </div>
 
       {error && (
-        <p className="mt-3 text-xs text-[var(--color-danger)]">{error}</p>
+        <p className="mt-3 text-xs text-destructive">{error}</p>
       )}
       {success && (
-        <p className="mt-3 text-xs text-[var(--color-brand-2)]">{success}</p>
+        <p className="mt-3 text-xs text-primary">{success}</p>
       )}
 
       <div className="mt-4 flex items-center justify-end gap-2">
         <button
           type="submit"
           disabled={pending || rating < 1}
-          className="h-10 rounded-[var(--radius-button)] bg-[var(--color-brand)] px-4 text-sm font-medium text-white hover:bg-[var(--color-brand-2)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? "Kaydediliyor…" : initial ? "Güncelle" : "Yorumu Gönder"}
         </button>

@@ -25,7 +25,7 @@ export default async function OrdersPage() {
       </h1>
 
       {orders.length === 0 ? (
-        <div className="mt-10 rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-12 text-center text-sm text-[var(--color-text-muted)]">
+        <div className="mt-10 rounded-xl border border-dashed border-border bg-card p-12 text-center text-sm text-muted-foreground">
           Henüz sipariş yok.
         </div>
       ) : (
@@ -34,10 +34,10 @@ export default async function OrdersPage() {
             <li key={o.id}>
               <Link
                 href={`/account/orders/${o.id}`}
-                className="flex items-center justify-between rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors hover:border-[var(--color-brand)]/40"
+                className="flex items-center justify-between rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
               >
                 <div>
-                  <p className="font-mono text-xs text-[var(--color-text-muted)]">
+                  <p className="font-mono text-xs text-muted-foreground">
                     #{o.id.slice(-8).toUpperCase()}
                   </p>
                   <p className="mt-1 text-sm">

@@ -18,6 +18,7 @@ export const TEMPLATES = {
   MESHY_JOB_DONE: "MESHY_JOB_DONE",
   ORDER_PAYMENT_FAILED: "ORDER_PAYMENT_FAILED",
   CREDIT_PAYMENT_FAILED: "CREDIT_PAYMENT_FAILED",
+  ORDER_CANCELED: "ORDER_CANCELED",
 } as const;
 
 export type TemplateName = (typeof TEMPLATES)[keyof typeof TEMPLATES];
@@ -71,6 +72,9 @@ export type TemplatePayloads = {
     purchaseId: string;
     credits: number;
     priceTRY: number;
+  };
+  ORDER_CANCELED: {
+    orderId: string;
   };
 };
 

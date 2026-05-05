@@ -18,14 +18,14 @@ export default async function CheckoutErrorPage({
 
   return (
     <Container className="py-20">
-      <div className="mx-auto max-w-xl rounded-[var(--radius-card)] border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 p-8 text-center">
-        <p className="text-xs uppercase tracking-wider text-[var(--color-danger)]">
+      <div className="mx-auto max-w-xl rounded-xl border border-destructive/40 bg-destructive/10 p-8 text-center">
+        <p className="text-xs uppercase tracking-wider text-destructive">
           Hata
         </p>
         <h1 className="mt-3 h-display text-3xl">
           Ödeme tamamlanamadı
         </h1>
-        <p className="mt-3 text-sm text-[var(--color-text-muted)]">{msg}</p>
+        <p className="mt-3 text-sm text-muted-foreground">{msg}</p>
         <div className="mt-6 flex justify-center gap-3">
           <Link href="/cart">
             <Button variant="secondary">Sepete Dön</Button>

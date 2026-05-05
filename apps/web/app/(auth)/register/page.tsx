@@ -65,14 +65,14 @@ export default async function RegisterPage({
 
   return (
     <div>
-      <h1 className="h-display text-3xl text-[var(--color-text)]">
+      <h1 className="h-display text-3xl text-foreground">
         Üye Ol
       </h1>
-      <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
+      <p className="mt-1.5 text-sm text-muted-foreground">
         Zaten hesabın var mı?{" "}
         <Link
           href="/login"
-          className="text-[var(--color-brand-2)] hover:underline"
+          className="font-medium text-foreground hover:underline"
         >
           Giriş yap
         </Link>
@@ -113,13 +113,13 @@ export default async function RegisterPage({
             autoComplete="new-password"
             className="mt-1.5"
           />
-          <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+          <p className="mt-1 text-xs text-muted-foreground/70">
             En az 6 karakter.
           </p>
         </div>
 
         {errorMsg && (
-          <div className="rounded-[10px] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-3.5 py-2.5 text-xs text-[var(--color-danger)]">
+          <div className="rounded-[10px] border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive">
             {errorMsg}
           </div>
         )}

@@ -208,6 +208,23 @@ export function render<T extends TemplateName>(
         ].join("\n"),
       };
     }
+    case "ORDER_CANCELED": {
+      const d = data as TemplatePayloads["ORDER_CANCELED"];
+      return {
+        subject: `${APP_NAME} · Siparişin iptal edildi`,
+        textBody: [
+          "Merhaba,",
+          "",
+          `Sipariş #${d.orderId.slice(-8).toUpperCase()} iptal edildi.`,
+          "",
+          "Herhangi bir ücret tahsil edilmedi.",
+          "",
+          `Yeni sipariş oluşturmak için: ${appLink("/designs")}`,
+          "",
+          `${APP_NAME} ekibi`,
+        ].join("\n"),
+      };
+    }
   }
   // Exhaustiveness: TS will flag unhandled cases.
   const _exhaustive: never = template;

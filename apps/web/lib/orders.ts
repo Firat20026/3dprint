@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { shippingFee, estimateDesignUnitPrice } from "@/lib/pricing";
+import { computeDiscount } from "@/lib/coupons";
 
 export type CartItemPayload =
   | {
@@ -41,6 +42,7 @@ export type CreateOrderInput = {
   userId: string;
   items: CartItemPayload[];
   shipping: ShippingAddress;
+  couponCode?: string; // optional promo code
 };
 
 /**
@@ -188,7 +190,38 @@ export async function createOrderDraft(input: CreateOrderInput) {
   const subtotalNum = subtotal.toNumber();
   const shippingNum = shippingFee(subtotalNum, settings);
   const shippingD = new Prisma.Decimal(shippingNum);
-  const totalD = subtotal.add(shippingD);
+
+  // --- Coupon validation & discount ------------------------------------------
+  let discountD = new Prisma.Decimal(0);
+  let appliedCouponCode: string | null = null;
+  let couponId: string | null = null;
+
+  if (input.couponCode) {
+    const code = input.couponCode.trim().toUpperCase();
+    const coupon = await prisma.coupon.findUnique({ where: { code } });
+
+    if (coupon && coupon.isActive) {
+      const expired = coupon.expiresAt && coupon.expiresAt < new Date();
+      const limitReached =
+        coupon.maxUsageTotal !== null && coupon.usageCount >= coupon.maxUsageTotal;
+      const minOk = coupon.minOrderTRY === null || subtotalNum >= Number(coupon.minOrderTRY);
+      const useCount = await prisma.couponUse.count({
+        where: { couponId: coupon.id, userId: input.userId },
+      });
+      const perUserOk = useCount < coupon.maxUsagePerUser;
+
+      if (!expired && !limitReached && minOk && perUserOk) {
+        const discountNum = computeDiscount(coupon, subtotalNum);
+        discountD = new Prisma.Decimal(discountNum);
+        appliedCouponCode = code;
+        couponId = coupon.id;
+      }
+    }
+    // Silent fail if coupon is invalid — front-end already validated, but we
+    // re-validate here for integrity. Worst case: user pays full price.
+  }
+
+  const totalD = subtotal.add(shippingD).sub(discountD);
 
   const conversationId = `conv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -198,13 +231,28 @@ export async function createOrderDraft(input: CreateOrderInput) {
       status: "PENDING_PAYMENT",
       subtotalTRY: subtotal,
       shippingTRY: shippingD,
+      discountTRY: discountD,
       totalTRY: totalD,
+      couponCode: appliedCouponCode,
       iyzicoConvId: conversationId,
       shippingSnapshot: input.shipping as unknown as Prisma.InputJsonValue,
       items: { createMany: { data: lines } },
     },
     include: { items: true },
   });
+
+  // Record coupon use and increment usage counter atomically
+  if (couponId && appliedCouponCode) {
+    await prisma.$transaction([
+      prisma.couponUse.create({
+        data: { couponId, userId: input.userId, orderId: order.id },
+      }),
+      prisma.coupon.update({
+        where: { id: couponId },
+        data: { usageCount: { increment: 1 } },
+      }),
+    ]);
+  }
 
   return order;
 }

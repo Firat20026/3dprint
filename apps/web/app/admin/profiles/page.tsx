@@ -34,7 +34,7 @@ export default async function AdminProfilesPage() {
         <h1 className="font-display text-2xl uppercase tracking-tight">
           Baskı Profilleri
         </h1>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Slicing parametreleri — layer height, infill, support, hız. Aktif
           profiller pricing sayfasında ve cart'ta seçilebilir.
         </p>
@@ -46,7 +46,7 @@ export default async function AdminProfilesPage() {
         </h2>
         <form
           action={createProfile}
-          className="mt-4 grid gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 md:grid-cols-3"
+          className="mt-4 grid gap-4 rounded-xl border border-border bg-card p-6 md:grid-cols-3"
         >
           <div>
             <Label htmlFor="new-name">İsim</Label>
@@ -141,7 +141,7 @@ export default async function AdminProfilesPage() {
         </h2>
         <div className="space-y-3">
           {profiles.length === 0 && (
-            <p className="rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center text-sm text-[var(--color-text-muted)]">
+            <p className="rounded-xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
               Henüz profil yok.
             </p>
           )}
@@ -151,7 +151,7 @@ export default async function AdminProfilesPage() {
             return (
               <details
                 key={p.id}
-                className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]"
+                className="rounded-xl border border-border bg-card"
               >
                 <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 px-5 py-4">
                   <div className="flex items-center gap-3">
@@ -160,12 +160,12 @@ export default async function AdminProfilesPage() {
                     </span>
                     {p.isDefault && <Badge tone="brand">Varsayılan</Badge>}
                     {!p.isActive && (
-                      <span className="rounded-full bg-[var(--color-text-muted)]/15 px-2 py-0.5 text-xs text-[var(--color-text-muted)]">
+                      <span className="rounded-full bg-[var(--color-text-muted)]/15 px-2 py-0.5 text-xs text-muted-foreground">
                         Pasif
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>{p.layerHeightMm}mm</span>
                     <span>%{p.infillPercent} dolgu</span>
                     <span>{p.speedMmPerS}mm/s</span>
@@ -176,7 +176,7 @@ export default async function AdminProfilesPage() {
 
                 <form
                   action={updateProfile}
-                  className="grid gap-4 border-t border-[var(--color-border)] p-5 md:grid-cols-3"
+                  className="grid gap-4 border-t border-border p-5 md:grid-cols-3"
                 >
                   <input type="hidden" name="id" value={p.id} />
                   <div>

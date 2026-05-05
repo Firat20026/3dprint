@@ -36,19 +36,19 @@ export default function ErrorBoundary({
       <h2 className="font-display text-2xl uppercase tracking-tight">
         Bir şeyler ters gitti
       </h2>
-      <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+      <p className="mt-3 text-sm text-muted-foreground">
         Sayfa yüklenirken hata oluştu. Tekrar deneyebilirsin; sorun devam ederse
         ekibimize iletildi.
       </p>
       {error.digest && (
-        <p className="mt-2 text-xs text-[var(--color-text-subtle)]">
+        <p className="mt-2 text-xs text-muted-foreground/70">
           Referans: {error.digest}
         </p>
       )}
       <button
         type="button"
         onClick={() => reset()}
-        className="mt-6 inline-flex h-10 items-center rounded-[var(--radius-button)] bg-[var(--color-brand)] px-4 text-sm font-medium text-white transition-colors hover:bg-[var(--color-brand-2)]"
+        className="mt-6 inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-primary/90"
       >
         Tekrar dene
       </button>

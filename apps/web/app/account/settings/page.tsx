@@ -213,24 +213,24 @@ export default async function SettingsPage({
     <Container className="py-12 animate-fade-in">
       <p className="eyebrow">Hesap</p>
       <h1 className="mt-3 h-display text-4xl md:text-5xl">Ayarlar</h1>
-      <p className="mt-3 max-w-2xl text-sm text-[var(--color-text-muted)]">
+      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
         Profil bilgilerin (telefon, TCKN, adres) iyzico ödeme formuna otomatik
         gider. Eksiksiz olursa kart hatası riski azalır.
       </p>
 
       {okMsg && (
-        <div className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-success)]/40 bg-[var(--color-success)]/10 p-3 text-sm text-[var(--color-success)]">
+        <div className="mt-6 rounded-xl border border-[hsl(var(--success))]/40 bg-[hsl(var(--success))]/10 p-3 text-sm text-[hsl(var(--success))]">
           ✓ {okMsg}
         </div>
       )}
       {errMsg && (
-        <div className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 p-3 text-sm text-[var(--color-danger)]">
+        <div className="mt-6 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
           ✗ {errMsg}
         </div>
       )}
 
       {!profileComplete && (
-        <div className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/10 p-4 text-sm text-[var(--color-accent)]">
+        <div className="mt-6 rounded-xl border border-foreground/30/40 bg-foreground/10 p-4 text-sm text-muted-foreground">
           <strong>Profil eksik:</strong> Telefon ve TCKN doldurmadan iyzico
           gerçek modunda ödeme reddedilebilir. Sandbox modunda test eder gibi
           çalışır ama production öncesi tamamla.
@@ -238,11 +238,11 @@ export default async function SettingsPage({
       )}
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+        <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-display text-xl uppercase tracking-tight">
             Kişisel Bilgiler
           </h2>
-          <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+          <p className="mt-1 text-xs text-muted-foreground">
             E-posta: <code>{user.email}</code> (değiştirmek için destek)
           </p>
           <form action={updateProfile} className="mt-5 grid gap-4">
@@ -267,7 +267,7 @@ export default async function SettingsPage({
                 inputMode="tel"
                 className="mt-1.5"
               />
-              <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+              <p className="mt-1 text-xs text-muted-foreground/70">
                 Boşsa yazılmayacak. Otomatik +90 ön ekiyle normalize edilir.
               </p>
             </div>
@@ -282,7 +282,7 @@ export default async function SettingsPage({
                 maxLength={11}
                 className="mt-1.5"
               />
-              <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+              <p className="mt-1 text-xs text-muted-foreground/70">
                 iyzico production gereği. Sadece TR kart sahipleri için.
               </p>
             </div>
@@ -306,29 +306,29 @@ export default async function SettingsPage({
                 rows={2}
                 maxLength={240}
                 placeholder="İlçe, mahalle, sokak..."
-                className="mt-1.5 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+                className="mt-1.5 w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
               />
             </div>
 
             {/* Public designer fields — shown to everyone but only useful for
                 people who upload designs. We always render them so a user
                 can prep their profile before publishing the first design. */}
-            <div className="border-t border-[var(--color-border)] pt-4">
-              <p className="text-xs uppercase tracking-wider text-[var(--color-accent)]">
+            <div className="border-t border-border pt-4">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
                 Tasarımcı Profili (herkese açık)
               </p>
-              <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+              <p className="mt-1 text-xs text-muted-foreground/70">
                 Tasarımların yayındaysa{" "}
                 {hasPublishedDesign ? (
                   <Link
                     href={`/designers/${user.id}`}
                     target="_blank"
-                    className="text-[var(--color-brand-2)] hover:underline"
+                    className="font-medium text-foreground hover:underline"
                   >
                     /designers/{user.id.slice(0, 8)}…
                   </Link>
                 ) : (
-                  <span className="text-[var(--color-text-muted)]">
+                  <span className="text-muted-foreground">
                     /designers sayfanda
                   </span>
                 )}{" "}
@@ -344,9 +344,9 @@ export default async function SettingsPage({
                 rows={3}
                 maxLength={600}
                 placeholder="Kısa bir tanıtım — uzmanlık, hangi tarz tasarımlar yapıyorsun, vs."
-                className="mt-1.5 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+                className="mt-1.5 w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
               />
-              <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+              <p className="mt-1 text-xs text-muted-foreground/70">
                 En fazla 600 karakter.
               </p>
             </div>
@@ -371,11 +371,11 @@ export default async function SettingsPage({
           </form>
         </section>
 
-        <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+        <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-display text-xl uppercase tracking-tight">
             Şifre Değiştir
           </h2>
-          <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+          <p className="mt-1 text-xs text-muted-foreground">
             En az 8 karakter. Mevcut şifren olmadan değiştirilemez.
           </p>
           <form action={changePassword} className="mt-5 grid gap-4">
@@ -426,7 +426,7 @@ export default async function SettingsPage({
       <div className="mt-8 text-sm">
         <Link
           href="/account"
-          className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+          className="text-muted-foreground hover:text-foreground"
         >
           ← Hesap profiline dön
         </Link>

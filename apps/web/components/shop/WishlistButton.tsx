@@ -49,10 +49,10 @@ export function WishlistButton({ designId, initial, variant = "compact" }: Props
         aria-pressed={active}
         aria-label={active ? "Favorilerden çıkar" : "Favorilere ekle"}
         className={
-          "inline-flex h-10 items-center gap-2 rounded-[var(--radius-button)] border px-4 text-sm transition-colors disabled:opacity-50 " +
+          "inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm transition-colors disabled:opacity-50 " +
           (active
-            ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
-            : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:border-[var(--color-danger)]/40 hover:text-[var(--color-danger)]")
+            ? "border-destructive/40 bg-destructive/10 text-destructive"
+            : "border-border bg-card text-muted-foreground hover:border-destructive/40 hover:text-destructive")
         }
       >
         <Heart className="size-4" fill={active ? "currentColor" : "none"} />
@@ -71,7 +71,7 @@ export function WishlistButton({ designId, initial, variant = "compact" }: Props
       className={
         "inline-flex size-9 items-center justify-center rounded-full border backdrop-blur transition-colors disabled:opacity-50 " +
         (active
-          ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/15 text-[var(--color-danger)]"
+          ? "border-destructive/40 bg-destructive/15 text-destructive"
           : "border-white/30 bg-black/40 text-white hover:bg-black/55")
       }
     >

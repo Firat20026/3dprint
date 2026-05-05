@@ -44,7 +44,7 @@ export function PurchaseButton({
         {loading ? "Yönlendiriliyor…" : label}
       </Button>
       {error && (
-        <p className="text-xs text-[var(--color-danger)]">{error}</p>
+        <p className="text-xs text-destructive">{error}</p>
       )}
     </div>
   );

@@ -40,14 +40,14 @@ export default async function LoginPage({
 
   return (
     <div>
-      <h1 className="h-display text-3xl text-[var(--color-text)]">
+      <h1 className="h-display text-3xl text-foreground">
         Giriş Yap
       </h1>
-      <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
+      <p className="mt-1.5 text-sm text-muted-foreground">
         Hesabın yok mu?{" "}
         <Link
           href="/register"
-          className="text-[var(--color-brand-2)] hover:underline"
+          className="font-medium text-foreground hover:underline"
         >
           Üye ol
         </Link>
@@ -72,7 +72,7 @@ export default async function LoginPage({
             <Label htmlFor="password">Şifre</Label>
             <Link
               href="/forgot-password"
-              className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-brand-2)]"
+              className="text-xs text-muted-foreground hover:text-foreground"
             >
               Şifremi unuttum
             </Link>
@@ -89,12 +89,12 @@ export default async function LoginPage({
         </div>
 
         {params.error === "invalid" && (
-          <div className="rounded-[10px] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-3.5 py-2.5 text-xs text-[var(--color-danger)]">
+          <div className="rounded-[10px] border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive">
             Email veya şifre hatalı.
           </div>
         )}
         {params.reset === "ok" && (
-          <div className="rounded-[10px] border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 px-3.5 py-2.5 text-xs text-[var(--color-success)]">
+          <div className="rounded-[10px] border border-[hsl(var(--success))]/30 bg-[hsl(var(--success))]/10 px-3.5 py-2.5 text-xs text-[hsl(var(--success))]">
             ✓ Şifren güncellendi. Yeni şifrenle giriş yapabilirsin.
           </div>
         )}
@@ -106,10 +106,10 @@ export default async function LoginPage({
 
       {googleConfigured && (
         <>
-          <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-[var(--color-text-subtle)]">
-            <span className="h-px flex-1 bg-[var(--color-border)]" />
+          <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-muted-foreground/70">
+            <span className="h-px flex-1 bg-border" />
             veya
-            <span className="h-px flex-1 bg-[var(--color-border)]" />
+            <span className="h-px flex-1 bg-border" />
           </div>
           <form action={loginGoogle}>
             <input type="hidden" name="from" value={params.from ?? "/"} />

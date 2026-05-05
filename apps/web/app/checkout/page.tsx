@@ -18,7 +18,7 @@ export default async function CheckoutPage() {
         <h1 className="mt-3 h-display text-4xl md:text-5xl">
           Teslimat &amp; Ödeme
         </h1>
-        <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-3 text-sm text-muted-foreground">
           Türkiye içi kargo 2-4 iş günü. Ödeme iyzico üzerinden güvenli.
         </p>
       </div>

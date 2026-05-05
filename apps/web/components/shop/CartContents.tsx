@@ -21,17 +21,17 @@ export function CartContents() {
 
   if (!mounted) {
     return (
-      <div className="h-32 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]" />
+      <div className="h-32 rounded-xl border border-border bg-card" />
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-12 text-center">
+      <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
         <p className="font-display text-xl uppercase tracking-tight">
           Sepetin boş
         </p>
-        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-2 text-sm text-muted-foreground">
           Kataloğa bak ve bir tasarım seç.
         </p>
         <Link href="/designs" className="mt-5 inline-block">
@@ -58,30 +58,30 @@ export function CartContents() {
         ))}
       </ul>
 
-      <aside className="h-fit rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+      <aside className="h-fit rounded-xl border border-border bg-card p-6">
         <h2 className="font-display text-lg uppercase tracking-tight">Özet</h2>
         <dl className="mt-5 space-y-3 text-sm">
           <div className="flex justify-between">
-            <dt className="text-[var(--color-text-muted)]">Ara toplam</dt>
+            <dt className="text-muted-foreground">Ara toplam</dt>
             <dd className="font-medium">₺{subtotal.toFixed(2)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-[var(--color-text-muted)]">Kargo</dt>
+            <dt className="text-muted-foreground">Kargo</dt>
             <dd className="font-medium">
               {shipping === 0 ? (
-                <span className="text-[var(--color-success)]">Ücretsiz</span>
+                <span className="text-[hsl(var(--success))]">Ücretsiz</span>
               ) : (
                 `₺${shipping.toFixed(2)}`
               )}
             </dd>
           </div>
           {shipping > 0 && (
-            <p className="rounded-md bg-[var(--color-surface-2)] px-3 py-2 text-xs text-[var(--color-text-muted)]">
+            <p className="rounded-md bg-secondary px-3 py-2 text-xs text-muted-foreground">
               ₺{(FREE_SHIPPING_THRESHOLD_TRY - subtotal).toFixed(2)} daha
               ekle → kargo ücretsiz.
             </p>
           )}
-          <div className="flex justify-between border-t border-[var(--color-border)] pt-3 text-base">
+          <div className="flex justify-between border-t border-border pt-3 text-base">
             <dt className="uppercase tracking-wider">Toplam</dt>
             <dd className="font-display text-xl uppercase tracking-tight">
               ₺{total.toFixed(2)}
@@ -93,7 +93,7 @@ export function CartContents() {
             Ödemeye Geç
           </Button>
         </Link>
-        <p className="mt-3 text-center text-[10px] text-[var(--color-text-subtle)]">
+        <p className="mt-3 text-center text-[10px] text-muted-foreground/70">
           Ödeme iyzico ile güvenli alınır.
         </p>
       </aside>
@@ -112,8 +112,8 @@ function CartLine({
 }) {
   const thumbUrl = publicUrlFor(item.thumbnailUrl);
   return (
-    <li className="flex gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-      <div className="size-20 shrink-0 overflow-hidden rounded-[10px] bg-[var(--color-surface-2)]">
+    <li className="flex gap-4 rounded-xl border border-border bg-card p-4">
+      <div className="size-20 shrink-0 overflow-hidden rounded-[10px] bg-secondary">
         {thumbUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -130,7 +130,7 @@ function CartLine({
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="size-8 text-[var(--color-text-subtle)]"
+              className="size-8 text-muted-foreground/70"
               aria-hidden="true"
             >
               <path d="M12 2 4 6.5v11L12 22l8-4.5v-11L12 2Z" />
@@ -145,7 +145,7 @@ function CartLine({
             {item.kind === "design" ? (
               <Link
                 href={`/designs/${item.designSlug}`}
-                className="text-sm font-medium hover:text-[var(--color-brand-2)]"
+                className="text-sm font-medium hover:text-foreground"
               >
                 {item.title}
               </Link>
@@ -155,30 +155,30 @@ function CartLine({
             <button
               type="button"
               onClick={onRemove}
-              className="text-xs text-[var(--color-text-subtle)] hover:text-[var(--color-danger)]"
+              className="text-xs text-muted-foreground/70 hover:text-destructive"
             >
               Kaldır
             </button>
           </div>
-          <p className="mt-1 flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+          <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
             <span
               className="inline-block size-3 rounded-full border border-white/10"
               style={{ backgroundColor: item.materialColorHex }}
             />
             {item.materialName} · {item.profileName}
             {item.kind === "slice" && (
-              <span className="text-[var(--color-text-subtle)]">
+              <span className="text-muted-foreground/70">
                 · {item.filamentGrams.toFixed(1)}g
               </span>
             )}
           </p>
         </div>
         <div className="mt-3 flex items-end justify-between">
-          <div className="inline-flex items-center overflow-hidden rounded-[var(--radius-button)] border border-[var(--color-border)]">
+          <div className="inline-flex items-center overflow-hidden rounded-lg border border-border">
             <button
               type="button"
               onClick={() => onQuantity(item.quantity - 1)}
-              className="px-3 py-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+              className="px-3 py-1.5 text-muted-foreground hover:bg-secondary"
             >
               −
             </button>
@@ -186,7 +186,7 @@ function CartLine({
             <button
               type="button"
               onClick={() => onQuantity(item.quantity + 1)}
-              className="px-3 py-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+              className="px-3 py-1.5 text-muted-foreground hover:bg-secondary"
             >
               +
             </button>

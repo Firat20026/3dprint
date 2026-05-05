@@ -34,7 +34,7 @@ export async function ReviewSection({
     : [false, null];
 
   return (
-    <section className="mt-16 border-t border-[var(--color-border)] pt-10">
+    <section className="mt-16 border-t border-border pt-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">Yorumlar</p>
@@ -50,7 +50,7 @@ export async function ReviewSection({
               </span>
               <StarRating value={summary.average} size={18} hideCount />
             </div>
-            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+            <p className="mt-1 text-xs text-muted-foreground">
               {summary.count} değerlendirme
             </p>
           </div>
@@ -65,14 +65,14 @@ export async function ReviewSection({
             const pct = summary.count > 0 ? (count / summary.count) * 100 : 0;
             return (
               <div key={n} className="flex items-center gap-2 text-xs">
-                <span className="w-4 text-[var(--color-text-muted)]">{n}</span>
-                <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-surface-2)]">
+                <span className="w-4 text-muted-foreground">{n}</span>
+                <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
                   <span
                     className="block h-full rounded-full bg-[var(--color-warning,#f5b740)]"
                     style={{ width: `${pct}%` }}
                   />
                 </span>
-                <span className="w-8 text-right text-[var(--color-text-subtle)]">
+                <span className="w-8 text-right text-muted-foreground/70">
                   {count}
                 </span>
               </div>
@@ -99,11 +99,11 @@ export async function ReviewSection({
             }
           />
         ) : (
-          <div className="rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center text-sm text-[var(--color-text-muted)]">
+          <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
             Yorum yazmak için{" "}
             <Link
               href={`/login?next=/designs/${slug}`}
-              className="text-[var(--color-brand-2)] hover:underline"
+              className="font-medium text-foreground hover:underline"
             >
               giriş yap
             </Link>
@@ -115,7 +115,7 @@ export async function ReviewSection({
       {/* Review list */}
       <div className="mt-10 space-y-4">
         {reviews.length === 0 ? (
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <p className="text-sm text-muted-foreground">
             Henüz yorum yok. İlk yorumu sen yaz.
           </p>
         ) : (
@@ -125,16 +125,16 @@ export async function ReviewSection({
             return (
               <article
                 key={r.id}
-                className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+                className="rounded-xl border border-border bg-card p-5"
               >
                 <header className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2 text-sm">
-                      <span className="font-medium text-[var(--color-text)]">
+                      <span className="font-medium text-foreground">
                         {display}
                       </span>
                       {r.verifiedBuyer && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand)]/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-[var(--color-brand-2)]">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
                           <BadgeCheck className="size-3" />
                           Doğrulanmış
                         </span>
@@ -142,7 +142,7 @@ export async function ReviewSection({
                     </div>
                     <div className="mt-1 flex items-center gap-2">
                       <StarRating value={r.rating} size={13} hideCount />
-                      <span className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
                         {r.createdAt.toLocaleDateString("tr-TR")}
                       </span>
                     </div>
@@ -150,12 +150,12 @@ export async function ReviewSection({
                   {isOwn && <DeleteReviewButton reviewId={r.id} slug={slug} />}
                 </header>
                 {r.title && (
-                  <p className="mt-3 text-sm font-medium text-[var(--color-text)]">
+                  <p className="mt-3 text-sm font-medium text-foreground">
                     {r.title}
                   </p>
                 )}
                 {r.body && (
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {r.body}
                   </p>
                 )}

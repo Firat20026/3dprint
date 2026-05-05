@@ -71,9 +71,9 @@ export default async function AdminEarningsPage({
           <h2 className="font-display text-2xl uppercase tracking-tight">
             Tasarımcı Kazançları
           </h2>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-1 text-sm text-muted-foreground">
             Toplam {total} kayıt · Sayfa {page}/{totalPages} · Bekleyen ödeme:{" "}
-            <span className="font-medium text-[var(--color-text)]">
+            <span className="font-medium text-foreground">
               {TRY(pendingSum)}
             </span>
           </p>
@@ -92,8 +92,8 @@ export default async function AdminEarningsPage({
                 className={
                   "rounded-full border px-3 py-1 text-xs transition-colors " +
                   (active
-                    ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-text)]"
-                    : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]")
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground")
                 }
               >
                 {t.label}
@@ -104,11 +104,11 @@ export default async function AdminEarningsPage({
       </div>
 
       {rows.length === 0 ? (
-        <p className="text-sm text-[var(--color-text-muted)]">Kayıt yok.</p>
+        <p className="text-sm text-muted-foreground">Kayıt yok.</p>
       ) : (
-        <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface-2)] text-left text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-secondary text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">Tasarımcı</th>
                 <th className="px-4 py-3">Tasarım</th>
@@ -124,13 +124,13 @@ export default async function AdminEarningsPage({
               {rows.map((r) => (
                 <tr
                   key={r.id}
-                  className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                  className="border-t border-border bg-card"
                 >
                   <td className="px-4 py-3">
-                    <p className="text-[var(--color-text)]">
+                    <p className="text-foreground">
                       {r.designer.name ?? "—"}
                     </p>
-                    <p className="text-xs text-[var(--color-text-muted)]">
+                    <p className="text-xs text-muted-foreground">
                       {r.designer.email}
                     </p>
                   </td>
@@ -138,7 +138,7 @@ export default async function AdminEarningsPage({
                     <Link
                       href={`/designs/${r.design.slug}`}
                       target="_blank"
-                      className="hover:text-[var(--color-brand-2)]"
+                      className="hover:text-foreground"
                     >
                       {r.design.title}
                     </Link>
@@ -155,17 +155,17 @@ export default async function AdminEarningsPage({
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/orders/${r.order.id}`}
-                      className="font-mono text-xs hover:text-[var(--color-brand-2)]"
+                      className="font-mono text-xs hover:text-foreground"
                     >
                       #{r.order.id.slice(-8).toUpperCase()}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-xs text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
                     {r.createdAt.toLocaleDateString("tr-TR")}
                   </td>
                   <td className="px-4 py-3 text-right">
                     {r.status === "PAID_OUT" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand)]/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-[var(--color-brand-2)]">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
                         <CheckCircle2 className="size-3" />
                         Ödendi
                       </span>
@@ -185,18 +185,18 @@ export default async function AdminEarningsPage({
           {page > 1 && (
             <Link
               href={pageUrl(page - 1)}
-              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+              className="rounded-md border border-border px-3 py-1.5 hover:bg-secondary"
             >
               ← Önceki
             </Link>
           )}
-          <span className="text-[var(--color-text-muted)]">
+          <span className="text-muted-foreground">
             {page} / {totalPages}
           </span>
           {page < totalPages && (
             <Link
               href={pageUrl(page + 1)}
-              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+              className="rounded-md border border-border px-3 py-1.5 hover:bg-secondary"
             >
               Sonraki →
             </Link>

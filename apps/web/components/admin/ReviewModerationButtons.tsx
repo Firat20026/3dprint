@@ -45,7 +45,7 @@ export function ReviewModerationButtons({
         type="button"
         onClick={onRestore}
         disabled={pending}
-        className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-1.5 text-xs hover:border-[var(--color-brand)]/40 disabled:opacity-50"
+        className="inline-flex items-center gap-1 rounded-md border border-border bg-secondary px-3 py-1.5 text-xs hover:border-primary/40 disabled:opacity-50"
       >
         <RotateCcw className="size-3.5" />
         {pending ? "…" : "Geri Yayınla"}
@@ -58,7 +58,7 @@ export function ReviewModerationButtons({
       type="button"
       onClick={onHide}
       disabled={pending}
-      className="inline-flex items-center gap-1 rounded-md border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/5 px-3 py-1.5 text-xs text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 disabled:opacity-50"
+      className="inline-flex items-center gap-1 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/10 disabled:opacity-50"
     >
       <EyeOff className="size-3.5" />
       {pending ? "…" : "Gizle"}

@@ -24,7 +24,7 @@ type Material = {
 };
 
 const inputCls =
-  "w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-subtle)] focus:border-[var(--color-brand)] focus:outline-none";
+  "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none";
 
 export function MaterialRow({ m }: { m: Material }) {
   const [editing, setEditing] = useState(false);
@@ -114,10 +114,10 @@ export function MaterialRow({ m }: { m: Material }) {
   return (
     <>
       {/* Display row */}
-      <tr className="border-t border-[var(--color-border)] bg-[var(--color-surface)]">
+      <tr className="border-t border-border bg-card">
         <td className="px-4 py-3">
-          <div className="font-medium text-[var(--color-text)]">{m.name}</div>
-          <div className="mt-0.5 text-xs text-[var(--color-text-muted)]">{m.type}</div>
+          <div className="font-medium text-foreground">{m.name}</div>
+          <div className="mt-0.5 text-xs text-muted-foreground">{m.type}</div>
         </td>
         <td className="px-4 py-3">
           <div className="flex items-center gap-2">
@@ -125,13 +125,13 @@ export function MaterialRow({ m }: { m: Material }) {
               className="inline-block size-5 rounded border border-white/10"
               style={{ backgroundColor: m.colorHex }}
             />
-            <span className="font-mono text-xs text-[var(--color-text-muted)]">{m.colorHex}</span>
+            <span className="font-mono text-xs text-muted-foreground">{m.colorHex}</span>
           </div>
         </td>
-        <td className="px-4 py-3 text-[var(--color-text-muted)]">
+        <td className="px-4 py-3 text-muted-foreground">
           {Number(m.stockGrams).toFixed(0)}g
         </td>
-        <td className="px-4 py-3 text-[var(--color-text-muted)]">
+        <td className="px-4 py-3 text-muted-foreground">
           ₺{Number(m.pricePerGramTRY).toFixed(3)}
         </td>
         <td className="px-4 py-3">
@@ -141,8 +141,8 @@ export function MaterialRow({ m }: { m: Material }) {
             className={
               "rounded-full px-2 py-0.5 text-xs font-medium transition-opacity disabled:opacity-50 " +
               (m.isActive
-                ? "bg-[var(--color-success)]/15 text-[var(--color-success)]"
-                : "bg-[var(--color-border)] text-[var(--color-text-muted)]")
+                ? "bg-[hsl(var(--success))]/15 text-[hsl(var(--success))]"
+                : "bg-border text-muted-foreground")
             }
           >
             {toggling ? "…" : m.isActive ? "Aktif" : "Pasif"}
@@ -154,31 +154,31 @@ export function MaterialRow({ m }: { m: Material }) {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => { setEditing((v) => !v); setMsg(null); setConfirmDelete(false); }}
-                  className="text-xs text-[var(--color-brand-2)] hover:underline"
+                  className="text-xs font-medium text-foreground hover:underline"
                 >
                   {editing ? "Kapat" : "Düzenle"}
                 </button>
                 <button
                   onClick={() => setConfirmDelete(true)}
                   disabled={deleting}
-                  className="text-xs text-[var(--color-danger)] hover:underline disabled:opacity-50"
+                  className="text-xs text-destructive hover:underline disabled:opacity-50"
                 >
                   Sil
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-[var(--color-text-muted)]">Emin misin?</span>
+                <span className="text-[10px] text-muted-foreground">Emin misin?</span>
                 <button
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="rounded bg-[var(--color-danger)]/15 px-2 py-0.5 text-[10px] font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger)]/30 disabled:opacity-50"
+                  className="rounded bg-destructive/15 px-2 py-0.5 text-[10px] font-medium text-destructive hover:bg-destructive/30 disabled:opacity-50"
                 >
                   {deleting ? "…" : "Evet, sil"}
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
-                  className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  className="text-[10px] text-muted-foreground hover:text-foreground"
                 >
                   İptal
                 </button>
@@ -187,7 +187,7 @@ export function MaterialRow({ m }: { m: Material }) {
             {msg && (
               <div className={
                 "flex items-start gap-1 text-right text-[10px] max-w-[200px] " +
-                (msg.kind === "warn" ? "text-[var(--color-accent)]" : "text-[var(--color-danger)]")
+                (msg.kind === "warn" ? "text-muted-foreground" : "text-destructive")
               }>
                 <Info className="mt-0.5 size-3 shrink-0" />
                 <span>{msg.text}</span>
@@ -199,28 +199,28 @@ export function MaterialRow({ m }: { m: Material }) {
 
       {/* Inline edit row */}
       {editing && (
-        <tr className="border-t border-[var(--color-brand)]/30 bg-[color-mix(in_oklab,var(--color-brand)_4%,var(--color-surface))]">
+        <tr className="border-t border-primary/30 bg-[color-mix(in_oklab,var(--color-brand)_4%,var(--color-surface))]">
           <td colSpan={6} className="px-4 py-4">
             <form ref={formRef} onSubmit={handleUpdate}>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="lg:col-span-2">
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">İsim</label>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">İsim</label>
                   <input name="name" defaultValue={m.name} required className={inputCls} />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Tür</label>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">Tür</label>
                   <select name="type" defaultValue={m.type} className={inputCls}>
                     {MATERIAL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Renk</label>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">Renk</label>
                   <div className="flex gap-2">
                     <input
                       type="color"
                       value={colorHex}
                       onChange={(e) => setColorHex(e.target.value)}
-                      className="h-10 w-12 cursor-pointer rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface)] p-1"
+                      className="h-10 w-12 cursor-pointer rounded-lg border border-border bg-card p-1"
                     />
                     <input
                       value={colorHex}
@@ -231,23 +231,23 @@ export function MaterialRow({ m }: { m: Material }) {
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Stok (g)</label>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">Stok (g)</label>
                   <input name="stockGrams" type="number" step="1" min="0" defaultValue={m.stockGrams} className={inputCls} />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">₺ / gram</label>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">₺ / gram</label>
                   <input name="pricePerGramTRY" type="number" step="0.001" min="0" defaultValue={Number(m.pricePerGramTRY)} className={inputCls} />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Yoğunluk (g/cm³)</label>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">Yoğunluk (g/cm³)</label>
                   <input name="densityGcm3" type="number" step="0.01" min="0.1" defaultValue={m.densityGcm3} className={inputCls} />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Çap (mm)</label>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">Çap (mm)</label>
                   <input name="diameterMm" type="number" step="0.01" min="0.1" defaultValue={m.diameterMm} className={inputCls} />
                 </div>
                 <div className="sm:col-span-2 lg:col-span-4">
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Notlar</label>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">Notlar</label>
                   <input name="notes" defaultValue={m.notes ?? ""} placeholder="Tedarikçi, ek bilgi..." className={inputCls} />
                 </div>
               </div>
@@ -255,14 +255,14 @@ export function MaterialRow({ m }: { m: Material }) {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-[var(--radius-button)] bg-[var(--color-brand)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                   {saving ? "Kaydediliyor…" : "Kaydet"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="rounded-[var(--radius-button)] border border-[var(--color-border)] px-4 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
                 >
                   İptal
                 </button>

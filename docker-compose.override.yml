@@ -1,0 +1,18 @@
+# Local-dev override: publish DB/Redis ports to host so the web dev server
+# (running outside Docker, npm run dev) can reach them on localhost.
+# Auto-loaded by `docker compose up`. Ignore in production deploys.
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+  redis:
+    ports:
+      - "6379:6379"
+  worker:
+    # Web is run on the host (pnpm dev) during development, not in a sibling
+    # container — point Puppeteer at the host gateway so /render-internal/...
+    # resolves to localhost:3000 from inside the worker container.
+    environment:
+      WEB_INTERNAL_URL: http://host.docker.internal:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

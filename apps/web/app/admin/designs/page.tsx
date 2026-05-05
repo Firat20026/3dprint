@@ -238,9 +238,9 @@ export default async function AdminDesignsPage() {
           <h2 className="font-display text-xl uppercase tracking-tight">
             Onay Bekleyen Gönderimler ({pending.length})
           </h2>
-          <div className="mt-4 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-accent)]/30">
+          <div className="mt-4 overflow-hidden rounded-xl border border-foreground/30">
             <table className="w-full text-sm">
-              <thead className="bg-[color-mix(in_oklab,var(--color-accent)_10%,transparent)] text-xs uppercase tracking-wider text-[var(--color-accent)]">
+              <thead className="bg-[color-mix(in_oklab,var(--color-accent)_10%,transparent)] text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 text-left">Başlık</th>
                   <th className="px-4 py-3 text-left">Gönderen</th>
@@ -253,23 +253,23 @@ export default async function AdminDesignsPage() {
                 {pending.map((d) => (
                   <tr
                     key={d.id}
-                    className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                    className="border-t border-border bg-card"
                   >
                     <td className="px-4 py-3">
                       <div className="font-medium">{d.title}</div>
                       {d.description && (
-                        <div className="mt-1 line-clamp-1 text-xs text-[var(--color-text-muted)]">
+                        <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
                           {d.description}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {d.uploader?.name ?? d.uploader?.email ?? "—"}
                     </td>
-                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       %{d.basePriceMarkupPercent}
                     </td>
-                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {d.createdAt.toLocaleDateString("tr-TR")}
                     </td>
                     <td className="px-4 py-3">
@@ -277,7 +277,7 @@ export default async function AdminDesignsPage() {
                         <div className="flex gap-2">
                           <Link
                             href={`/admin/designs/${d.id}/review`}
-                            className="inline-flex h-9 items-center rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-xs text-[var(--color-text)] hover:bg-[var(--color-surface-3)]"
+                            className="inline-flex h-9 items-center rounded-lg border border-border bg-secondary px-3 text-xs text-foreground hover:bg-muted"
                           >
                             İncele
                           </Link>
@@ -289,7 +289,7 @@ export default async function AdminDesignsPage() {
                           </form>
                         </div>
                         <details className="text-xs">
-                          <summary className="cursor-pointer text-right text-[var(--color-danger)] hover:underline">
+                          <summary className="cursor-pointer text-right text-destructive hover:underline">
                             Hızlı reddet ↓
                           </summary>
                           <form
@@ -304,7 +304,7 @@ export default async function AdminDesignsPage() {
                               maxLength={500}
                               rows={2}
                               placeholder="Red sebebi (kullanıcı görecek)"
-                              className="w-64 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2 py-1 text-xs text-[var(--color-text)] focus:border-[var(--color-danger)] focus:outline-none"
+                              className="w-64 rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-foreground focus:border-destructive focus:outline-none"
                             />
                             <SubmitButton
                               size="sm"
@@ -332,7 +332,7 @@ export default async function AdminDesignsPage() {
         </h2>
         <form
           action={createDesign}
-          className="mt-4 grid gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 md:grid-cols-2"
+          className="mt-4 grid gap-4 rounded-xl border border-border bg-card p-6 md:grid-cols-2"
         >
           <div className="md:col-span-2">
             <Label htmlFor="title">Başlık</Label>
@@ -353,7 +353,7 @@ export default async function AdminDesignsPage() {
               name="description"
               rows={3}
               placeholder="Kısa tanıtım — boyut, kullanım, özel notlar"
-              className="mt-1.5 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-subtle)] focus:border-[var(--color-brand)] focus:outline-none"
+              className="mt-1.5 w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none"
             />
           </div>
           <div>
@@ -370,7 +370,7 @@ export default async function AdminDesignsPage() {
             <select
               id="profileId"
               name="profileId"
-              className="mt-1.5 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+              className="mt-1.5 w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
               defaultValue={
                 profiles.find((p) => p.isDefault)?.id ?? profiles[0]?.id
               }
@@ -390,7 +390,7 @@ export default async function AdminDesignsPage() {
               type="file"
               accept=".stl,.3mf,model/stl,model/3mf"
               required
-              className="mt-1.5 block w-full text-sm text-[var(--color-text-muted)] file:mr-3 file:rounded-md file:border-0 file:bg-[var(--color-brand)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-[var(--color-brand-2)]"
+              className="mt-1.5 block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary/90"
             />
           </div>
           <div>
@@ -400,7 +400,7 @@ export default async function AdminDesignsPage() {
               name="thumbnail"
               type="file"
               accept=".jpg,.jpeg,.png,.webp,image/*"
-              className="mt-1.5 block w-full text-sm text-[var(--color-text-muted)] file:mr-3 file:rounded-md file:border-0 file:bg-[var(--color-surface-2)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[var(--color-text)] hover:file:bg-[var(--color-border)]"
+              className="mt-1.5 block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-border"
             />
           </div>
           <label className="flex items-center gap-2 md:col-span-2">
@@ -408,9 +408,9 @@ export default async function AdminDesignsPage() {
               type="checkbox"
               name="publish"
               defaultChecked
-              className="size-4 rounded border-[var(--color-border)] bg-[var(--color-surface-2)] accent-[var(--color-brand)]"
+              className="size-4 rounded border-border bg-secondary accent-[var(--color-brand)]"
             />
-            <span className="text-sm text-[var(--color-text-muted)]">
+            <span className="text-sm text-muted-foreground">
               Yükledikten sonra doğrudan yayınla
             </span>
           </label>
@@ -428,9 +428,9 @@ export default async function AdminDesignsPage() {
             Tüm Tasarımlar ({designs.length})
           </h2>
         </div>
-        <div className="mt-4 overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="mt-4 overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 text-left">Başlık</th>
                 <th className="px-4 py-3 text-left">Kaynak</th>
@@ -446,7 +446,7 @@ export default async function AdminDesignsPage() {
                 <tr>
                   <td
                     colSpan={7}
-                    className="px-4 py-8 text-center text-[var(--color-text-muted)]"
+                    className="px-4 py-8 text-center text-muted-foreground"
                   >
                     Henüz tasarım yok. İlkini yukarıdaki formdan yükle.
                   </td>
@@ -455,40 +455,40 @@ export default async function AdminDesignsPage() {
               {designs.map((d) => (
                 <tr
                   key={d.id}
-                  className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                  className="border-t border-border bg-card"
                 >
-                  <td className="px-4 py-3 font-medium text-[var(--color-text)]">
+                  <td className="px-4 py-3 font-medium text-foreground">
                     {d.title}
                   </td>
-                  <td className="px-4 py-3 text-xs text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
                     {d.source === "USER_MARKETPLACE"
                       ? "Kullanıcı"
                       : d.source === "MESHY"
                         ? "AI"
                         : "Admin"}
                   </td>
-                  <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {d.category ?? "—"}
                   </td>
                   <td className="px-4 py-3">
                     <span
                       className={
                         d.status === "PUBLISHED"
-                          ? "rounded-full bg-[var(--color-success)]/15 px-2 py-0.5 text-xs text-[var(--color-success)]"
+                          ? "rounded-full bg-[hsl(var(--success))]/15 px-2 py-0.5 text-xs text-[hsl(var(--success))]"
                           : d.status === "PENDING_REVIEW"
-                            ? "rounded-full bg-[var(--color-accent)]/15 px-2 py-0.5 text-xs text-[var(--color-accent)]"
+                            ? "rounded-full bg-foreground/15 px-2 py-0.5 text-xs text-muted-foreground"
                             : d.status === "REJECTED"
-                              ? "rounded-full bg-[var(--color-danger)]/15 px-2 py-0.5 text-xs text-[var(--color-danger)]"
-                              : "rounded-full bg-[var(--color-text-muted)]/15 px-2 py-0.5 text-xs text-[var(--color-text-muted)]"
+                              ? "rounded-full bg-destructive/15 px-2 py-0.5 text-xs text-destructive"
+                              : "rounded-full bg-[var(--color-text-muted)]/15 px-2 py-0.5 text-xs text-muted-foreground"
                       }
                     >
                       {d.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {d.defaultProfile?.name ?? "—"}
                   </td>
-                  <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {d.createdAt.toLocaleDateString("tr-TR")}
                   </td>
                   <td className="px-4 py-3">
@@ -504,7 +504,7 @@ export default async function AdminDesignsPage() {
                           </form>
                           <Link
                             href={`/designs/${d.slug}`}
-                            className="inline-flex h-9 items-center rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-sm text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-3)]"
+                            className="inline-flex h-9 items-center rounded-lg border border-border bg-secondary px-3 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-muted"
                           >
                             Görüntüle
                           </Link>
@@ -520,7 +520,7 @@ export default async function AdminDesignsPage() {
                         </form>
                       )}
                       {d.status === "PENDING_REVIEW" && (
-                        <span className="text-xs text-[var(--color-text-subtle)]">
+                        <span className="text-xs text-muted-foreground/70">
                           İncelemede
                         </span>
                       )}

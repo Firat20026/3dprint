@@ -1,5 +1,4 @@
 import { Container } from "@/components/ui/container";
-import { Card, CardBody } from "@/components/ui/card";
 import { SectionHeader } from "@/components/site/HowItWorks";
 import { Reveal } from "@/components/site/Reveal";
 import {
@@ -46,35 +45,30 @@ const features = [
 
 export function Features() {
   return (
-    <section className="relative py-24">
+    <section className="relative py-20 md:py-28">
       <Container>
         <SectionHeader
           eyebrow="Öne Çıkan"
-          title="Profesyonel hassasiyet, kullanıcı dostu akış."
+          title="Profesyonel hassasiyet, sade akış."
           subtitle="Bir tıkla anlık fiyat, dilersen detaylı kontrol. Profesyonel slicer'ın gücü, e-ticaret rahatlığı."
         />
-        <Reveal className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" stagger>
+        <Reveal className="mt-14 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3" stagger>
           {features.map((f) => (
-            <Card
+            <div
               key={f.title}
-              className="group hover-lift relative overflow-hidden hover:border-[var(--color-brand)]/40"
+              className="bg-card p-7 transition-colors"
             >
-              <CardBody>
-                <div className="inline-flex size-11 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-brand-2)] transition-all duration-300 group-hover:scale-110 group-hover:border-[var(--color-brand)]/60 group-hover:bg-[color-mix(in_oklab,var(--color-brand)_12%,var(--color-surface-2))]">
-                  <f.icon className="size-5" />
-                </div>
-                <h3 className="mt-5 text-lg font-semibold tracking-tight text-[var(--color-text)]">
-                  {f.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
-                  {f.body}
-                </p>
-              </CardBody>
-            </Card>
+              <f.icon className="size-5 text-muted-foreground" strokeWidth={1.5} />
+              <h3 className="mt-6 text-base font-semibold tracking-tight text-foreground">
+                {f.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {f.body}
+              </p>
+            </div>
           ))}
         </Reveal>
       </Container>
     </section>
   );
 }
-

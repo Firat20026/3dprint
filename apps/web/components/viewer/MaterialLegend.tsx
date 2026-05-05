@@ -25,7 +25,7 @@ export function MaterialLegend({
   if (materials.length === 0) return null;
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+    <div className="rounded-xl border border-border bg-card p-4">
       <p className="eyebrow">Materyaller</p>
       <ul className="mt-3 space-y-1.5">
         {materials.map((m) => {
@@ -36,10 +36,10 @@ export function MaterialLegend({
                 type="button"
                 onClick={() => onToggle(m.index)}
                 className={
-                  "flex w-full items-center justify-between gap-2 rounded-[var(--radius-button)] border px-2.5 py-1.5 text-left text-xs transition-colors " +
+                  "flex w-full items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-left text-xs transition-colors " +
                   (isVisible
-                    ? "border-[var(--color-border)] bg-[var(--color-surface-2)] hover:border-[var(--color-brand)]/40"
-                    : "border-transparent text-[var(--color-text-subtle)] line-through opacity-60 hover:opacity-100")
+                    ? "border-border bg-secondary hover:border-primary/40"
+                    : "border-transparent text-muted-foreground/70 line-through opacity-60 hover:opacity-100")
                 }
               >
                 <span className="flex items-center gap-2">
@@ -47,11 +47,11 @@ export function MaterialLegend({
                     className="inline-block size-3.5 rounded-full border border-white/20"
                     style={{ backgroundColor: m.colorHex }}
                   />
-                  <span className="font-medium text-[var(--color-text)]">
+                  <span className="font-medium text-foreground">
                     {m.name}
                   </span>
                 </span>
-                <span className="font-mono text-[10px] text-[var(--color-text-muted)]">
+                <span className="font-mono text-[10px] text-muted-foreground">
                   E{m.extruderId}
                 </span>
               </button>

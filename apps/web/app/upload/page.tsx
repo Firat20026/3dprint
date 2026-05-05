@@ -58,7 +58,7 @@ export default async function UploadPage({
         <h1 className="mt-3 h-display text-4xl md:text-5xl">
           {meshySeed ? meshySeed.title : "STL/3MF yükle, basalım"}
         </h1>
-        <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-3 text-sm text-muted-foreground">
           {meshySeed
             ? "AI'ın ürettiği model dilimleniyor — materyal ve kaliteyi seç, fiyat çıkınca sepete ekle."
             : "Dosyanı bırak, materyal ve kaliteyi seç. Slicer gramaj ve süreyi hesaplar, TRY fiyat saniyeler içinde çıkar."}
@@ -66,7 +66,7 @@ export default async function UploadPage({
       </div>
 
       {materials.length === 0 ? (
-        <div className="rounded-[var(--radius-card)] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 p-6 text-sm text-[var(--color-danger)]">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-sm text-destructive">
           Stokta aktif materyal bulunmuyor — admin stok eklemeden yükleme yapılamaz.
         </div>
       ) : (

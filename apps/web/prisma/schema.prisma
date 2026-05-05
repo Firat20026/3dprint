@@ -421,7 +421,9 @@ model Order {
   iyzicoConvId      String?     @unique // conversation id
   subtotalTRY       Decimal     @db.Decimal(10, 2)
   shippingTRY       Decimal     @db.Decimal(10, 2)
+  discountTRY       Decimal     @db.Decimal(10, 2) @default(0)
   totalTRY          Decimal     @db.Decimal(10, 2)
+  couponCode        String?     // snapshot of code used (immutable audit trail)
   shippingAddressId String?
   shippingSnapshot  Json
   cargoTrackingNo   String?
@@ -439,6 +441,7 @@ model Order {
   shippingAddress ShippingAddress? @relation(fields: [shippingAddressId], references: [id])
   items           OrderItem[]
   designerEarnings DesignerEarning[]
+  couponUse       CouponUse?
 
   @@index([userId, status])
   @@index([status, createdAt])
@@ -565,6 +568,50 @@ model MeshyJob {
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId, status])
+}
+
+// =====================================================
+// Coupons / promo codes
+// =====================================================
+
+enum DiscountType {
+  PERCENT // discountValue = % off (e.g. 10 = 10%)
+  FIXED   // discountValue = ₺ off (e.g. 25 = ₺25)
+}
+
+model Coupon {
+  id              String       @id @default(cuid())
+  code            String       @unique // "WELCOME10" — stored uppercase
+  description     String?              // admin label
+  discountType    DiscountType
+  discountValue   Decimal      @db.Decimal(10, 2)
+  minOrderTRY     Decimal?     @db.Decimal(10, 2) // minimum cart subtotal before applying
+  maxUsageTotal   Int?                            // null = unlimited global uses
+  maxUsagePerUser Int          @default(1)        // 1 = single-use per account
+  usageCount      Int          @default(0)        // denormalized for fast admin display
+  isActive        Boolean      @default(true)
+  expiresAt       DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  uses CouponUse[]
+
+  @@index([code])
+  @@index([isActive, expiresAt])
+}
+
+model CouponUse {
+  id        String   @id @default(cuid())
+  couponId  String
+  userId    String
+  orderId   String   @unique // one redemption per order
+  createdAt DateTime @default(now())
+
+  coupon Coupon @relation(fields: [couponId], references: [id])
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([couponId])
+  @@index([userId, couponId]) // fast "has user used this coupon?" check
 }
 
 // =====================================================

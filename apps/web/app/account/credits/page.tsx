@@ -55,26 +55,26 @@ export default async function CreditsPage({
         <h1 className="h-display text-4xl md:text-5xl">
           Krediler
         </h1>
-        <nav className="hidden gap-4 text-sm text-[var(--color-text-muted)] md:flex">
-          <Link href="/account/orders" className="hover:text-[var(--color-text)]">
+        <nav className="hidden gap-4 text-sm text-muted-foreground md:flex">
+          <Link href="/account/orders" className="hover:text-foreground">
             Siparişler
           </Link>
-          <Link href="/account/credits" className="text-[var(--color-text)]">
+          <Link href="/account/credits" className="text-foreground">
             Krediler
           </Link>
-          <Link href="/account/my-designs" className="hover:text-[var(--color-text)]">
+          <Link href="/account/my-designs" className="hover:text-foreground">
             Tasarımlar
           </Link>
         </nav>
       </div>
 
       {sp.purchased && (
-        <div className="mt-8 rounded-[var(--radius-card)] border border-[color-mix(in_oklab,var(--color-success)_40%,transparent)] bg-[color-mix(in_oklab,var(--color-success)_10%,transparent)] p-5 text-sm text-[var(--color-success)]">
+        <div className="mt-8 rounded-xl border border-[color-mix(in_oklab,var(--color-success)_40%,transparent)] bg-[color-mix(in_oklab,var(--color-success)_10%,transparent)] p-5 text-sm text-[hsl(var(--success))]">
           Kredileriniz hesabınıza yüklendi. Artık AI üretim için kullanabilirsiniz.
         </div>
       )}
       {sp.error && (
-        <div className="mt-8 rounded-[var(--radius-card)] border border-[color-mix(in_oklab,var(--color-danger)_40%,transparent)] bg-[color-mix(in_oklab,var(--color-danger)_10%,transparent)] p-5 text-sm text-[var(--color-danger)]">
+        <div className="mt-8 rounded-xl border border-[color-mix(in_oklab,var(--color-danger)_40%,transparent)] bg-[color-mix(in_oklab,var(--color-danger)_10%,transparent)] p-5 text-sm text-destructive">
           Ödeme tamamlanamadı:{" "}
           {sp.error === "declined"
             ? "ödeme reddedildi."
@@ -88,19 +88,19 @@ export default async function CreditsPage({
       <Card className="mt-10">
         <CardBody className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">
               Bakiye
             </p>
             <p className="mt-2 font-display text-6xl uppercase tracking-tight">
               {balance}
-              <span className="ml-3 align-middle text-lg text-[var(--color-text-muted)]">
+              <span className="ml-3 align-middle text-lg text-muted-foreground">
                 kredi
               </span>
             </p>
           </div>
           <Link
             href="/ai"
-            className="inline-flex items-center gap-2 self-start rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-5 py-3 text-sm text-[var(--color-text)] transition-colors hover:border-[var(--color-brand)]/40 sm:self-auto"
+            className="inline-flex items-center gap-2 self-start rounded-lg border border-border bg-secondary px-5 py-3 text-sm text-foreground transition-colors hover:border-primary/40 sm:self-auto"
           >
             AI ile model üret →
           </Link>
@@ -115,22 +115,22 @@ export default async function CreditsPage({
         {packs.map((p) => {
           const perCredit = Number(p.priceTRY) / p.credits;
           return (
-            <Card key={p.id} className="hover-lift flex flex-col hover:border-[var(--color-brand)]/40">
+            <Card key={p.id} className="hover-lift flex flex-col hover:border-primary/40">
               <CardBody className="flex flex-1 flex-col">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-[var(--color-text-muted)]">{p.name}</p>
+                  <p className="text-sm text-muted-foreground">{p.name}</p>
                   {p.badge && <Badge tone="accent">{p.badge}</Badge>}
                 </div>
                 <p className="mt-3 font-display text-4xl uppercase tracking-tight">
                   {p.credits}
-                  <span className="ml-2 text-sm text-[var(--color-text-muted)]">
+                  <span className="ml-2 text-sm text-muted-foreground">
                     kredi
                   </span>
                 </p>
                 <p className="mt-4 text-3xl font-semibold">
                   ₺{Number(p.priceTRY).toFixed(2)}
                 </p>
-                <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                <p className="mt-1 text-xs text-muted-foreground">
                   kredi başına ₺{perCredit.toFixed(2)}
                 </p>
                 <div className="mt-auto">
@@ -147,14 +147,14 @@ export default async function CreditsPage({
         Kredi Hareketleri
       </h2>
       {ledger.length === 0 ? (
-        <div className="mt-6 rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-10 text-center text-sm text-[var(--color-text-muted)]">
+        <div className="mt-6 rounded-xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
           Henüz hareket yok.
         </div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--color-border)] text-left text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+              <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <th className="px-5 py-3">Tarih</th>
                 <th className="px-5 py-3">İşlem</th>
                 <th className="px-5 py-3">Not</th>
@@ -165,22 +165,22 @@ export default async function CreditsPage({
               {ledger.map((l) => (
                 <tr
                   key={l.id}
-                  className="border-b border-[var(--color-border)]/60 last:border-0"
+                  className="border-b border-border/60 last:border-0"
                 >
-                  <td className="px-5 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-5 py-3 text-muted-foreground">
                     {new Date(l.createdAt).toLocaleString("tr-TR")}
                   </td>
                   <td className="px-5 py-3">
                     {LEDGER_LABELS[l.reason] ?? l.reason}
                   </td>
-                  <td className="px-5 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-5 py-3 text-muted-foreground">
                     {l.note ?? "—"}
                   </td>
                   <td
                     className={`px-5 py-3 text-right font-mono ${
                       l.delta >= 0
-                        ? "text-[var(--color-success)]"
-                        : "text-[var(--color-danger)]"
+                        ? "text-[hsl(var(--success))]"
+                        : "text-destructive"
                     }`}
                   >
                     {l.delta >= 0 ? "+" : ""}

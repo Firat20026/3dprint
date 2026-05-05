@@ -134,11 +134,11 @@ export function AddToCartForm({
         <div>
           <p
             id="atc-plate-label"
-            className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]"
+            className="text-xs uppercase tracking-wider text-muted-foreground"
           >
             Plate Seçimi
           </p>
-          <p className="mt-1 text-[10px] text-[var(--color-text-subtle)]">
+          <p className="mt-1 text-[10px] text-muted-foreground/70">
             Bu tasarım {plateCount} plate'ten oluşuyor. Tek plate seç veya
             hepsini birden ayrı satır olarak ekle.
           </p>
@@ -167,7 +167,7 @@ export function AddToCartForm({
       <div>
         <p
           id="atc-material-label"
-          className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]"
+          className="text-xs uppercase tracking-wider text-muted-foreground"
         >
           Materyal
         </p>
@@ -189,8 +189,8 @@ export function AddToCartForm({
                 className={
                   "flex items-center gap-2 rounded-[10px] border px-3 py-2 text-left text-xs transition-colors " +
                   (checked
-                    ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-text)]"
-                    : "border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:border-[var(--color-border)]/80 hover:text-[var(--color-text)]")
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-border bg-secondary text-muted-foreground hover:border-border/80 hover:text-foreground")
                 }
               >
                 <span
@@ -208,7 +208,7 @@ export function AddToCartForm({
       <div>
         <p
           id="atc-profile-label"
-          className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]"
+          className="text-xs uppercase tracking-wider text-muted-foreground"
         >
           Baskı Kalitesi
         </p>
@@ -230,12 +230,12 @@ export function AddToCartForm({
                 className={
                   "rounded-[10px] border px-3 py-2.5 text-left text-xs transition-colors " +
                   (checked
-                    ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10"
-                    : "border-[var(--color-border)] bg-[var(--color-surface-2)] hover:border-[var(--color-border)]/80")
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-secondary hover:border-border/80")
                 }
               >
-                <p className="font-medium text-[var(--color-text)]">{p.name}</p>
-                <p className="mt-0.5 text-[10px] text-[var(--color-text-muted)]">
+                <p className="font-medium text-foreground">{p.name}</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">
                   {p.layerHeightMm}mm · %{p.infillPercent}
                 </p>
               </button>
@@ -248,7 +248,7 @@ export function AddToCartForm({
         <div>
           <p
             id="atc-qty-label"
-            className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]"
+            className="text-xs uppercase tracking-wider text-muted-foreground"
           >
             Adet
           </p>
@@ -258,13 +258,13 @@ export function AddToCartForm({
             aria-valuemin={1}
             aria-valuemax={20}
             aria-valuenow={quantity}
-            className="mt-2 inline-flex items-center overflow-hidden rounded-[var(--radius-button)] border border-[var(--color-border)]"
+            className="mt-2 inline-flex items-center overflow-hidden rounded-lg border border-border"
           >
             <button
               type="button"
               aria-label="Adeti azalt"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="px-3 py-2 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+              className="px-3 py-2 text-muted-foreground hover:bg-secondary"
             >
               −
             </button>
@@ -275,20 +275,20 @@ export function AddToCartForm({
               type="button"
               aria-label="Adeti artır"
               onClick={() => setQuantity(Math.min(20, quantity + 1))}
-              className="px-3 py-2 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
+              className="px-3 py-2 text-muted-foreground hover:bg-secondary"
             >
               +
             </button>
           </div>
         </div>
         <div className="flex-1">
-          <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">
             Tahmini fiyat
           </p>
-          <p className="mt-2 font-display text-2xl uppercase tracking-tight text-[var(--color-text)]">
+          <p className="mt-2 font-display text-2xl uppercase tracking-tight text-foreground">
             ₺{previewTotal.toFixed(2)}
           </p>
-          <p className="text-[10px] text-[var(--color-text-subtle)]">
+          <p className="text-[10px] text-muted-foreground/70">
             {platesToAdd > 1
               ? `${platesToAdd} plate × ₺${estimatedUnitPrice.toFixed(2)} (kalite: tahmini)`
               : "Kesin fiyat slicing sonrası netleşir"}
@@ -338,8 +338,8 @@ function PlateChip({
       className={
         "rounded-full border px-3 py-1 text-xs transition-colors " +
         (active
-          ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-brand-2)]"
-          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-brand)]/40 hover:text-[var(--color-text)]")
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground")
       }
     >
       {label}

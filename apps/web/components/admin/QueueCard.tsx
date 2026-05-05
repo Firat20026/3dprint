@@ -61,22 +61,22 @@ export function QueueCard({
   }
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)]">
+    <div className="overflow-hidden rounded-lg border border-border bg-secondary">
       {/* Card body — links to detail page */}
       <Link
         href={`/admin/orders/${orderId}`}
-        className="block p-3 transition-colors hover:bg-[var(--color-surface)]"
+        className="block p-3 transition-colors hover:bg-card"
       >
         <div className="flex items-center justify-between gap-2">
-          <p className="font-mono text-[10px] text-[var(--color-text-muted)]">
+          <p className="font-mono text-[10px] text-muted-foreground">
             #{orderId.slice(-8).toUpperCase()}
           </p>
           <OrderStatusBadge status={status} />
         </div>
-        <p className="mt-1.5 text-sm font-medium text-[var(--color-text)]">
+        <p className="mt-1.5 text-sm font-medium text-foreground">
           {customerName ?? "—"}
         </p>
-        <ul className="mt-2 space-y-1 text-xs text-[var(--color-text-muted)]">
+        <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
           {items.slice(0, 3).map((it) => {
             const snap = (it.snapshot ?? {}) as Snap;
             return (
@@ -92,7 +92,7 @@ export function QueueCard({
             );
           })}
           {items.length > 3 && (
-            <li className="text-[var(--color-text-subtle)]">+{items.length - 3} daha</li>
+            <li className="text-muted-foreground/70">+{items.length - 3} daha</li>
           )}
         </ul>
         <p className="mt-2 font-display text-sm uppercase tracking-tight">
@@ -102,33 +102,33 @@ export function QueueCard({
 
       {/* Action area */}
       {transition && (
-        <div className="border-t border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-2">
+        <div className="border-t border-border bg-card p-3 space-y-2">
           {needsCargo && (
             <>
               <input
                 placeholder="Kargo firması (opsiyonel)"
                 value={carrier}
                 onChange={(e) => setCarrier(e.target.value)}
-                className="w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-xs text-[var(--color-text)] placeholder:text-[var(--color-text-subtle)] focus:border-[var(--color-brand)] focus:outline-none"
+                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none"
               />
               <input
                 placeholder="Takip no *"
                 value={trackingNo}
                 onChange={(e) => setTrackingNo(e.target.value)}
-                className="w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-xs text-[var(--color-text)] placeholder:text-[var(--color-text-subtle)] focus:border-[var(--color-brand)] focus:outline-none"
+                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none"
               />
             </>
           )}
           <button
             onClick={advance}
             disabled={pending}
-            className="flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-button)] bg-[var(--color-brand)] px-3 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {pending ? "İşleniyor…" : transition.label}
             {!pending && <ArrowRight className="size-3" />}
           </button>
           {error && (
-            <p className="text-[10px] text-[var(--color-danger)]">{error}</p>
+            <p className="text-[10px] text-destructive">{error}</p>
           )}
         </div>
       )}

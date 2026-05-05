@@ -34,7 +34,7 @@ export default async function PricingPage() {
       <h1 className="mt-3 h-display text-4xl md:text-5xl">
         Şeffaf fiyat, sürpriz yok.
       </h1>
-      <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--color-text-muted)]">
+      <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
         Slicer gerçek gram ve süreyi hesaplar, biz bunun üstüne sabit formülü
         uygularız. Her siparişte kırılımı görürsün.
       </p>
@@ -42,7 +42,7 @@ export default async function PricingPage() {
       {/* Formula */}
       <section className="mt-12">
         <div className="flex items-center gap-2">
-          <Calculator className="size-5 text-[var(--color-brand-2)]" />
+          <Calculator className="size-5 text-primary" />
           <h2 className="font-display text-2xl tracking-tight">
             Baskı Fiyat Formülü
           </h2>
@@ -50,27 +50,27 @@ export default async function PricingPage() {
         <div className="mt-6 grid gap-5 lg:grid-cols-[1.4fr_1fr]">
           <Card>
             <CardBody className="font-mono text-sm leading-relaxed">
-              <div className="text-[var(--color-text-muted)]">
+              <div className="text-muted-foreground">
                 materyal ={" "}
-                <span className="text-[var(--color-text)]">gram × ₺/gram</span>
+                <span className="text-foreground">gram × ₺/gram</span>
               </div>
-              <div className="mt-1 text-[var(--color-text-muted)]">
+              <div className="mt-1 text-muted-foreground">
                 süre ={" "}
-                <span className="text-[var(--color-text)]">
+                <span className="text-foreground">
                   saat × ₺{settings.machineCostPerHourTRY}
                 </span>
               </div>
-              <div className="mt-1 text-[var(--color-text-muted)]">
+              <div className="mt-1 text-muted-foreground">
                 kurulum ={" "}
-                <span className="text-[var(--color-text)]">
+                <span className="text-foreground">
                   ₺{settings.setupFeeTRY}
                 </span>
               </div>
-              <div className="mt-3 border-t border-[var(--color-border)] pt-3 text-[var(--color-text-muted)]">
+              <div className="mt-3 border-t border-border pt-3 text-muted-foreground">
                 ara = materyal + süre + kurulum
               </div>
-              <div className="mt-1 text-[var(--color-text)]">
-                <span className="text-[var(--color-brand-2)]">birim fiyat</span>{" "}
+              <div className="mt-1 text-foreground">
+                <span className="text-primary">birim fiyat</span>{" "}
                 = ara × (1 + %{settings.marginPercent})
               </div>
             </CardBody>
@@ -78,17 +78,17 @@ export default async function PricingPage() {
           <Card>
             <CardBody>
               <div className="flex items-start gap-3">
-                <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] text-[var(--color-brand-2)]">
+                <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] text-primary">
                   <Truck className="size-5" />
                 </span>
                 <div>
-                  <p className="font-semibold text-[var(--color-text)]">
+                  <p className="font-semibold text-foreground">
                     Kargo ₺{settings.shippingFlatTRY}
                   </p>
-                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Türkiye geneli sabit. ₺
                     {settings.freeShippingThresholdTRY} üzeri siparişlerde{" "}
-                    <span className="text-[var(--color-success)]">
+                    <span className="text-[hsl(var(--success))]">
                       ücretsiz
                     </span>
                     .
@@ -103,7 +103,7 @@ export default async function PricingPage() {
       {/* Example calc */}
       <section className="mt-14">
         <h2 className="font-display text-2xl tracking-tight">Örnek Hesap</h2>
-        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-2 text-sm text-muted-foreground">
           35g PLA Siyah · 2 sa 36 dk baskı · Standart profil
         </p>
         <Card className="mt-5">
@@ -117,31 +117,31 @@ export default async function PricingPage() {
               const sub = material + time + settings.setupFeeTRY;
               const unit = sub * (1 + settings.marginPercent / 100);
               return (
-                <dl className="divide-y divide-[var(--color-border)] text-sm">
+                <dl className="divide-y divide-border text-sm">
                   <div className="flex items-center justify-between py-2.5">
-                    <dt className="text-[var(--color-text-muted)]">
+                    <dt className="text-muted-foreground">
                       Materyal (35g × ₺{pricePerGram})
                     </dt>
                     <dd className="font-mono">₺{material.toFixed(2)}</dd>
                   </div>
                   <div className="flex items-center justify-between py-2.5">
-                    <dt className="text-[var(--color-text-muted)]">
+                    <dt className="text-muted-foreground">
                       Süre (2.6 sa × ₺{settings.machineCostPerHourTRY})
                     </dt>
                     <dd className="font-mono">₺{time.toFixed(2)}</dd>
                   </div>
                   <div className="flex items-center justify-between py-2.5">
-                    <dt className="text-[var(--color-text-muted)]">Kurulum</dt>
+                    <dt className="text-muted-foreground">Kurulum</dt>
                     <dd className="font-mono">
                       ₺{settings.setupFeeTRY.toFixed(2)}
                     </dd>
                   </div>
-                  <div className="flex items-center justify-between py-2.5 text-[var(--color-text-subtle)]">
+                  <div className="flex items-center justify-between py-2.5 text-muted-foreground/70">
                     <dt>Ara toplam</dt>
                     <dd className="font-mono">₺{sub.toFixed(2)}</dd>
                   </div>
                   <div className="flex items-center justify-between py-2.5">
-                    <dt className="text-[var(--color-text-muted)]">
+                    <dt className="text-muted-foreground">
                       Kâr marjı (%{settings.marginPercent})
                     </dt>
                     <dd className="font-mono">
@@ -150,7 +150,7 @@ export default async function PricingPage() {
                   </div>
                   <div className="flex items-center justify-between py-3">
                     <dt className="h-display text-base">Birim fiyat</dt>
-                    <dd className="h-display text-2xl text-[var(--color-brand-2)]">
+                    <dd className="h-display text-2xl text-primary">
                       ₺{unit.toFixed(2)}
                     </dd>
                   </div>
@@ -164,19 +164,19 @@ export default async function PricingPage() {
       {/* Materials */}
       <section className="mt-14">
         <div className="flex items-center gap-2">
-          <Package className="size-5 text-[var(--color-brand-2)]" />
+          <Package className="size-5 text-primary" />
           <h2 className="font-display text-2xl tracking-tight">
             Materyal Fiyatları
           </h2>
         </div>
         {materials.length === 0 ? (
-          <p className="mt-4 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-4 text-sm text-muted-foreground">
             Henüz aktif materyal yok.
           </p>
         ) : (
-          <div className="mt-6 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)]">
+          <div className="mt-6 overflow-hidden rounded-xl border border-border">
             <table className="w-full text-sm">
-              <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+              <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 text-left">Materyal</th>
                   <th className="px-4 py-3 text-left">Tür</th>
@@ -188,14 +188,14 @@ export default async function PricingPage() {
                 {materials.map((m) => (
                   <tr
                     key={m.id}
-                    className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                    className="border-t border-border bg-card"
                   >
                     <td className="px-4 py-3 font-medium">{m.name}</td>
-                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {m.type}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                      <span className="flex items-center gap-2 text-muted-foreground">
                         <span
                           className="inline-block size-3.5 rounded-full border border-white/10"
                           style={{ background: m.colorHex }}
@@ -219,18 +219,18 @@ export default async function PricingPage() {
       {/* Credit packs */}
       <section className="mt-14">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-5 text-[var(--color-brand-2)]" />
+          <Sparkles className="size-5 text-primary" />
           <h2 className="font-display text-2xl tracking-tight">
             AI Kredi Paketleri
           </h2>
         </div>
-        <p className="mt-2 max-w-xl text-sm text-[var(--color-text-muted)]">
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
           Meshy AI ile metinden {settings.meshyTextCost} kredi, görselden{" "}
           {settings.meshyImageCost} kredi. Üretilen model direkt baskı pipeline&apos;ına
           girer.
         </p>
         {packs.length === 0 ? (
-          <p className="mt-4 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-4 text-sm text-muted-foreground">
             Şu an aktif paket yok.
           </p>
         ) : (
@@ -240,25 +240,25 @@ export default async function PricingPage() {
               return (
                 <Card
                   key={p.id}
-                  className="hover-lift flex flex-col hover:border-[var(--color-brand)]/40"
+                  className="hover-lift flex flex-col hover:border-primary/40"
                 >
                   <CardBody className="flex flex-1 flex-col">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-[var(--color-text-muted)]">
+                      <p className="text-sm text-muted-foreground">
                         {p.name}
                       </p>
                       {p.badge && <Badge tone="accent">{p.badge}</Badge>}
                     </div>
                     <p className="mt-3 h-display text-4xl">
                       {p.credits}
-                      <span className="ml-2 text-sm text-[var(--color-text-muted)]">
+                      <span className="ml-2 text-sm text-muted-foreground">
                         kredi
                       </span>
                     </p>
                     <p className="mt-4 text-3xl font-semibold">
                       ₺{Number(p.priceTRY).toFixed(2)}
                     </p>
-                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       kredi başına ₺{perCredit.toFixed(2)}
                     </p>
                     <div className="mt-auto pt-5">
@@ -278,9 +278,9 @@ export default async function PricingPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="mt-14 rounded-[var(--radius-card)] border border-[var(--color-brand)]/30 bg-gradient-to-br from-[#0e1832] via-[var(--color-surface)] to-[var(--color-surface)] p-8 text-center">
+      <section className="mt-14 rounded-xl border border-border bg-card p-10 text-center">
         <h3 className="h-display text-3xl">Dene, canlı fiyat gör.</h3>
-        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-2 text-sm text-muted-foreground">
           Dosyanı yükle, 30 saniye içinde kesin fiyatı ekranda görürsün.
         </p>
         <div className="mt-6 flex justify-center gap-3">

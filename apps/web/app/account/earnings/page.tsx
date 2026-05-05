@@ -34,11 +34,11 @@ export default async function EarningsPage() {
     <Container className="py-12 animate-fade-in">
       <p className="eyebrow">Hesap</p>
       <h1 className="mt-3 h-display text-4xl md:text-5xl">Kazançlarım</h1>
-      <p className="mt-3 max-w-2xl text-sm text-[var(--color-text-muted)]">
+      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
         Yüklediğin tasarımlardan elde ettiğin gelirler. Ödeme talimatın için{" "}
         <Link
           href="/account/settings"
-          className="text-[var(--color-brand-2)] hover:underline"
+          className="font-medium text-foreground hover:underline"
         >
           profilini güncelle
         </Link>{" "}
@@ -46,16 +46,16 @@ export default async function EarningsPage() {
       </p>
 
       {!hasDesigns ? (
-        <div className="mt-10 rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-10 text-center">
+        <div className="mt-10 rounded-xl border border-dashed border-border bg-card p-10 text-center">
           <p className="font-display text-xl uppercase tracking-tight">
             Henüz tasarım yüklemedin
           </p>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-2 text-sm text-muted-foreground">
             Tasarım yükle, biri satın aldığında payın otomatik biriksin.
           </p>
           <Link
             href="/account/my-designs"
-            className="mt-5 inline-flex h-10 items-center rounded-[var(--radius-button)] bg-[var(--color-brand)] px-4 text-sm font-medium text-white hover:bg-[var(--color-brand-2)]"
+            className="mt-5 inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary/90"
           >
             Tasarımlarıma Git →
           </Link>
@@ -93,14 +93,14 @@ export default async function EarningsPage() {
               Son Satışlar
             </h2>
             {rows.length === 0 ? (
-              <p className="text-sm text-[var(--color-text-muted)]">
+              <p className="text-sm text-muted-foreground">
                 Henüz satış yok. Tasarımın yayınlandığında ve sipariş alındığında
                 burada görünecek.
               </p>
             ) : (
-              <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+              <div className="overflow-hidden overflow-x-auto rounded-xl border border-border">
                 <table className="w-full text-sm">
-                  <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+                  <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-4 py-3 text-left">Tasarım</th>
                       <th className="px-4 py-3 text-right">Adet</th>
@@ -115,12 +115,12 @@ export default async function EarningsPage() {
                     {rows.map((r) => (
                       <tr
                         key={r.id}
-                        className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                        className="border-t border-border bg-card"
                       >
                         <td className="px-4 py-3">
                           <Link
                             href={`/designs/${r.design.slug}`}
-                            className="hover:text-[var(--color-brand-2)]"
+                            className="hover:text-foreground"
                             target="_blank"
                           >
                             {r.design.title}
@@ -140,7 +140,7 @@ export default async function EarningsPage() {
                         </td>
                         <td className="px-4 py-3">
                           {r.status === "PAID_OUT" ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand)]/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-[var(--color-brand-2)]">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
                               <CheckCircle2 className="size-3" />
                               Ödendi
                             </span>
@@ -150,7 +150,7 @@ export default async function EarningsPage() {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-xs text-[var(--color-text-muted)]">
+                        <td className="px-4 py-3 text-xs text-muted-foreground">
                           {r.createdAt.toLocaleDateString("tr-TR")}
                         </td>
                       </tr>
@@ -181,21 +181,21 @@ function SummaryCard({
 }) {
   const ring =
     tone === "brand"
-      ? "border-[var(--color-brand)]/30 bg-[var(--color-brand)]/5"
+      ? "border-primary/30 bg-primary/5"
       : tone === "accent"
-        ? "border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5"
-        : "border-[var(--color-border)] bg-[var(--color-surface)]";
+        ? "border-foreground/30 bg-foreground/5"
+        : "border-border bg-card";
   return (
-    <div className={`rounded-[var(--radius-card)] border p-5 ${ring}`}>
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+    <div className={`rounded-xl border p-5 ${ring}`}>
+      <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
         {icon}
         <span>{label}</span>
       </div>
-      <p className="mt-3 font-display text-3xl text-[var(--color-text)]">
+      <p className="mt-3 font-display text-3xl text-foreground">
         {value}
       </p>
       {hint && (
-        <p className="mt-1 text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+        <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground/70">
           {hint}
         </p>
       )}

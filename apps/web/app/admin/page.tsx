@@ -75,15 +75,15 @@ export default async function AdminDashboard() {
         {statCards.map((s) => (
           <div
             key={s.label}
-            className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+            className="rounded-xl border border-border bg-card p-5"
           >
             <div className="flex items-start justify-between">
-              <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
                 {s.label}
               </p>
               <s.Icon
                 size={16}
-                className="text-[var(--color-text-subtle)] shrink-0"
+                className="text-muted-foreground/70 shrink-0"
               />
             </div>
             <p className="mt-2 font-display text-3xl uppercase">{s.value}</p>
@@ -97,7 +97,7 @@ export default async function AdminDashboard() {
           {pendingDesignsCount > 0 && (
             <Link
               href="/admin/designs"
-              className="flex-1 rounded-[var(--radius-card)] border border-amber-500/30 bg-amber-500/10 px-5 py-4 transition-colors hover:bg-amber-500/20"
+              className="flex-1 rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 py-4 transition-colors hover:bg-amber-500/20"
             >
               <p className="text-sm font-medium text-amber-400">
                 {pendingDesignsCount} tasarım onay bekliyor
@@ -110,12 +110,12 @@ export default async function AdminDashboard() {
           {lowStockMaterials.length > 0 && (
             <Link
               href="/admin/materials"
-              className="flex-1 rounded-[var(--radius-card)] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-5 py-4 transition-colors hover:bg-[var(--color-danger)]/20"
+              className="flex-1 rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4 transition-colors hover:bg-destructive/20"
             >
-              <p className="text-sm font-medium text-[var(--color-danger)]">
+              <p className="text-sm font-medium text-destructive">
                 Düşük stok uyarısı ({lowStockMaterials.length} materyal)
               </p>
-              <p className="mt-1 text-xs text-[var(--color-danger)]/70">
+              <p className="mt-1 text-xs text-destructive/70">
                 {lowStockMaterials.map((m) => m.name).join(", ")}
               </p>
             </Link>
@@ -128,9 +128,9 @@ export default async function AdminDashboard() {
         <h2 className="font-display text-xl uppercase tracking-tight">
           Son Siparişler
         </h2>
-        <div className="mt-4 overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="mt-4 overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 text-left">Sipariş ID</th>
                 <th className="px-4 py-3 text-left">Müşteri</th>
@@ -145,7 +145,7 @@ export default async function AdminDashboard() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-4 py-8 text-center text-[var(--color-text-muted)]"
+                    className="px-4 py-8 text-center text-muted-foreground"
                   >
                     Henüz sipariş yok.
                   </td>
@@ -154,34 +154,34 @@ export default async function AdminDashboard() {
               {recentOrders.map((o) => (
                 <tr
                   key={o.id}
-                  className="border-t border-[var(--color-border)] bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface-2)]"
+                  className="border-t border-border bg-card transition-colors hover:bg-secondary"
                 >
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/orders/${o.id}`}
-                      className="font-mono text-xs text-[var(--color-brand-2)] hover:underline"
+                      className="font-mono text-xs font-medium text-foreground hover:underline"
                     >
                       #{o.id.slice(-8).toUpperCase()}
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="font-medium text-[var(--color-text)]">
+                    <div className="font-medium text-foreground">
                       {o.user.name ?? "—"}
                     </div>
-                    <div className="text-xs text-[var(--color-text-muted)]">
+                    <div className="text-xs text-muted-foreground">
                       {o.user.email}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {o._count.items}
                   </td>
-                  <td className="px-4 py-3 font-medium text-[var(--color-text)]">
+                  <td className="px-4 py-3 font-medium text-foreground">
                     ₺{Number(o.totalTRY).toFixed(2)}
                   </td>
                   <td className="px-4 py-3">
                     <OrderStatusBadge status={o.status} />
                   </td>
-                  <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {o.createdAt.toLocaleDateString("tr-TR")}
                   </td>
                 </tr>

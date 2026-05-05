@@ -78,20 +78,20 @@ export default async function AccountPage() {
     <Container className="py-12 animate-fade-in">
       <p className="eyebrow">Hesap</p>
       <h1 className="mt-3 h-display text-4xl md:text-5xl">Profil</h1>
-      <p className="mt-3 max-w-2xl text-sm text-[var(--color-text-muted)]">
+      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
         Bilgilerini güncelle, siparişlerini ve kredilerini tek yerden takip et.
       </p>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         {/* Profile card */}
-        <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+        <section className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-4">
             <span className="inline-flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-brand)] to-[#1d4ed8] text-xl font-semibold text-white">
               {initial}
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h2 className="truncate text-lg font-semibold text-[var(--color-text)]">
+                <h2 className="truncate text-lg font-semibold text-foreground">
                   {user.name ?? user.email.split("@")[0]}
                 </h2>
                 {user.role === "ADMIN" && (
@@ -101,11 +101,11 @@ export default async function AccountPage() {
                   </Badge>
                 )}
               </div>
-              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
+              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Mail className="size-3" />
                 {user.email}
               </p>
-              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--color-text-subtle)]">
+              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground/70">
                 <CalendarDays className="size-3" />
                 {joined} tarihinde katıldı
               </p>
@@ -114,7 +114,7 @@ export default async function AccountPage() {
 
           <form
             action={updateProfile}
-            className="mt-6 grid gap-4 border-t border-[var(--color-border)] pt-6"
+            className="mt-6 grid gap-4 border-t border-border pt-6"
           >
             <div>
               <Label htmlFor="name">Görünen Ad</Label>
@@ -126,7 +126,7 @@ export default async function AccountPage() {
                 placeholder="Örn. Fırat"
                 className="mt-1.5"
               />
-              <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+              <p className="mt-1 text-xs text-muted-foreground/70">
                 Siparişlerde ve yorumlarında bu ad görünür.
               </p>
             </div>
@@ -140,7 +140,7 @@ export default async function AccountPage() {
                 readOnly
                 className="mt-1.5 cursor-not-allowed opacity-70"
               />
-              <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+              <p className="mt-1 text-xs text-muted-foreground/70">
                 E-postanı değiştirmek için destekle iletişime geç.
               </p>
             </div>
@@ -148,7 +148,7 @@ export default async function AccountPage() {
               <SubmitButton pendingLabel="Kaydediliyor...">Kaydet</SubmitButton>
               <Link
                 href="/account/settings"
-                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-brand-2)] hover:underline"
+                className="text-xs text-muted-foreground hover:font-medium text-foreground hover:underline"
               >
                 Detaylı ayarlar (telefon, TCKN, adres, şifre) →
               </Link>
@@ -158,21 +158,21 @@ export default async function AccountPage() {
 
         {/* Stats + quick links */}
         <aside className="flex flex-col gap-5">
-          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+          <div className="rounded-xl border border-border bg-card p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="eyebrow">Kredi Bakiyesi</p>
-                <p className="mt-2 font-display text-4xl text-[var(--color-text)]">
+                <p className="mt-2 font-display text-4xl text-foreground">
                   {user.credits}
                 </p>
               </div>
-              <span className="inline-flex size-11 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] text-[var(--color-brand-2)]">
+              <span className="inline-flex size-11 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] text-primary">
                 <Sparkles className="size-5" />
               </span>
             </div>
             <Link
               href="/account/credits"
-              className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-brand-2)] hover:underline"
+              className="mt-4 inline-flex items-center gap-1 text-xs font-medium font-medium text-foreground hover:underline"
             >
               Kredi satın al →
             </Link>
@@ -181,66 +181,66 @@ export default async function AccountPage() {
           <div className="grid grid-cols-3 gap-3">
             <Link
               href="/account/orders"
-              className="group hover-lift rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 hover:border-[var(--color-brand)]/40"
+              className="group hover-lift rounded-xl border border-border bg-card p-4 hover:border-primary/40"
             >
-              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-[var(--color-surface-2)] text-[var(--color-brand-2)] transition-transform duration-300 group-hover:scale-110">
+              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-secondary text-primary transition-transform duration-300 group-hover:scale-110">
                 <Package className="size-4" />
               </span>
-              <p className="mt-3 font-display text-2xl text-[var(--color-text)]">
+              <p className="mt-3 font-display text-2xl text-foreground">
                 {orderCount}
               </p>
-              <p className="text-xs text-[var(--color-text-muted)]">Siparişim</p>
+              <p className="text-xs text-muted-foreground">Siparişim</p>
             </Link>
             <Link
               href="/account/my-designs"
-              className="group hover-lift rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 hover:border-[var(--color-brand)]/40"
+              className="group hover-lift rounded-xl border border-border bg-card p-4 hover:border-primary/40"
             >
-              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-[var(--color-surface-2)] text-[var(--color-brand-2)] transition-transform duration-300 group-hover:scale-110">
+              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-secondary text-primary transition-transform duration-300 group-hover:scale-110">
                 <Upload className="size-4" />
               </span>
-              <p className="mt-3 font-display text-2xl text-[var(--color-text)]">
+              <p className="mt-3 font-display text-2xl text-foreground">
                 {designCount}
               </p>
-              <p className="text-xs text-[var(--color-text-muted)]">Tasarımım</p>
+              <p className="text-xs text-muted-foreground">Tasarımım</p>
             </Link>
             <Link
               href="/account/wishlist"
-              className="group hover-lift rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 hover:border-[var(--color-danger)]/40"
+              className="group hover-lift rounded-xl border border-border bg-card p-4 hover:border-destructive/40"
             >
-              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-[var(--color-surface-2)] text-[var(--color-danger)] transition-transform duration-300 group-hover:scale-110">
+              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-secondary text-destructive transition-transform duration-300 group-hover:scale-110">
                 <Heart className="size-4" />
               </span>
-              <p className="mt-3 font-display text-2xl text-[var(--color-text)]">
+              <p className="mt-3 font-display text-2xl text-foreground">
                 {wishlistCount}
               </p>
-              <p className="text-xs text-[var(--color-text-muted)]">Favori</p>
+              <p className="text-xs text-muted-foreground">Favori</p>
             </Link>
           </div>
 
           {earningsSummary && (
             <Link
               href="/account/earnings"
-              className="group hover-lift rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 hover:border-[var(--color-brand)]/40"
+              className="group hover-lift rounded-xl border border-border bg-card p-5 hover:border-primary/40"
             >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="eyebrow">Bekleyen Kazanç</p>
-                  <p className="mt-2 font-display text-3xl text-[var(--color-text)]">
+                  <p className="mt-2 font-display text-3xl text-foreground">
                     {earningsSummary.pendingTRY.toLocaleString("tr-TR", {
                       style: "currency",
                       currency: "TRY",
                       maximumFractionDigits: 2,
                     })}
                   </p>
-                  <p className="mt-1 text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground/70">
                     {earningsSummary.pendingCount} satış · ödeme bekliyor
                   </p>
                 </div>
-                <span className="inline-flex size-11 items-center justify-center rounded-full bg-[var(--color-brand)]/10 text-[var(--color-brand-2)] transition-transform duration-300 group-hover:scale-110">
+                <span className="inline-flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
                   <Wallet className="size-5" />
                 </span>
               </div>
-              <span className="mt-3 inline-flex text-xs font-medium text-[var(--color-brand-2)] hover:underline">
+              <span className="mt-3 inline-flex text-xs font-medium font-medium text-foreground hover:underline">
                 Tüm kazançları gör →
               </span>
             </Link>

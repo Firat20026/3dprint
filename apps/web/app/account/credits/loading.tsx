@@ -14,7 +14,7 @@ export default function Loading() {
         ))}
       </div>
       <Skeleton className="mt-14 h-8 w-56" />
-      <div className="mt-6 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
         <table className="w-full">
           <tbody>
             {Array.from({ length: 4 }).map((_, i) => (

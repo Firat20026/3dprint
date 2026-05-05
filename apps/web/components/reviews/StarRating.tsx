@@ -24,7 +24,7 @@ export function StarRating({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-[var(--color-text-muted)] ${className}`}
+      className={`inline-flex items-center gap-1.5 text-muted-foreground ${className}`}
       role="img"
       aria-label={`${clamped.toFixed(1)} / 5 yıldız${count ? `, ${count} değerlendirme` : ""}`}
     >
@@ -62,7 +62,7 @@ export function StarRating({
         <span className="text-xs">
           {count > 0 ? clamped.toFixed(1) : "—"}
           {count > 0 && (
-            <span className="ml-1 text-[var(--color-text-subtle)]">({count})</span>
+            <span className="ml-1 text-muted-foreground/70">({count})</span>
           )}
         </span>
       )}

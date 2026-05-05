@@ -12,6 +12,7 @@ const sections = [
   { href: "/admin/users", label: "Kullanıcılar" },
   { href: "/admin/materials", label: "Materyaller" },
   { href: "/admin/profiles", label: "Baskı Profilleri" },
+  { href: "/admin/coupons", label: "Kuponlar" },
   { href: "/admin/observability", label: "Olaylar & Hatalar" },
   { href: "/admin/settings", label: "Ayarlar" },
 ];
@@ -19,7 +20,7 @@ const sections = [
 export function AdminNav() {
   const pathname = usePathname();
   return (
-    <nav className="mb-8 flex flex-wrap gap-2 border-b border-[var(--color-border)] pb-3">
+    <nav className="mb-8 flex flex-wrap gap-2 border-b border-border pb-3">
       {sections.map((s) => {
         // exact match for dashboard, startsWith for others
         const active =
@@ -33,8 +34,8 @@ export function AdminNav() {
             className={
               "rounded-md px-3 py-1.5 text-sm transition-colors " +
               (active
-                ? "bg-[var(--color-brand)]/10 text-[var(--color-brand-2)] font-medium"
-                : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]")
+                ? "bg-foreground text-background font-medium"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground")
             }
           >
             {s.label}

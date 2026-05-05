@@ -45,17 +45,24 @@ export function CheckoutFlow({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Coupon state
+  const [couponInput, setCouponInput] = useState("");
+  const [couponStatus, setCouponStatus] = useState<"idle" | "checking" | "applied" | "invalid">("idle");
+  const [couponMessage, setCouponMessage] = useState("");
+  const [discountTRY, setDiscountTRY] = useState(0);
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+
   if (!mounted) {
     return (
-      <div className="h-64 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]" />
+      <div className="h-64 rounded-xl border border-border bg-card" />
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-12 text-center">
+      <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
         <p className="font-display text-xl uppercase tracking-tight">Sepet boş</p>
-        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-2 text-sm text-muted-foreground">
           Ödemeye geçmeden önce sepete ürün ekle.
         </p>
       </div>
@@ -63,7 +70,7 @@ export function CheckoutFlow({
   }
 
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD_TRY ? 0 : SHIPPING_FLAT_TRY;
-  const total = subtotal + shipping;
+  const total = Math.max(subtotal + shipping - discountTRY, 0);
 
   const requiredFields: FieldKey[] = [
     "fullName", "phone", "email", "city", "district", "address",
@@ -102,6 +109,7 @@ export function CheckoutFlow({
           };
         }),
         shipping: form,
+        couponCode: appliedCode ?? undefined,
       };
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -123,6 +131,43 @@ export function CheckoutFlow({
 
   function setField(k: FieldKey, v: string) {
     setForm((prev) => ({ ...prev, [k]: v }));
+  }
+
+  async function applyCoupon() {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    setCouponStatus("checking");
+    setCouponMessage("");
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code, subtotalTRY: subtotal }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCouponStatus("applied");
+        setCouponMessage(data.message ?? "İndirim uygulandı");
+        setDiscountTRY(data.discountTRY ?? 0);
+        setAppliedCode(code);
+      } else {
+        setCouponStatus("invalid");
+        setCouponMessage(data.message ?? "Geçersiz kupon");
+        setDiscountTRY(0);
+        setAppliedCode(null);
+      }
+    } catch {
+      setCouponStatus("invalid");
+      setCouponMessage("Kupon kontrol edilemedi.");
+    }
+  }
+
+  function removeCoupon() {
+    setCouponInput("");
+    setCouponStatus("idle");
+    setCouponMessage("");
+    setDiscountTRY(0);
+    setAppliedCode(null);
   }
 
   return (
@@ -170,42 +215,96 @@ export function CheckoutFlow({
             onChange={(v) => setField("notes", v)}
           />
         </Section>
+
+        <Section title="Kupon Kodu">
+          {couponStatus === "applied" ? (
+            <div className="flex items-center justify-between rounded-lg border border-[hsl(var(--success))]/40 bg-[hsl(var(--success))]/10 px-3 py-2.5 text-sm">
+              <span className="font-mono font-medium text-[hsl(var(--success))]">
+                {appliedCode}
+              </span>
+              <span className="text-xs text-[hsl(var(--success))]">{couponMessage}</span>
+              <button
+                type="button"
+                onClick={removeCoupon}
+                className="ml-3 text-xs text-muted-foreground hover:text-destructive"
+              >
+                Kaldır ✕
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="KUPONKODU"
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyCoupon())}
+                className="flex-1 rounded-lg border border-border bg-secondary px-3 py-2.5 text-sm font-mono uppercase tracking-widest text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={applyCoupon}
+                disabled={couponStatus === "checking" || !couponInput.trim()}
+              >
+                {couponStatus === "checking" ? "…" : "Uygula"}
+              </Button>
+            </div>
+          )}
+          {couponStatus === "invalid" && couponMessage && (
+            <p className="mt-1.5 text-xs text-destructive">{couponMessage}</p>
+          )}
+        </Section>
       </div>
 
-      <aside className="h-fit rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+      <aside className="h-fit rounded-xl border border-border bg-card p-6">
         <h2 className="font-display text-lg uppercase tracking-tight">Özet</h2>
         <ul className="mt-4 space-y-3 text-sm">
           {items.map((i) => (
-            <li key={i.id} className="flex justify-between gap-3 text-[var(--color-text-muted)]">
+            <li key={i.id} className="flex justify-between gap-3 text-muted-foreground">
               <span className="min-w-0">
-                <span className="block truncate text-[var(--color-text)]">{i.title}</span>
+                <span className="block truncate text-foreground">{i.title}</span>
                 <span className="text-[10px] uppercase tracking-wider">
                   {i.materialName} · {i.profileName} · ×{i.quantity}
                 </span>
               </span>
-              <span className="font-medium text-[var(--color-text)]">
+              <span className="font-medium text-foreground">
                 ₺{(i.unitPriceTRY * i.quantity).toFixed(2)}
               </span>
             </li>
           ))}
         </ul>
 
-        <dl className="mt-5 space-y-2 border-t border-[var(--color-border)] pt-4 text-sm">
+        <dl className="mt-5 space-y-2 border-t border-border pt-4 text-sm">
           <div className="flex justify-between">
-            <dt className="text-[var(--color-text-muted)]">Ara toplam</dt>
+            <dt className="text-muted-foreground">Ara toplam</dt>
             <dd className="font-medium">₺{subtotal.toFixed(2)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-[var(--color-text-muted)]">Kargo</dt>
+            <dt className="text-muted-foreground">Kargo</dt>
             <dd className="font-medium">
               {shipping === 0 ? (
-                <span className="text-[var(--color-success)]">Ücretsiz</span>
+                <span className="text-[hsl(var(--success))]">Ücretsiz</span>
               ) : (
                 `₺${shipping.toFixed(2)}`
               )}
             </dd>
           </div>
-          <div className="flex justify-between border-t border-[var(--color-border)] pt-3 text-base">
+          {discountTRY > 0 && (
+            <div className="flex justify-between text-[hsl(var(--success))]">
+              <dt className="flex items-center gap-1">
+                <span>İndirim</span>
+                {appliedCode && (
+                  <span className="rounded-full bg-[hsl(var(--success))]/15 px-1.5 py-0.5 text-[10px] font-mono">
+                    {appliedCode}
+                  </span>
+                )}
+              </dt>
+              <dd className="font-medium">−₺{discountTRY.toFixed(2)}</dd>
+            </div>
+          )}
+          <div className="flex justify-between border-t border-border pt-3 text-base">
             <dt className="uppercase tracking-wider">Toplam</dt>
             <dd className="font-display text-xl uppercase tracking-tight">
               ₺{total.toFixed(2)}
@@ -214,7 +313,7 @@ export function CheckoutFlow({
         </dl>
 
         {error && (
-          <div className="mt-4 rounded-[var(--radius-card)] border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 p-3 text-xs text-[var(--color-danger)]">
+          <div className="mt-4 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
             {error}
           </div>
         )}
@@ -227,7 +326,7 @@ export function CheckoutFlow({
         >
           {submitting ? "Yönlendiriliyor…" : `₺${total.toFixed(2)} Öde`}
         </Button>
-        <p className="mt-3 text-center text-[10px] text-[var(--color-text-subtle)]">
+        <p className="mt-3 text-center text-[10px] text-muted-foreground/70">
           iyzico güvenli ödeme sayfasına yönlendirileceksin
         </p>
       </aside>
@@ -237,8 +336,8 @@ export function CheckoutFlow({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-      <h3 className="font-display text-sm uppercase tracking-wider text-[var(--color-text-muted)]">
+    <div className="rounded-xl border border-border bg-card p-5">
+      <h3 className="font-display text-sm uppercase tracking-wider text-muted-foreground">
         {title}
       </h3>
       <div className="mt-4">{children}</div>
@@ -264,12 +363,12 @@ function TextField({
   multiline?: boolean;
 }) {
   const common =
-    "w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-subtle)] focus:border-[var(--color-brand)] focus:outline-none";
+    "w-full rounded-lg border border-border bg-secondary px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none";
   return (
     <label className="block">
       {label && (
-        <span className="mb-1.5 block text-[11px] uppercase tracking-wider text-[var(--color-text-muted)]">
-          {label} {required && <span className="text-[var(--color-accent)]">*</span>}
+        <span className="mb-1.5 block text-[11px] uppercase tracking-wider text-muted-foreground">
+          {label} {required && <span className="text-muted-foreground">*</span>}
         </span>
       )}
       {multiline ? (
@@ -309,13 +408,13 @@ function SelectField({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[11px] uppercase tracking-wider text-[var(--color-text-muted)]">
-        {label} {required && <span className="text-[var(--color-accent)]">*</span>}
+      <span className="mb-1.5 block text-[11px] uppercase tracking-wider text-muted-foreground">
+        {label} {required && <span className="text-muted-foreground">*</span>}
       </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2.5 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+        className="w-full rounded-lg border border-border bg-secondary px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none"
       >
         {options.map((o) => (
           <option key={o} value={o}>

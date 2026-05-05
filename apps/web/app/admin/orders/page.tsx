@@ -67,7 +67,7 @@ export default async function AdminOrdersPage({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-[var(--color-text-muted)]">
+        <p className="text-sm text-muted-foreground">
           Toplam {total} sipariş · Sayfa {page}/{totalPages}
         </p>
       </div>
@@ -82,8 +82,8 @@ export default async function AdminOrdersPage({
               className={
                 "rounded-full border px-3 py-1 text-xs transition-colors " +
                 (active
-                  ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-text)]"
-                  : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]")
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:text-foreground")
               }
             >
               {f.label}
@@ -93,11 +93,11 @@ export default async function AdminOrdersPage({
       </div>
 
       {orders.length === 0 ? (
-        <p className="text-sm text-[var(--color-text-muted)]">Sipariş yok.</p>
+        <p className="text-sm text-muted-foreground">Sipariş yok.</p>
       ) : (
-        <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface)] text-left text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-card text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">ID</th>
                 <th className="px-4 py-3">Müşteri</th>
@@ -111,19 +111,19 @@ export default async function AdminOrdersPage({
               {orders.map((o) => (
                 <tr
                   key={o.id}
-                  className="border-t border-[var(--color-border)] hover:bg-[var(--color-surface)]"
+                  className="border-t border-border hover:bg-card"
                 >
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/orders/${o.id}`}
-                      className="font-mono text-xs hover:text-[var(--color-brand-2)]"
+                      className="font-mono text-xs hover:text-foreground"
                     >
                       #{o.id.slice(-8).toUpperCase()}
                     </Link>
                   </td>
                   <td className="px-4 py-3">
                     <p>{o.user.name ?? "—"}</p>
-                    <p className="text-xs text-[var(--color-text-muted)]">{o.user.email}</p>
+                    <p className="text-xs text-muted-foreground">{o.user.email}</p>
                   </td>
                   <td className="px-4 py-3">{o.items.length}</td>
                   <td className="px-4 py-3 font-medium">
@@ -132,7 +132,7 @@ export default async function AdminOrdersPage({
                   <td className="px-4 py-3">
                     <OrderStatusBadge status={o.status} />
                   </td>
-                  <td className="px-4 py-3 text-xs text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
                     {new Date(o.createdAt).toLocaleString("tr-TR")}
                   </td>
                 </tr>
@@ -147,18 +147,18 @@ export default async function AdminOrdersPage({
           {page > 1 && (
             <Link
               href={pageUrl(page - 1)}
-              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+              className="rounded-md border border-border px-3 py-1.5 hover:bg-secondary"
             >
               ← Önceki
             </Link>
           )}
-          <span className="text-[var(--color-text-muted)]">
+          <span className="text-muted-foreground">
             {page} / {totalPages}
           </span>
           {page < totalPages && (
             <Link
               href={pageUrl(page + 1)}
-              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+              className="rounded-md border border-border px-3 py-1.5 hover:bg-secondary"
             >
               Sonraki →
             </Link>

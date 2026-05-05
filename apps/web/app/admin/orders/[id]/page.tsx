@@ -48,7 +48,7 @@ export default async function AdminOrderDetailPage({
     <div>
       <Link
         href="/admin/orders"
-        className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+        className="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
       >
         ← Siparişler
       </Link>
@@ -66,25 +66,25 @@ export default async function AdminOrderDetailPage({
             return (
               <div
                 key={it.id}
-                className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+                className="rounded-xl border border-border bg-card p-4"
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-medium">{snap.title ?? "Ürün"}</p>
-                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {snap.material?.name} · {snap.profile?.name}
                       {snap.filamentGrams && ` · ${snap.filamentGrams.toFixed(1)}g`}
                       {snap.printSeconds && ` · ${Math.round(snap.printSeconds / 60)}dk`}
                     </p>
                     {it.sliceJob && (
-                      <p className="mt-2 font-mono text-[10px] text-[var(--color-text-subtle)]">
+                      <p className="mt-2 font-mono text-[10px] text-muted-foreground/70">
                         slice:{it.sliceJob.id.slice(-8)} · file:{it.sliceJob.sourceFileKey}
                       </p>
                     )}
                     {it.design && (
                       <Link
                         href={`/designs/${it.design.slug}`}
-                        className="mt-2 block text-[10px] uppercase tracking-wider text-[var(--color-brand-2)] hover:underline"
+                        className="mt-2 block text-[10px] uppercase tracking-wider font-medium text-foreground hover:underline"
                       >
                         Tasarım sayfası →
                       </Link>
@@ -94,7 +94,7 @@ export default async function AdminOrderDetailPage({
                     <p className="font-display text-lg uppercase tracking-tight">
                       ₺{Number(it.totalPriceTRY).toFixed(2)}
                     </p>
-                    <p className="text-xs text-[var(--color-text-muted)]">×{it.quantity}</p>
+                    <p className="text-xs text-muted-foreground">×{it.quantity}</p>
                   </div>
                 </div>
               </div>
@@ -103,45 +103,45 @@ export default async function AdminOrderDetailPage({
         </section>
 
         <aside className="space-y-4">
-          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm">
-            <h3 className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <div className="rounded-xl border border-border bg-card p-4 text-sm">
+            <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
               Özet
             </h3>
             <dl className="mt-3 space-y-1">
               <div className="flex justify-between">
-                <dt className="text-[var(--color-text-muted)]">Ara toplam</dt>
+                <dt className="text-muted-foreground">Ara toplam</dt>
                 <dd>₺{Number(order.subtotalTRY).toFixed(2)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-[var(--color-text-muted)]">Kargo</dt>
+                <dt className="text-muted-foreground">Kargo</dt>
                 <dd>₺{Number(order.shippingTRY).toFixed(2)}</dd>
               </div>
-              <div className="flex justify-between border-t border-[var(--color-border)] pt-2 font-medium">
+              <div className="flex justify-between border-t border-border pt-2 font-medium">
                 <dt>Toplam</dt>
                 <dd>₺{Number(order.totalTRY).toFixed(2)}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm">
-            <h3 className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <div className="rounded-xl border border-border bg-card p-4 text-sm">
+            <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
               Müşteri
             </h3>
             <p className="mt-2">{order.user.name ?? "—"}</p>
-            <p className="text-xs text-[var(--color-text-muted)]">{order.user.email}</p>
+            <p className="text-xs text-muted-foreground">{order.user.email}</p>
             <p className="mt-3 text-xs">{shipping.phone}</p>
-            <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+            <p className="mt-2 text-xs text-muted-foreground">
               {shipping.address}, {shipping.district}, {shipping.city}
             </p>
             {shipping.notes && (
-              <p className="mt-3 rounded-[var(--radius-button)] bg-[var(--color-surface-2)] p-2 text-xs">
+              <p className="mt-3 rounded-lg bg-secondary p-2 text-xs">
                 {shipping.notes}
               </p>
             )}
           </div>
 
-          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm">
-            <h3 className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <div className="rounded-xl border border-border bg-card p-4 text-sm">
+            <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
               İşlemler
             </h3>
             <OrderActions
@@ -153,21 +153,21 @@ export default async function AdminOrderDetailPage({
           </div>
 
           {/* Timeline */}
-          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm">
-            <h3 className="mb-4 text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <div className="rounded-xl border border-border bg-card p-4 text-sm">
+            <h3 className="mb-4 text-xs uppercase tracking-wider text-muted-foreground">
               Sipariş Zaman Çizelgesi
             </h3>
             <OrderTimeline order={order} />
           </div>
 
           {order.iyzicoPaymentId && (
-            <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-xs">
-              <h3 className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <div className="rounded-xl border border-border bg-card p-4 text-xs">
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
                 iyzico
               </h3>
               <p className="mt-2 font-mono">Payment: {order.iyzicoPaymentId}</p>
               {order.paidAt && (
-                <p className="mt-1 text-[var(--color-text-muted)]">
+                <p className="mt-1 text-muted-foreground">
                   Ödendi: {new Date(order.paidAt).toLocaleString("tr-TR")}
                 </p>
               )}
@@ -227,11 +227,11 @@ function OrderTimeline({ order }: { order: OrderForTimeline }) {
 
   if (isCanceled) {
     return (
-      <div className="flex items-center gap-2 text-[var(--color-danger)]">
+      <div className="flex items-center gap-2 text-destructive">
         <Circle className="size-4 shrink-0" />
         <div>
           <p className="text-sm font-medium">{STATUS_LABELS[order.status]}</p>
-          <p className="text-xs text-[var(--color-text-muted)]">
+          <p className="text-xs text-muted-foreground">
             {new Date(order.createdAt).toLocaleString("tr-TR")}
           </p>
         </div>
@@ -265,8 +265,8 @@ function OrderTimeline({ order }: { order: OrderForTimeline }) {
                 className={
                   "absolute left-[7px] top-5 h-full w-px " +
                   (done && i < currentIdx
-                    ? "bg-[var(--color-brand)]/40"
-                    : "bg-[var(--color-border)]")
+                    ? "bg-primary/40"
+                    : "bg-border")
                 }
               />
             )}
@@ -275,11 +275,11 @@ function OrderTimeline({ order }: { order: OrderForTimeline }) {
             <div className="relative z-10 mt-0.5 shrink-0">
               {done ? (
                 active ? (
-                  <span className="flex size-4 items-center justify-center rounded-full bg-[var(--color-brand)] ring-2 ring-[var(--color-brand)]/30">
+                  <span className="flex size-4 items-center justify-center rounded-full bg-primary ring-2 ring-primary/30">
                     <Clock className="size-2.5 text-white" />
                   </span>
                 ) : (
-                  <CheckCircle2 className="size-4 text-[var(--color-brand-2)]" />
+                  <CheckCircle2 className="size-4 text-primary" />
                 )
               ) : (
                 <Circle className="size-4 text-[var(--color-border)]" />
@@ -290,20 +290,20 @@ function OrderTimeline({ order }: { order: OrderForTimeline }) {
             <div className="min-w-0 flex-1">
               <p className={
                 "text-sm font-medium " +
-                (done ? "text-[var(--color-text)]" : "text-[var(--color-text-subtle)]")
+                (done ? "text-foreground" : "text-muted-foreground/70")
               }>
                 {STATUS_LABELS[s]}
               </p>
               {done && STATUS_HINT[s] && (
-                <p className="text-xs text-[var(--color-text-muted)]">{STATUS_HINT[s]}</p>
+                <p className="text-xs text-muted-foreground">{STATUS_HINT[s]}</p>
               )}
               {s === "SHIPPED" && done && order.cargoTrackingNo && (
-                <p className="mt-0.5 font-mono text-xs text-[var(--color-brand-2)]">
+                <p className="mt-0.5 font-mono text-xs text-primary">
                   {order.cargoCarrier ? `${order.cargoCarrier} · ` : ""}{order.cargoTrackingNo}
                 </p>
               )}
               {ts && (
-                <p className="mt-0.5 text-[10px] text-[var(--color-text-subtle)]">
+                <p className="mt-0.5 text-[10px] text-muted-foreground/70">
                   {ts.toLocaleString("tr-TR")}
                 </p>
               )}

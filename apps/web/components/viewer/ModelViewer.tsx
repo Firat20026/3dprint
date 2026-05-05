@@ -350,12 +350,12 @@ export function ModelViewer({
     <div
       ref={containerRef}
       className={
-        "relative aspect-square w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-gradient-to-br from-[#0d0d10] to-[#17171c] " +
+        "relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-gradient-to-br from-[#0d0d10] to-[#17171c] " +
         (className ?? "")
       }
     >
       {!mounted || !canRender ? (
-        <div className="flex h-full w-full items-center justify-center text-sm text-[var(--color-text-muted)]">
+        <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
           {canRender ? "Viewer yükleniyor…" : "Önizleme desteklenmiyor"}
         </div>
       ) : (

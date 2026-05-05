@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/Reveal";
 import { getSettings } from "@/lib/settings";
 import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/watermelon-ui/animated-accordion";
+import {
   Upload,
   Cpu,
   Wand2,
@@ -30,7 +36,7 @@ export default async function HowItWorksPage() {
       <h1 className="mt-3 h-display text-4xl md:text-5xl">
         Fikrinden elinize dört adım.
       </h1>
-      <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--color-text-muted)]">
+      <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
         Slicing, malzeme seçimi, baskı ve kargo — hepsini biz yönetiriz. Sen
         sadece ne istediğini söyle.
       </p>
@@ -39,20 +45,20 @@ export default async function HowItWorksPage() {
       <section className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {STEPS.map((s, i) => (
           <Reveal key={s.n} variant="up" delay={i * 80}>
-            <Card className="group hover-lift h-full hover:border-[var(--color-brand)]/40">
+            <Card className="group hover-lift h-full hover:border-primary/40">
               <CardBody>
                 <div className="flex items-start justify-between">
-                  <span className="inline-flex size-12 items-center justify-center rounded-[12px] bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] text-[var(--color-brand-2)] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-4deg]">
+                  <span className="inline-flex size-12 items-center justify-center rounded-[12px] bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] text-primary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-4deg]">
                     <s.icon className="size-6" />
                   </span>
                   <span className="font-display text-3xl text-[var(--color-border-strong)]">
                     {s.n}
                   </span>
                 </div>
-                <h3 className="mt-6 text-lg font-semibold tracking-tight text-[var(--color-text)]">
+                <h3 className="mt-6 text-lg font-semibold tracking-tight text-foreground">
                   {s.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {s.body}
                 </p>
               </CardBody>
@@ -64,7 +70,7 @@ export default async function HowItWorksPage() {
       {/* Three paths */}
       <section className="mt-20">
         <h2 className="font-display text-2xl tracking-tight">Üç Farklı Yol</h2>
-        <p className="mt-2 max-w-xl text-sm text-[var(--color-text-muted)]">
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
           Nereden başlayacağına sen karar ver — hepsi aynı boru hattına akar.
         </p>
         <div className="mt-8 grid gap-5 lg:grid-cols-3">
@@ -97,7 +103,7 @@ export default async function HowItWorksPage() {
 
       {/* Machine specs */}
       <section className="mt-20">
-        <div className="grid gap-8 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 md:grid-cols-[1fr_1.4fr] md:p-10">
+        <div className="grid gap-8 rounded-xl border border-border bg-card p-8 md:grid-cols-[1fr_1.4fr] md:p-10">
           <div>
             <Badge tone="brand" className="mb-4">
               <Cpu className="size-3" />
@@ -106,7 +112,7 @@ export default async function HowItWorksPage() {
             <h2 className="h-display text-3xl">
               Dört renk, dört materyal — tek baskı.
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-muted)]">
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               IDEX (bağımsız çift ekstrüder) + 4 slotlu renk değiştirici. Katman
               yüksekliği 0.08mm&apos;ye kadar iner. 270mm³ yazdırma hacmi.
             </p>
@@ -125,7 +131,7 @@ export default async function HowItWorksPage() {
         <h2 className="font-display text-2xl tracking-tight">
           Sipariş Zaman Çizelgesi
         </h2>
-        <ol className="mt-8 space-y-5 border-l border-[var(--color-border)] pl-6">
+        <ol className="mt-8 space-y-5 border-l border-border pl-6">
           <TimelineItem
             title="Ödeme onaylandı"
             body="iyzico ödemeni doğrular, sipariş baskı kuyruğuna düşer. Anında e-posta gönderilir."
@@ -149,30 +155,35 @@ export default async function HowItWorksPage() {
         </ol>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ — Watermelon animated-accordion */}
       <section className="mt-20">
         <h2 className="font-display text-2xl tracking-tight">Sık Sorulanlar</h2>
-        <div className="mt-6 divide-y divide-[var(--color-border)] overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]">
-          {FAQ.map((q) => (
-            <details key={q.q} className="group">
-              <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-surface-2)]">
-                <span>{q.q}</span>
-                <span className="text-[var(--color-text-subtle)] transition-transform group-open:rotate-45">
-                  +
-                </span>
-              </summary>
-              <div className="px-5 pb-5 text-sm leading-relaxed text-[var(--color-text-muted)]">
+        <Accordion
+          type="single"
+          collapsible
+          className="mt-6 overflow-hidden rounded-xl border border-border bg-card"
+        >
+          {FAQ.map((q, i) => (
+            <AccordionItem
+              key={q.q}
+              value={`item-${i}`}
+              className="border-border px-5"
+            >
+              <AccordionTrigger className="text-foreground">
+                {q.q}
+              </AccordionTrigger>
+              <AccordionContent className="leading-relaxed text-muted-foreground">
                 {q.a}
-              </div>
-            </details>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </section>
 
       {/* CTA */}
-      <section className="mt-20 rounded-[var(--radius-card)] border border-[var(--color-brand)]/30 bg-gradient-to-br from-[#0e1832] via-[var(--color-surface)] to-[var(--color-surface)] p-10 text-center">
+      <section className="mt-20 rounded-xl border border-border bg-card p-10 text-center">
         <h3 className="h-display text-3xl">Başlamaya hazır mısın?</h3>
-        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-2 text-sm text-muted-foreground">
           Canlı fiyat için dosyanı yükle — 30 saniyede sonuç.
         </p>
         <div className="mt-6 flex justify-center gap-3">
@@ -264,26 +275,26 @@ function PathCard({
 }) {
   const color =
     tone === "accent"
-      ? "bg-[color-mix(in_oklab,var(--color-accent)_18%,transparent)] text-[var(--color-accent)]"
-      : "bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] text-[var(--color-brand-2)]";
+      ? "bg-[color-mix(in_oklab,var(--color-accent)_18%,transparent)] text-muted-foreground"
+      : "bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] text-primary";
   return (
-    <Card className="group hover-lift flex h-full flex-col hover:border-[var(--color-brand)]/40">
+    <Card className="group hover-lift flex h-full flex-col hover:border-primary/40">
       <CardBody className="flex flex-1 flex-col">
         <span
           className={`inline-flex size-11 items-center justify-center rounded-[10px] transition-transform duration-300 group-hover:scale-110 ${color}`}
         >
           <Icon className="size-5" />
         </span>
-        <h3 className="mt-5 text-lg font-semibold tracking-tight text-[var(--color-text)]">
+        <h3 className="mt-5 text-lg font-semibold tracking-tight text-foreground">
           {title}
         </h3>
-        <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           {body}
         </p>
         <div className="mt-auto pt-5">
           <Link
             href={href}
-            className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-brand-2)] hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-medium font-medium text-foreground hover:underline"
           >
             {cta}
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -304,13 +315,13 @@ function SpecRow({
   value: string;
 }) {
   return (
-    <li className="flex items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-4 py-3">
-      <Icon className="size-4 text-[var(--color-brand-2)]" />
+    <li className="flex items-center gap-3 rounded-[10px] border border-border bg-secondary px-4 py-3">
+      <Icon className="size-4 text-primary" />
       <div>
-        <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
           {label}
         </p>
-        <p className="text-sm font-medium text-[var(--color-text)]">{value}</p>
+        <p className="text-sm font-medium text-foreground">{value}</p>
       </div>
     </li>
   );
@@ -327,18 +338,18 @@ function TimelineItem({
 }) {
   return (
     <li className="relative">
-      <span className="absolute -left-[31px] top-1.5 flex size-5 items-center justify-center rounded-full border border-[var(--color-brand)]/40 bg-[var(--color-bg)] text-[var(--color-brand-2)]">
+      <span className="absolute -left-[31px] top-1.5 flex size-5 items-center justify-center rounded-full border border-primary/40 bg-background text-primary">
         <CheckCircle2 className="size-3.5" />
       </span>
       <div className="flex flex-wrap items-baseline gap-x-3">
-        <h3 className="text-base font-semibold text-[var(--color-text)]">
+        <h3 className="text-base font-semibold text-foreground">
           {title}
         </h3>
-        <span className="font-mono text-xs text-[var(--color-text-subtle)]">
+        <span className="font-mono text-xs text-muted-foreground/70">
           {meta}
         </span>
       </div>
-      <p className="mt-1.5 text-sm leading-relaxed text-[var(--color-text-muted)]">
+      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
         {body}
       </p>
     </li>

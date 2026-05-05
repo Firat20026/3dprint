@@ -8,16 +8,16 @@ export const metadata = {
 
 export default function KvkkPage() {
   return (
-    <Container className="prose prose-invert max-w-3xl py-16 text-[var(--color-text)]">
+    <Container className="prose prose-invert max-w-3xl py-16 text-foreground">
       <p className="eyebrow">Yasal</p>
       <h1 className="mt-3 h-display text-4xl">KVKK Aydınlatma Metni</h1>
-      <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+      <p className="mt-3 text-sm text-muted-foreground">
         Son güncelleme: {new Date().toLocaleDateString("tr-TR")}
       </p>
 
-      <div className="mt-10 space-y-6 text-sm leading-relaxed text-[var(--color-text-muted)]">
+      <div className="mt-10 space-y-6 text-sm leading-relaxed text-muted-foreground">
         <section>
-          <h2 className="font-display text-lg uppercase tracking-tight text-[var(--color-text)]">
+          <h2 className="font-display text-lg uppercase tracking-tight text-foreground">
             1. Veri Sorumlusu
           </h2>
           <p className="mt-2">
@@ -29,7 +29,7 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-lg uppercase tracking-tight text-[var(--color-text)]">
+          <h2 className="font-display text-lg uppercase tracking-tight text-foreground">
             2. İşlenen Kişisel Veriler
           </h2>
           <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -45,7 +45,7 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-lg uppercase tracking-tight text-[var(--color-text)]">
+          <h2 className="font-display text-lg uppercase tracking-tight text-foreground">
             3. İşleme Amaçları
           </h2>
           <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -58,7 +58,7 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-lg uppercase tracking-tight text-[var(--color-text)]">
+          <h2 className="font-display text-lg uppercase tracking-tight text-foreground">
             4. Aktarılan Taraflar
           </h2>
           <p className="mt-2">
@@ -69,20 +69,20 @@ export default function KvkkPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-lg uppercase tracking-tight text-[var(--color-text)]">
+          <h2 className="font-display text-lg uppercase tracking-tight text-foreground">
             5. Haklarınız
           </h2>
           <p className="mt-2">
             KVKK 11. madde kapsamında verilerinize erişme, düzeltme, silme ve
             işlenmesine itiraz etme haklarına sahipsiniz. Talepleriniz için{" "}
-            <a href="/contact" className="text-[var(--color-brand-2)] hover:underline">
+            <a href="/contact" className="font-medium text-foreground hover:underline">
               iletişim sayfası
             </a>{" "}
             üzerinden bize ulaşabilirsiniz.
           </p>
         </section>
 
-        <p className="text-xs italic text-[var(--color-text-subtle)]">
+        <p className="text-xs italic text-muted-foreground/70">
           Bu metin bilgilendirme amaçlıdır; nihai versiyonu hukuk müşaviriniz
           tarafından gözden geçirilmeden yayınlamayın.
         </p>

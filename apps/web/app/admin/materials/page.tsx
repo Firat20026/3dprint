@@ -13,7 +13,7 @@ const MATERIAL_TYPES: MaterialType[] = [
 ];
 
 const inputCls =
-  "mt-1.5 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-subtle)] focus:border-[var(--color-brand)] focus:outline-none";
+  "mt-1.5 w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none";
 
 export default async function AdminMaterialsPage() {
   const materials = await prisma.material.findMany({
@@ -27,7 +27,7 @@ export default async function AdminMaterialsPage() {
         <h2 className="font-display text-xl uppercase tracking-tight">Yeni Materyal</h2>
         <form
           action={createMaterial}
-          className="mt-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
+          className="mt-4 rounded-xl border border-border bg-card p-6"
         >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="lg:col-span-2">
@@ -55,7 +55,7 @@ export default async function AdminMaterialsPage() {
                   type="color"
                   name="colorHex"
                   defaultValue="#ffffff"
-                  className="h-10 w-14 cursor-pointer rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] p-1"
+                  className="h-10 w-14 cursor-pointer rounded-lg border border-border bg-secondary p-1"
                 />
                 <input
                   name="colorHexText"
@@ -98,9 +98,9 @@ export default async function AdminMaterialsPage() {
         <h2 className="font-display text-xl uppercase tracking-tight">
           Tüm Materyaller ({materials.length})
         </h2>
-        <div className="mt-4 overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="mt-4 overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 text-left">Materyal</th>
                 <th className="px-4 py-3 text-left">Renk</th>
@@ -113,7 +113,7 @@ export default async function AdminMaterialsPage() {
             <tbody>
               {materials.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                     Henüz materyal yok. Yukarıdaki formdan ekle.
                   </td>
                 </tr>

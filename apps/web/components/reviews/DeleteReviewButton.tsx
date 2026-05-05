@@ -32,7 +32,7 @@ export function DeleteReviewButton({
       type="button"
       onClick={onClick}
       disabled={pending}
-      className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-danger)] disabled:opacity-50"
+      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive disabled:opacity-50"
     >
       <Trash2 className="size-3" />
       {pending ? "Siliniyor…" : "Sil"}

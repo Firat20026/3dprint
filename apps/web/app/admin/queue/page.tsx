@@ -24,7 +24,7 @@ export default async function PrintQueuePage() {
 
   return (
     <div>
-      <p className="mb-6 text-sm text-[var(--color-text-muted)]">
+      <p className="mb-6 text-sm text-muted-foreground">
         Her kartın altındaki butonla durumu doğrudan ilerlet. Kart başlığına tıklayınca detay sayfası açılır.
       </p>
 
@@ -34,7 +34,7 @@ export default async function PrintQueuePage() {
           return (
             <div
               key={col.status}
-              className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+              className="rounded-xl border border-border bg-card p-4"
             >
               <div className="mb-1 flex items-baseline justify-between">
                 <h3
@@ -43,15 +43,15 @@ export default async function PrintQueuePage() {
                 >
                   {col.title}
                 </h3>
-                <span className="rounded-full bg-[var(--color-surface-2)] px-2 py-0.5 text-xs text-[var(--color-text-muted)]">
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
                   {list.length}
                 </span>
               </div>
-              <p className="mb-4 text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+              <p className="mb-4 text-[10px] uppercase tracking-wider text-muted-foreground/70">
                 {col.hint}
               </p>
               {list.length === 0 ? (
-                <p className="text-xs text-[var(--color-text-subtle)]">Boş.</p>
+                <p className="text-xs text-muted-foreground/70">Boş.</p>
               ) : (
                 <ul className="space-y-2">
                   {list.map((o) => (

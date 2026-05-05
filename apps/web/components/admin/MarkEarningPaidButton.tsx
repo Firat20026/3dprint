@@ -29,7 +29,7 @@ export function MarkEarningPaidButton({ earningId }: { earningId: string }) {
       type="button"
       onClick={onClick}
       disabled={pending}
-      className="inline-flex items-center gap-1 rounded-md border border-[var(--color-brand)]/40 bg-[var(--color-brand)]/5 px-3 py-1.5 text-xs text-[var(--color-brand-2)] hover:bg-[var(--color-brand)]/10 disabled:opacity-50"
+      className="inline-flex items-center gap-1 rounded-md border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs text-primary hover:bg-primary/10 disabled:opacity-50"
     >
       <CheckCircle2 className="size-3.5" />
       {pending ? "…" : "Ödendi İşaretle"}

@@ -4,7 +4,7 @@ import * as React from "react";
 import { useFormStatus } from "react-dom";
 import { Button, type ButtonProps } from "./button";
 
-export interface SubmitButtonProps extends Omit<ButtonProps, "type"> {
+export interface SubmitButtonProps extends Omit<ButtonProps, "type" | "asChild"> {
   pendingLabel?: string;
 }
 

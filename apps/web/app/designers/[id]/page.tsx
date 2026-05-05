@@ -67,21 +67,21 @@ export default async function DesignerProfilePage({
 
   return (
     <Container className="py-12 animate-fade-in">
-      <nav className="mb-6 text-xs text-[var(--color-text-muted)]">
-        <Link href="/" className="hover:text-[var(--color-text)]">
+      <nav className="mb-6 text-xs text-muted-foreground">
+        <Link href="/" className="hover:text-foreground">
           Ana Sayfa
         </Link>
         <span className="mx-2">/</span>
-        <Link href="/designs" className="hover:text-[var(--color-text)]">
+        <Link href="/designs" className="hover:text-foreground">
           Tasarımlar
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-[var(--color-text)]">
+        <span className="text-foreground">
           {profile.name ?? "Tasarımcı"}
         </span>
       </nav>
 
-      <header className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8">
+      <header className="rounded-xl border border-border bg-card p-6 sm:p-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           <span className="inline-flex size-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-brand)] to-[#1d4ed8] text-3xl font-semibold text-white">
             {initial}
@@ -91,7 +91,7 @@ export default async function DesignerProfilePage({
             <h1 className="mt-2 h-display text-3xl md:text-4xl">
               {profile.name ?? "Anonim Tasarımcı"}
             </h1>
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[var(--color-text-muted)]">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <CalendarDays className="size-3.5" />
                 {joined} tarihinde katıldı
@@ -117,7 +117,7 @@ export default async function DesignerProfilePage({
                 href={profile.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
-                className="mt-3 inline-flex items-center gap-1.5 text-xs text-[var(--color-brand-2)] hover:underline"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-foreground hover:underline"
               >
                 <Globe className="size-3.5" />
                 {profile.websiteUrl.replace(/^https?:\/\//, "")}
@@ -127,7 +127,7 @@ export default async function DesignerProfilePage({
           </div>
         </div>
         {profile.bio && (
-          <p className="mt-6 max-w-2xl text-sm leading-relaxed text-[var(--color-text-muted)]">
+          <p className="mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             {profile.bio}
           </p>
         )}
@@ -138,7 +138,7 @@ export default async function DesignerProfilePage({
           Tasarımları
         </h2>
         {designs.length === 0 ? (
-          <p className="mt-4 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-4 text-sm text-muted-foreground">
             Yayında tasarım yok.
           </p>
         ) : (

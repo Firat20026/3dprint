@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Type, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ModelViewer } from "@/components/viewer/ModelViewer";
+import { FluidTabs } from "@/components/watermelon-ui/fluid-tabs";
 
 type Mode = "TEXT" | "IMAGE";
 type JobStatus = "PENDING" | "RUNNING" | "DONE" | "FAILED";
@@ -116,45 +118,37 @@ export function AIGenerateForm({
     <div className="grid gap-8 md:grid-cols-5">
       <form
         onSubmit={submit}
-        className="md:col-span-2 flex flex-col gap-5 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
+        className="md:col-span-2 flex flex-col gap-5 rounded-xl border border-border bg-card p-6"
       >
-        {/* Mode tabs */}
-        <div className="flex rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] p-1">
-          {(["TEXT", "IMAGE"] as Mode[]).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              className={`flex-1 rounded-[calc(var(--radius-button)-2px)] px-3 py-2 text-sm transition-colors ${
-                mode === m
-                  ? "bg-[var(--color-brand)] text-white"
-                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-              }`}
-            >
-              {m === "TEXT" ? "Metin" : "Görsel"}
-            </button>
-          ))}
-        </div>
+        {/* Mode tabs — Watermelon fluid-tabs micro-interaction */}
+        <FluidTabs
+          tabs={[
+            { id: "TEXT", label: "Metin", icon: <Type className="size-4" /> },
+            { id: "IMAGE", label: "Görsel", icon: <ImageIcon className="size-4" /> },
+          ]}
+          defaultActive={mode}
+          onChange={(id) => setMode(id as Mode)}
+        />
 
         {mode === "TEXT" ? (
           <div>
-            <label className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <label className="text-xs uppercase tracking-wider text-muted-foreground">
               Prompt
             </label>
             <textarea
-              className="mt-2 w-full min-h-[120px] rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm outline-none focus:border-[var(--color-brand)]/50"
+              className="mt-2 w-full min-h-[120px] rounded-lg border border-border bg-background p-3 text-sm outline-none focus:border-primary/50"
               placeholder="Örnek: minimalist robot figürü, 10cm, stilize"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               maxLength={500}
             />
-            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+            <p className="mt-1 text-xs text-muted-foreground">
               {prompt.length}/500
             </p>
           </div>
         ) : (
           <div>
-            <label className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <label className="text-xs uppercase tracking-wider text-muted-foreground">
               Görsel
             </label>
             <Input
@@ -163,23 +157,23 @@ export function AIGenerateForm({
               className="mt-2"
               onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
             />
-            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+            <p className="mt-1 text-xs text-muted-foreground">
               PNG/JPEG/WEBP · max 10MB
             </p>
           </div>
         )}
 
-        <div className="flex items-center justify-between rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-4 py-3 text-sm">
-          <span className="text-[var(--color-text-muted)]">Maliyet</span>
+        <div className="flex items-center justify-between rounded-lg border border-border bg-secondary px-4 py-3 text-sm">
+          <span className="text-muted-foreground">Maliyet</span>
           <span className="font-mono">{cost} kredi</span>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Bakiye: {currentBalance} kredi</span>
           {!canAfford && (
             <Link
               href="/account/credits"
-              className="text-[var(--color-accent)] hover:underline"
+              className="text-muted-foreground hover:underline"
             >
               Kredi al →
             </Link>
@@ -191,34 +185,34 @@ export function AIGenerateForm({
         </Button>
 
         {error && (
-          <p className="text-sm text-[var(--color-danger)]">{error}</p>
+          <p className="text-sm text-destructive">{error}</p>
         )}
       </form>
 
       {/* Output */}
       <div className="md:col-span-3">
         {!job ? (
-          <div className="flex h-[420px] items-center justify-center rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] text-center text-sm text-[var(--color-text-muted)]">
+          <div className="flex h-[420px] items-center justify-center rounded-xl border border-dashed border-border bg-card text-center text-sm text-muted-foreground">
             Prompt gir veya görsel yükle · üretim sonucu burada görünecek
           </div>
         ) : job.status === "FAILED" ? (
-          <div className="flex h-[420px] flex-col items-center justify-center gap-3 rounded-[var(--radius-card)] border border-[color-mix(in_oklab,var(--color-danger)_40%,transparent)] bg-[color-mix(in_oklab,var(--color-danger)_8%,transparent)] p-6 text-center">
-            <p className="font-display text-xl uppercase text-[var(--color-danger)]">
+          <div className="flex h-[420px] flex-col items-center justify-center gap-3 rounded-xl border border-[color-mix(in_oklab,var(--color-danger)_40%,transparent)] bg-[color-mix(in_oklab,var(--color-danger)_8%,transparent)] p-6 text-center">
+            <p className="font-display text-xl uppercase text-destructive">
               Üretim başarısız
             </p>
-            <p className="text-sm text-[var(--color-text-muted)]">
+            <p className="text-sm text-muted-foreground">
               {job.errorText ?? "Bilinmeyen bir hata oluştu."}
             </p>
             {job.creditsCharged > 0 && (
-              <p className="rounded-full bg-[var(--color-success)]/15 px-3 py-1 text-xs text-[var(--color-success)]">
+              <p className="rounded-full bg-[hsl(var(--success))]/15 px-3 py-1 text-xs text-[hsl(var(--success))]">
                 ✓ {job.creditsCharged} kredi iade edildi
               </p>
             )}
           </div>
         ) : job.status !== "DONE" ? (
-          <div className="flex h-[420px] flex-col items-center justify-center gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)]">
-            <div className="size-12 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-brand)]" />
-            <p className="text-sm text-[var(--color-text-muted)]">
+          <div className="flex h-[420px] flex-col items-center justify-center gap-4 rounded-xl border border-border bg-card">
+            <div className="size-12 animate-spin rounded-full border-2 border-border border-t-[var(--color-brand)]" />
+            <p className="text-sm text-muted-foreground">
               AI modeli oluşturuluyor… (~3 sn)
             </p>
           </div>
@@ -228,7 +222,7 @@ export function AIGenerateForm({
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
                 href={`/upload?meshyJobId=${job.id}`}
-                className="flex-1 inline-flex h-11 items-center justify-center gap-2 rounded-[var(--radius-button)] bg-[var(--color-brand)] px-5 text-sm font-medium text-[var(--color-brand-fg)] shadow-[var(--shadow-glow-brand)] transition-colors hover:bg-[var(--color-brand-2)]"
+                className="flex-1 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
               >
                 Bunu Bastır →
               </Link>
@@ -236,7 +230,7 @@ export function AIGenerateForm({
                 <a
                   href={job.modelUrl}
                   download
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-[var(--radius-button)] border border-[var(--color-border-strong)] bg-transparent px-5 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-surface-2)]"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-transparent px-5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
                 >
                   STL İndir
                 </a>

@@ -64,7 +64,7 @@ export default async function AdminUsersPage({
           <h1 className="font-display text-2xl uppercase tracking-tight">
             Kullanıcılar
           </h1>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-1 text-sm text-muted-foreground">
             Toplam {total} kullanıcı · Sayfa {page}/{totalPages}
           </p>
         </div>
@@ -74,20 +74,20 @@ export default async function AdminUsersPage({
             name="q"
             defaultValue={q}
             placeholder="email veya isim ara"
-            className="h-9 w-72 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-sm text-[var(--color-text)]"
+            className="h-9 w-72 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground"
           />
           <button
             type="submit"
-            className="h-9 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-sm hover:bg-[var(--color-surface-3)]"
+            className="h-9 rounded-lg border border-border bg-secondary px-3 text-sm hover:bg-muted"
           >
             Ara
           </button>
         </form>
       </div>
 
-      <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+      <div className="overflow-hidden overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
-          <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+          <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
               <th className="px-4 py-3 text-left">E-posta</th>
               <th className="px-4 py-3 text-left">Ad</th>
@@ -103,7 +103,7 @@ export default async function AdminUsersPage({
               <tr>
                 <td
                   colSpan={7}
-                  className="px-4 py-10 text-center text-[var(--color-text-muted)]"
+                  className="px-4 py-10 text-center text-muted-foreground"
                 >
                   {q ? "Eşleşen kullanıcı yok." : "Henüz kullanıcı yok."}
                 </td>
@@ -112,10 +112,10 @@ export default async function AdminUsersPage({
             {users.map((u) => (
               <tr
                 key={u.id}
-                className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                className="border-t border-border bg-card"
               >
                 <td className="px-4 py-3 font-mono text-xs">{u.email}</td>
-                <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                <td className="px-4 py-3 text-muted-foreground">
                   {u.name ?? "—"}
                 </td>
                 <td className="px-4 py-3">
@@ -125,27 +125,27 @@ export default async function AdminUsersPage({
                       Admin
                     </Badge>
                   ) : (
-                    <span className="text-xs text-[var(--color-text-subtle)]">
+                    <span className="text-xs text-muted-foreground/70">
                       Kullanıcı
                     </span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <span className="inline-flex items-center gap-1 font-mono">
-                    <Sparkles className="size-3 text-[var(--color-brand-2)]" />
+                    <Sparkles className="size-3 text-primary" />
                     {u.credits}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right text-[var(--color-text-muted)]">
+                <td className="px-4 py-3 text-right text-muted-foreground">
                   {u._count.orders}
                 </td>
-                <td className="px-4 py-3 text-xs text-[var(--color-text-muted)]">
+                <td className="px-4 py-3 text-xs text-muted-foreground">
                   {u.createdAt.toLocaleDateString("tr-TR")}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <Link
                     href={`/admin/users/${u.id}`}
-                    className="text-sm text-[var(--color-brand-2)] hover:underline"
+                    className="text-sm font-medium text-foreground hover:underline"
                   >
                     Detay →
                   </Link>
@@ -161,18 +161,18 @@ export default async function AdminUsersPage({
           {page > 1 && (
             <Link
               href={`?${q ? `q=${encodeURIComponent(q)}&` : ""}page=${page - 1}`}
-              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+              className="rounded-md border border-border px-3 py-1.5 hover:bg-secondary"
             >
               ← Önceki
             </Link>
           )}
-          <span className="text-[var(--color-text-muted)]">
+          <span className="text-muted-foreground">
             {page} / {totalPages}
           </span>
           {page < totalPages && (
             <Link
               href={`?${q ? `q=${encodeURIComponent(q)}&` : ""}page=${page + 1}`}
-              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+              className="rounded-md border border-border px-3 py-1.5 hover:bg-secondary"
             >
               Sonraki →
             </Link>

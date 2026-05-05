@@ -168,20 +168,20 @@ export default async function MyDesignsPage() {
         <h1 className="h-display text-4xl md:text-5xl">
           Tasarımlarım
         </h1>
-        <nav className="hidden gap-4 text-sm text-[var(--color-text-muted)] md:flex">
-          <Link href="/account/orders" className="hover:text-[var(--color-text)]">
+        <nav className="hidden gap-4 text-sm text-muted-foreground md:flex">
+          <Link href="/account/orders" className="hover:text-foreground">
             Siparişler
           </Link>
-          <Link href="/account/credits" className="hover:text-[var(--color-text)]">
+          <Link href="/account/credits" className="hover:text-foreground">
             Krediler
           </Link>
-          <Link href="/account/my-designs" className="text-[var(--color-text)]">
+          <Link href="/account/my-designs" className="text-foreground">
             Tasarımlar
           </Link>
         </nav>
       </div>
 
-      <p className="mt-3 max-w-2xl text-sm text-[var(--color-text-muted)]">
+      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
         Tasarımını yükle, onaylandığında katalogda herkes bastırabilir — her
         satışta kâr markupın kadar sana geçer.
       </p>
@@ -193,7 +193,7 @@ export default async function MyDesignsPage() {
         </h2>
         <form
           action={submitDesign}
-          className="mt-4 grid gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 md:grid-cols-2"
+          className="mt-4 grid gap-4 rounded-xl border border-border bg-card p-6 md:grid-cols-2"
         >
           <div className="md:col-span-2">
             <Label htmlFor="title">Başlık</Label>
@@ -214,7 +214,7 @@ export default async function MyDesignsPage() {
               name="description"
               rows={3}
               placeholder="Boyut, kullanım, ek not..."
-              className="mt-1.5 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-subtle)] focus:border-[var(--color-brand)] focus:outline-none"
+              className="mt-1.5 w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none"
             />
           </div>
           <div>
@@ -237,7 +237,7 @@ export default async function MyDesignsPage() {
               defaultValue={20}
               className="mt-1.5"
             />
-            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+            <p className="mt-1 text-xs text-muted-foreground">
               Platform komisyonu ayrıca düşülür.
             </p>
           </div>
@@ -249,7 +249,7 @@ export default async function MyDesignsPage() {
               type="file"
               accept=".stl,.3mf"
               required
-              className="mt-1.5 block w-full text-sm text-[var(--color-text-muted)] file:mr-3 file:rounded-md file:border-0 file:bg-[var(--color-brand)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-[var(--color-brand-2)]"
+              className="mt-1.5 block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary/90"
             />
           </div>
           <div>
@@ -259,7 +259,7 @@ export default async function MyDesignsPage() {
               name="thumbnail"
               type="file"
               accept=".jpg,.jpeg,.png,.webp"
-              className="mt-1.5 block w-full text-sm text-[var(--color-text-muted)] file:mr-3 file:rounded-md file:border-0 file:bg-[var(--color-surface-2)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[var(--color-text)] hover:file:bg-[var(--color-border)]"
+              className="mt-1.5 block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-border"
             />
           </div>
           <div className="md:col-span-2">
@@ -276,13 +276,13 @@ export default async function MyDesignsPage() {
           Gönderimlerim ({designs.length})
         </h2>
         {designs.length === 0 ? (
-          <div className="mt-4 rounded-[var(--radius-card)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-10 text-center text-sm text-[var(--color-text-muted)]">
+          <div className="mt-4 rounded-xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
             Henüz gönderim yok.
           </div>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)]">
+          <div className="mt-4 overflow-hidden rounded-xl border border-border">
             <table className="w-full text-sm">
-              <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+              <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 text-left">Başlık</th>
                   <th className="px-4 py-3 text-left">Kategori</th>
@@ -296,21 +296,21 @@ export default async function MyDesignsPage() {
                 {designs.map((d) => (
                   <tr
                     key={d.id}
-                    className="border-t border-[var(--color-border)] bg-[var(--color-surface)] align-top"
+                    className="border-t border-border bg-card align-top"
                   >
                     <td className="px-4 py-3">
                       <div className="font-medium">{d.title}</div>
                       {d.status === "REJECTED" && d.rejectionReason && (
-                        <div className="mt-2 max-w-md rounded-[var(--radius-button)] border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-2 py-1.5 text-xs text-[var(--color-danger)]">
+                        <div className="mt-2 max-w-md rounded-lg border border-destructive/30 bg-destructive/10 px-2 py-1.5 text-xs text-destructive">
                           <span className="font-semibold">Red sebebi:</span>{" "}
                           {d.rejectionReason}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {d.category ?? "—"}
                     </td>
-                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       %{d.basePriceMarkupPercent}
                     </td>
                     <td className="px-4 py-3">
@@ -326,21 +326,21 @@ export default async function MyDesignsPage() {
                         }
                         className={
                           d.status === "REJECTED"
-                            ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/15 text-[var(--color-danger)]"
+                            ? "border-destructive/40 bg-destructive/15 text-destructive"
                             : ""
                         }
                       >
                         {STATUS_LABELS[d.status] ?? d.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {d.createdAt.toLocaleDateString("tr-TR")}
                     </td>
                     <td className="px-4 py-3 text-right">
                       {d.status === "PUBLISHED" ? (
                         <Link
                           href={`/designs/${d.slug}`}
-                          className="text-sm text-[var(--color-brand-2)] hover:underline"
+                          className="text-sm font-medium text-foreground hover:underline"
                         >
                           Katalogda →
                         </Link>
@@ -352,7 +352,7 @@ export default async function MyDesignsPage() {
                           </SubmitButton>
                         </form>
                       ) : (
-                        <span className="text-sm text-[var(--color-text-subtle)]">—</span>
+                        <span className="text-sm text-muted-foreground/70">—</span>
                       )}
                     </td>
                   </tr>

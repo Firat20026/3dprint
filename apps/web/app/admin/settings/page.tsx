@@ -105,7 +105,7 @@ export default async function AdminSettingsPage() {
         </h2>
         <form
           action={saveSettings}
-          className="mt-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
+          className="mt-4 rounded-xl border border-border bg-card p-6"
         >
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {(Object.keys(SETTING_LABELS) as (keyof typeof SETTING_LABELS)[]).map(
@@ -143,9 +143,9 @@ export default async function AdminSettingsPage() {
           AI Kredi Paketleri
         </h2>
 
-        <div className="mt-4 overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="mt-4 overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 text-left">İsim</th>
                 <th className="px-4 py-3 text-left">Kredi</th>
@@ -160,7 +160,7 @@ export default async function AdminSettingsPage() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-4 py-8 text-center text-[var(--color-text-muted)]"
+                    className="px-4 py-8 text-center text-muted-foreground"
                   >
                     Henüz kredi paketi yok.
                   </td>
@@ -169,24 +169,24 @@ export default async function AdminSettingsPage() {
               {packs.map((pack) => (
                 <tr
                   key={pack.id}
-                  className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                  className="border-t border-border bg-card"
                 >
                   <td className="px-4 py-3 font-medium">{pack.name}</td>
-                  <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {pack.credits}
                   </td>
-                  <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-muted-foreground">
                     ₺{Number(pack.priceTRY).toFixed(2)}
                   </td>
-                  <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                  <td className="px-4 py-3 text-muted-foreground">
                     {pack.badge ?? "—"}
                   </td>
                   <td className="px-4 py-3">
                     <span
                       className={
                         pack.isActive
-                          ? "rounded-full bg-[var(--color-success)]/15 px-2 py-0.5 text-xs text-[var(--color-success)]"
-                          : "rounded-full bg-[var(--color-danger)]/15 px-2 py-0.5 text-xs text-[var(--color-danger)]"
+                          ? "rounded-full bg-[hsl(var(--success))]/15 px-2 py-0.5 text-xs text-[hsl(var(--success))]"
+                          : "rounded-full bg-destructive/15 px-2 py-0.5 text-xs text-destructive"
                       }
                     >
                       {pack.isActive ? "Aktif" : "Pasif"}
@@ -222,9 +222,9 @@ export default async function AdminSettingsPage() {
         {/* Add New Pack Form */}
         <form
           action={createCreditPack}
-          className="mt-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
+          className="mt-4 rounded-xl border border-border bg-card p-6"
         >
-          <h3 className="mb-4 text-sm font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+          <h3 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Yeni Paket Ekle
           </h3>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">

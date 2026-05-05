@@ -23,7 +23,7 @@ export function SkeletonText({ lines = 3 }: { lines?: number }) {
 
 export function SkeletonCard() {
   return (
-    <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <Skeleton className="aspect-[4/3] w-full" />
       <div className="mt-4 space-y-2">
         <Skeleton className="h-4 w-3/4" />
@@ -39,7 +39,7 @@ export function SkeletonCard() {
 
 export function SkeletonRow({ cells = 4 }: { cells?: number }) {
   return (
-    <tr className="border-b border-[var(--color-border)]/60">
+    <tr className="border-b border-border/60">
       {Array.from({ length: cells }).map((_, i) => (
         <td key={i} className="px-5 py-4">
           <Skeleton className="h-3" style={{ width: `${60 + (i % 3) * 15}%` }} />

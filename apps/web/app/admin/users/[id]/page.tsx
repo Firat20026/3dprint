@@ -210,29 +210,29 @@ export default async function AdminUserDetailPage({
       <div>
         <Link
           href="/admin/users"
-          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+          className="text-xs text-muted-foreground hover:text-foreground"
         >
           ← Kullanıcı listesi
         </Link>
         <h1 className="mt-2 font-display text-2xl uppercase tracking-tight">
           {user.name ?? user.email}
         </h1>
-        <p className="text-sm text-[var(--color-text-muted)]">{user.email}</p>
+        <p className="text-sm text-muted-foreground">{user.email}</p>
       </div>
 
       {okMsg && (
-        <div className="rounded-[var(--radius-card)] border border-[var(--color-success)]/40 bg-[var(--color-success)]/10 p-3 text-sm text-[var(--color-success)]">
+        <div className="rounded-xl border border-[hsl(var(--success))]/40 bg-[hsl(var(--success))]/10 p-3 text-sm text-[hsl(var(--success))]">
           ✓ {okMsg}
         </div>
       )}
       {errMsg && (
-        <div className="rounded-[var(--radius-card)] border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 p-3 text-sm text-[var(--color-danger)]">
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
           ✗ {errMsg}
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+        <section className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-display text-lg uppercase tracking-tight">
             Profil
           </h2>
@@ -241,7 +241,7 @@ export default async function AdminUserDetailPage({
               <code className="text-xs">{user.email}</code>
             </Field>
             <Field icon={<Phone className="size-3.5" />} label="Telefon">
-              {user.phone ?? <em className="text-[var(--color-text-subtle)]">—</em>}
+              {user.phone ?? <em className="text-muted-foreground/70">—</em>}
             </Field>
             <Field icon={<IdCard className="size-3.5" />} label="TCKN">
               {user.identityNumber ? (
@@ -250,29 +250,29 @@ export default async function AdminUserDetailPage({
                   {user.identityNumber.slice(-2)}
                 </code>
               ) : (
-                <em className="text-[var(--color-text-subtle)]">—</em>
+                <em className="text-muted-foreground/70">—</em>
               )}
             </Field>
             <Field icon={<MapPin className="size-3.5" />} label="Şehir">
-              {user.city ?? <em className="text-[var(--color-text-subtle)]">—</em>}
+              {user.city ?? <em className="text-muted-foreground/70">—</em>}
             </Field>
             <Field icon={null} label="Adres">
               {user.registrationAddress ? (
                 <span className="text-xs">{user.registrationAddress}</span>
               ) : (
-                <em className="text-[var(--color-text-subtle)]">—</em>
+                <em className="text-muted-foreground/70">—</em>
               )}
             </Field>
           </dl>
 
-          <div className="mt-5 flex flex-wrap gap-3 border-t border-[var(--color-border)] pt-4 text-xs text-[var(--color-text-muted)]">
+          <div className="mt-5 flex flex-wrap gap-3 border-t border-border pt-4 text-xs text-muted-foreground">
             <span>Üyelik: {user.createdAt.toLocaleDateString("tr-TR")}</span>
             <span>· {user._count.orders} sipariş</span>
             <span>· {user._count.designs} tasarım</span>
             <span>· {user._count.meshyJobs} AI üretim</span>
           </div>
 
-          <div className="mt-5 flex items-center justify-between border-t border-[var(--color-border)] pt-4">
+          <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
             <div>
               <p className="eyebrow">Rol</p>
               <div className="mt-1">
@@ -300,12 +300,12 @@ export default async function AdminUserDetailPage({
           </div>
         </section>
 
-        <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+        <section className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-start justify-between">
             <div>
               <p className="eyebrow">Kredi Bakiyesi</p>
               <p className="mt-2 flex items-center gap-2 font-display text-4xl">
-                <Sparkles className="size-6 text-[var(--color-brand-2)]" />
+                <Sparkles className="size-6 text-primary" />
                 {user.credits}
               </p>
             </div>
@@ -332,7 +332,7 @@ export default async function AdminUserDetailPage({
                 maxLength={240}
                 rows={2}
                 placeholder="Sebep (örn. promosyon, manuel iade)"
-                className="w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
               />
               <SubmitButton size="sm" pendingLabel="Ekleniyor...">
                 + Ekle
@@ -359,7 +359,7 @@ export default async function AdminUserDetailPage({
                 maxLength={240}
                 rows={2}
                 placeholder="Sebep (örn. hatalı ödeme, abuse)"
-                className="w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-danger)] focus:outline-none"
+                className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-xs text-foreground focus:border-destructive focus:outline-none"
               />
               <SubmitButton
                 size="sm"
@@ -378,9 +378,9 @@ export default async function AdminUserDetailPage({
         <h2 className="mb-3 font-display text-xl uppercase tracking-tight">
           Kredi Geçmişi ({ledger.length})
         </h2>
-        <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-left">Zaman</th>
                 <th className="px-3 py-2 text-left">Sebep</th>
@@ -393,7 +393,7 @@ export default async function AdminUserDetailPage({
                 <tr>
                   <td
                     colSpan={4}
-                    className="px-3 py-8 text-center text-[var(--color-text-muted)]"
+                    className="px-3 py-8 text-center text-muted-foreground"
                   >
                     Hareket yok.
                   </td>
@@ -402,9 +402,9 @@ export default async function AdminUserDetailPage({
               {ledger.map((l) => (
                 <tr
                   key={l.id}
-                  className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                  className="border-t border-border bg-card"
                 >
-                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-[var(--color-text-muted)]">
+                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-muted-foreground">
                     {l.createdAt.toLocaleString("tr-TR")}
                   </td>
                   <td className="px-3 py-2 text-xs">
@@ -414,15 +414,15 @@ export default async function AdminUserDetailPage({
                     <span
                       className={
                         l.delta > 0
-                          ? "text-[var(--color-success)]"
-                          : "text-[var(--color-danger)]"
+                          ? "text-[hsl(var(--success))]"
+                          : "text-destructive"
                       }
                     >
                       {l.delta > 0 ? "+" : ""}
                       {l.delta}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-xs text-[var(--color-text-muted)]">
+                  <td className="px-3 py-2 text-xs text-muted-foreground">
                     {l.note ?? "—"}
                   </td>
                 </tr>
@@ -436,9 +436,9 @@ export default async function AdminUserDetailPage({
         <h2 className="mb-3 font-display text-xl uppercase tracking-tight">
           Son Siparişler ({orders.length})
         </h2>
-        <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-left">Tarih</th>
                 <th className="px-3 py-2 text-left">Sipariş</th>
@@ -451,7 +451,7 @@ export default async function AdminUserDetailPage({
                 <tr>
                   <td
                     colSpan={4}
-                    className="px-3 py-8 text-center text-[var(--color-text-muted)]"
+                    className="px-3 py-8 text-center text-muted-foreground"
                   >
                     Sipariş yok.
                   </td>
@@ -460,15 +460,15 @@ export default async function AdminUserDetailPage({
               {orders.map((o) => (
                 <tr
                   key={o.id}
-                  className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                  className="border-t border-border bg-card"
                 >
-                  <td className="whitespace-nowrap px-3 py-2 text-xs text-[var(--color-text-muted)]">
+                  <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
                     {o.createdAt.toLocaleDateString("tr-TR")}
                   </td>
                   <td className="px-3 py-2">
                     <Link
                       href={`/admin/orders/${o.id}`}
-                      className="font-mono text-xs text-[var(--color-brand-2)] hover:underline"
+                      className="font-mono text-xs font-medium text-foreground hover:underline"
                     >
                       {o.id.slice(0, 8)}…
                     </Link>
@@ -512,11 +512,11 @@ function Field({
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
         {icon}
         {label}
       </span>
-      <span className="text-right text-sm text-[var(--color-text)]">
+      <span className="text-right text-sm text-foreground">
         {children}
       </span>
     </div>

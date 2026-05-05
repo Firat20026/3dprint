@@ -20,9 +20,9 @@ export function PlateSelector({
   if (plateCount <= 1) return null;
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+    <div className="rounded-xl border border-border bg-card p-4">
       <p className="eyebrow">Plate'ler</p>
-      <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+      <p className="mt-1 text-xs text-muted-foreground">
         Her plate ayrı bastırılır — sepete farklı materyallerle ayrı satır olarak eklenir.
       </p>
       <div className="mt-3 flex flex-wrap gap-1.5">
@@ -60,8 +60,8 @@ function PlateChip({
       className={
         "rounded-full border px-3 py-1 text-xs transition-colors " +
         (active
-          ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-brand-2)]"
-          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-brand)]/40 hover:text-[var(--color-text)]")
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground")
       }
     >
       {label}

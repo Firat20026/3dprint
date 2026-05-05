@@ -64,10 +64,10 @@ async function markUnresolved(formData: FormData) {
 
 const SEVERITY_COLORS: Record<ErrorSeverity, string> = {
   CRITICAL:
-    "bg-[var(--color-danger)]/20 text-[var(--color-danger)] border-[var(--color-danger)]/30",
-  HIGH: "bg-[var(--color-danger)]/10 text-[var(--color-danger)]",
-  MEDIUM: "bg-[var(--color-accent)]/15 text-[var(--color-accent)]",
-  LOW: "bg-[var(--color-text-muted)]/15 text-[var(--color-text-muted)]",
+    "bg-destructive/20 text-destructive border-destructive/30",
+  HIGH: "bg-destructive/10 text-destructive",
+  MEDIUM: "bg-foreground/15 text-muted-foreground",
+  LOW: "bg-[var(--color-text-muted)]/15 text-muted-foreground",
 };
 
 type SearchParams = Promise<{
@@ -132,7 +132,7 @@ export default async function ObservabilityPage({
         <h1 className="font-display text-2xl uppercase tracking-tight">
           Olaylar & Hatalar
         </h1>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Son 7 günün özeti — analitik olayları ve uygulama hatalarını burada
           incele. Detaylı ürün analitiği için PostHog/Sentry entegrasyonu eklenebilir.
         </p>
@@ -153,37 +153,37 @@ export default async function ObservabilityPage({
       </div>
 
       {/* ── Email test ── */}
-      <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+      <section className="rounded-xl border border-border bg-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-base uppercase tracking-tight">
               E-posta Testi
             </h2>
-            <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+            <p className="mt-0.5 text-xs text-muted-foreground">
               Resend:{" "}
               {isResendEnabled() ? (
-                <span className="text-[var(--color-success)]">
+                <span className="text-[hsl(var(--success))]">
                   ● Aktif ({process.env.RESEND_FROM_EMAIL})
                 </span>
               ) : (
-                <span className="text-[var(--color-danger)]">
+                <span className="text-destructive">
                   ● Pasif — RESEND_API_KEY veya RESEND_FROM_EMAIL eksik
                 </span>
               )}
             </p>
           </div>
           {emailResult === "ok" && (
-            <span className="rounded-full bg-[var(--color-success)]/15 px-3 py-1 text-sm text-[var(--color-success)]">
+            <span className="rounded-full bg-[hsl(var(--success))]/15 px-3 py-1 text-sm text-[hsl(var(--success))]">
               ✓ Email gönderildi
             </span>
           )}
           {emailResult === "error" && (
-            <span className="rounded-full bg-[var(--color-danger)]/15 px-3 py-1 text-sm text-[var(--color-danger)]">
+            <span className="rounded-full bg-destructive/15 px-3 py-1 text-sm text-destructive">
               ✗ Gönderim başarısız — docker logs web ile kontrol et
             </span>
           )}
           {emailResult === "invalid" && (
-            <span className="rounded-full bg-[var(--color-accent)]/15 px-3 py-1 text-sm text-[var(--color-accent)]">
+            <span className="rounded-full bg-foreground/15 px-3 py-1 text-sm text-muted-foreground">
               Geçerli bir email adresi gir
             </span>
           )}
@@ -194,7 +194,7 @@ export default async function ObservabilityPage({
             name="to"
             required
             placeholder="test@example.com"
-            className="h-9 flex-1 min-w-48 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-sm text-[var(--color-text)] focus:border-[var(--color-brand)] focus:outline-none"
+            className="h-9 flex-1 min-w-48 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground focus:border-primary focus:outline-none"
           />
           <SubmitButton size="sm" pendingLabel="Gönderiliyor...">
             Test Gönder
@@ -213,9 +213,9 @@ export default async function ObservabilityPage({
               name="errorFilter"
               defaultValue={errorFilter}
               placeholder="kaynak filtresi (örn. api:checkout)"
-              className="h-8 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2 text-xs text-[var(--color-text)]"
+              className="h-8 rounded-lg border border-border bg-secondary px-2 text-xs text-foreground"
             />
-            <label className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+            <label className="flex items-center gap-1 text-xs text-muted-foreground">
               <input
                 type="checkbox"
                 name="showResolved"
@@ -230,15 +230,15 @@ export default async function ObservabilityPage({
             )}
             <button
               type="submit"
-              className="h-8 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-xs hover:bg-[var(--color-surface-3)]"
+              className="h-8 rounded-lg border border-border bg-secondary px-3 text-xs hover:bg-muted"
             >
               Filtrele
             </button>
           </form>
         </div>
-        <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-left">Zaman</th>
                 <th className="px-3 py-2 text-left">Severity</th>
@@ -253,7 +253,7 @@ export default async function ObservabilityPage({
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-4 py-8 text-center text-[var(--color-text-muted)]"
+                    className="px-4 py-8 text-center text-muted-foreground"
                   >
                     {showResolved
                       ? "Hata kaydı yok."
@@ -265,13 +265,13 @@ export default async function ObservabilityPage({
                 <tr
                   key={e.id}
                   className={
-                    "border-t border-[var(--color-border)] " +
+                    "border-t border-border " +
                     (e.resolved
-                      ? "bg-[var(--color-surface-2)] opacity-60"
-                      : "bg-[var(--color-surface)]")
+                      ? "bg-secondary opacity-60"
+                      : "bg-card")
                   }
                 >
-                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-[var(--color-text-muted)]">
+                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-muted-foreground">
                     {e.occurredAt.toLocaleString("tr-TR")}
                   </td>
                   <td className="px-3 py-2">
@@ -287,18 +287,18 @@ export default async function ObservabilityPage({
                   <td className="whitespace-nowrap px-3 py-2 font-mono text-xs">
                     {e.source}
                     {e.requestPath && (
-                      <span className="ml-1 text-[var(--color-text-subtle)]">
+                      <span className="ml-1 text-muted-foreground/70">
                         {e.requestMethod} {e.requestPath}
                       </span>
                     )}
                   </td>
                   <td
-                    className="px-3 py-2 text-[var(--color-text)]"
+                    className="px-3 py-2 text-foreground"
                     title={e.stack ?? undefined}
                   >
                     <div className="line-clamp-2 max-w-md">{e.message}</div>
                   </td>
-                  <td className="px-3 py-2 text-xs text-[var(--color-text-muted)]">
+                  <td className="px-3 py-2 text-xs text-muted-foreground">
                     {e.user?.name ?? e.user?.email ?? (e.userId ?? "—")}
                   </td>
                   <td className="px-3 py-2 text-right">
@@ -331,7 +331,7 @@ export default async function ObservabilityPage({
               name="eventFilter"
               defaultValue={eventFilter}
               placeholder="olay adı (örn. PAYMENT)"
-              className="h-8 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2 text-xs text-[var(--color-text)]"
+              className="h-8 rounded-lg border border-border bg-secondary px-2 text-xs text-foreground"
             />
             {errorFilter && (
               <input type="hidden" name="errorFilter" value={errorFilter} />
@@ -341,15 +341,15 @@ export default async function ObservabilityPage({
             )}
             <button
               type="submit"
-              className="h-8 rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 text-xs hover:bg-[var(--color-surface-3)]"
+              className="h-8 rounded-lg border border-border bg-secondary px-3 text-xs hover:bg-muted"
             >
               Filtrele
             </button>
           </form>
         </div>
-        <div className="overflow-hidden overflow-x-auto rounded-[var(--radius-card)] border border-[var(--color-border)]">
+        <div className="overflow-hidden overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--color-surface-2)] text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="bg-secondary text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-left">Zaman</th>
                 <th className="px-3 py-2 text-left">Olay</th>
@@ -362,7 +362,7 @@ export default async function ObservabilityPage({
                 <tr>
                   <td
                     colSpan={4}
-                    className="px-4 py-8 text-center text-[var(--color-text-muted)]"
+                    className="px-4 py-8 text-center text-muted-foreground"
                   >
                     Henüz olay yok.
                   </td>
@@ -371,20 +371,20 @@ export default async function ObservabilityPage({
               {events.map((ev) => (
                 <tr
                   key={ev.id}
-                  className="border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+                  className="border-t border-border bg-card"
                 >
-                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-[var(--color-text-muted)]">
+                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-muted-foreground">
                     {ev.occurredAt.toLocaleString("tr-TR")}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 font-mono text-xs">
-                    <span className="rounded-full bg-[var(--color-brand)]/10 px-2 py-0.5 text-[var(--color-brand-2)]">
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">
                       {ev.name}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-xs text-[var(--color-text-muted)]">
+                  <td className="px-3 py-2 text-xs text-muted-foreground">
                     {ev.user?.email ?? (ev.userId ?? "—")}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-[var(--color-text-muted)]">
+                  <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
                     <div className="line-clamp-1 max-w-md">
                       {Object.keys(ev.properties as Record<string, unknown>).length
                         ? JSON.stringify(ev.properties)
@@ -412,17 +412,17 @@ function StatCard({
 }) {
   const toneClass =
     tone === "danger"
-      ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10"
+      ? "border-destructive/40 bg-destructive/10"
       : tone === "warn"
-        ? "border-[var(--color-accent)]/40 bg-[var(--color-accent)]/10"
-        : "border-[var(--color-border)] bg-[var(--color-surface)]";
+        ? "border-foreground/30/40 bg-foreground/10"
+        : "border-border bg-card";
   return (
     <div
       className={
-        "rounded-[var(--radius-card)] border p-4 " + toneClass
+        "rounded-xl border p-4 " + toneClass
       }
     >
-      <div className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+      <div className="text-xs uppercase tracking-wider text-muted-foreground">
         {label}
       </div>
       <div className="mt-1 font-display text-3xl">{value}</div>

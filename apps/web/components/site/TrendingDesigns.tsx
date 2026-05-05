@@ -7,28 +7,24 @@ import { listTrendingDesigns } from "@/lib/trending";
 import { getDesignRatingSummaries } from "@/lib/reviews";
 import { getWishlistedDesignIds } from "@/lib/wishlist";
 import { auth } from "@/lib/auth";
+import { ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Server component for the home page. Falls back to a newest-first list
- * when there are no recent sales — keeps the section non-empty in dev /
- * during the quiet period right after launch.
- */
 export async function TrendingDesigns() {
   const designs = await listTrendingDesigns(8).catch(() => []);
   if (designs.length === 0) return null;
 
-  const session = await auth();
+  const session = await auth().catch(() => null);
   const [ratings, wishlistedIds] = await Promise.all([
-    getDesignRatingSummaries(designs.map((d) => d.id)),
-    getWishlistedDesignIds(session?.user?.id),
+    getDesignRatingSummaries(designs.map((d) => d.id)).catch(() => new Map()),
+    getWishlistedDesignIds(session?.user?.id).catch(() => new Set<string>()),
   ]);
 
   return (
-    <section className="relative py-24">
+    <section className="relative py-20 md:py-28">
       <Container>
-        <div className="flex flex-col items-end justify-between gap-6 md:flex-row">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <SectionHeader
             align="left"
             eyebrow="Öne Çıkanlar"
@@ -37,15 +33,13 @@ export async function TrendingDesigns() {
           />
           <Link
             href="/designs"
-            className="text-sm text-[var(--color-brand-2)] hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Tüm katalog →
+            Tüm katalog
+            <ArrowRight className="size-3.5" />
           </Link>
         </div>
-        <Reveal
-          className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
-          stagger
-        >
+        <Reveal className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" stagger>
           {designs.map((d) => (
             <DesignCard
               key={d.id}

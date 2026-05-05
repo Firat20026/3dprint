@@ -64,7 +64,7 @@ export default async function AdminReviewsPage({
           <h2 className="font-display text-2xl uppercase tracking-tight">
             Tasarım Yorumları
           </h2>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-1 text-sm text-muted-foreground">
             Toplam {total} yorum · Sayfa {page}/{totalPages}
           </p>
         </div>
@@ -82,8 +82,8 @@ export default async function AdminReviewsPage({
                 className={
                   "rounded-full border px-3 py-1 text-xs transition-colors " +
                   (active
-                    ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10 text-[var(--color-text)]"
-                    : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]")
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground")
                 }
               >
                 {t.label}
@@ -94,37 +94,37 @@ export default async function AdminReviewsPage({
       </div>
 
       {reviews.length === 0 ? (
-        <p className="text-sm text-[var(--color-text-muted)]">Yorum yok.</p>
+        <p className="text-sm text-muted-foreground">Yorum yok.</p>
       ) : (
         <div className="space-y-3">
           {reviews.map((r) => (
             <article
               key={r.id}
-              className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+              className="rounded-xl border border-border bg-card p-4"
             >
               <header className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2 text-sm">
                     <Link
                       href={`/designs/${r.design.slug}`}
-                      className="font-medium text-[var(--color-text)] hover:text-[var(--color-brand-2)]"
+                      className="font-medium text-foreground hover:text-foreground"
                       target="_blank"
                     >
                       {r.design.title}
                     </Link>
                     {r.status === "HIDDEN" && (
-                      <span className="rounded-full bg-[var(--color-danger)]/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-[var(--color-danger)]">
+                      <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-destructive">
                         Gizli
                       </span>
                     )}
                     {r.verifiedBuyer && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand)]/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-[var(--color-brand-2)]">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
                         <BadgeCheck className="size-3" />
                         Doğrulanmış
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {r.user.name ?? "—"} · {r.user.email} ·{" "}
                     {r.createdAt.toLocaleString("tr-TR")}
                   </p>
@@ -138,17 +138,17 @@ export default async function AdminReviewsPage({
                 />
               </header>
               {r.title && (
-                <p className="mt-3 text-sm font-medium text-[var(--color-text)]">
+                <p className="mt-3 text-sm font-medium text-foreground">
                   {r.title}
                 </p>
               )}
               {r.body && (
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[var(--color-text-muted)]">
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
                   {r.body}
                 </p>
               )}
               {r.hiddenReason && (
-                <p className="mt-3 rounded-md border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/5 px-3 py-2 text-xs text-[var(--color-danger)]">
+                <p className="mt-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
                   Gizleme sebebi: {r.hiddenReason}
                 </p>
               )}
@@ -162,18 +162,18 @@ export default async function AdminReviewsPage({
           {page > 1 && (
             <Link
               href={pageUrl(page - 1)}
-              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+              className="rounded-md border border-border px-3 py-1.5 hover:bg-secondary"
             >
               ← Önceki
             </Link>
           )}
-          <span className="text-[var(--color-text-muted)]">
+          <span className="text-muted-foreground">
             {page} / {totalPages}
           </span>
           {page < totalPages && (
             <Link
               href={pageUrl(page + 1)}
-              className="rounded-md border border-[var(--color-border)] px-3 py-1.5 hover:bg-[var(--color-surface-2)]"
+              className="rounded-md border border-border px-3 py-1.5 hover:bg-secondary"
             >
               Sonraki →
             </Link>

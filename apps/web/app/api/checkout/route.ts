@@ -43,6 +43,7 @@ export async function POST(req: Request) {
       userId: session.user.id,
       items: body.items,
       shipping: body.shipping,
+      couponCode: typeof body.couponCode === "string" ? body.couponCode : undefined,
     });
   } catch (e) {
     return NextResponse.json(

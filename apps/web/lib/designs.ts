@@ -119,6 +119,41 @@ export async function listActiveProfiles(): Promise<PrintProfile[]> {
   });
 }
 
+/**
+ * Related designs — same category first, then random PUBLISHED designs.
+ * Excludes the current design. Never throws; returns [] on error.
+ */
+export async function listRelatedDesigns(
+  designId: string,
+  category: string | null,
+  limit = 4,
+): Promise<Design[]> {
+  try {
+    // Prefer same-category designs
+    const sameCat = category
+      ? await prisma.design.findMany({
+          where: { status: "PUBLISHED", category, id: { not: designId } },
+          orderBy: { createdAt: "desc" },
+          take: limit,
+        })
+      : [];
+
+    if (sameCat.length >= limit) return sameCat.slice(0, limit);
+
+    // Pad with newest published (different category or no category filter)
+    const exclude = new Set([designId, ...sameCat.map((d) => d.id)]);
+    const padded = await prisma.design.findMany({
+      where: { status: "PUBLISHED", id: { notIn: [...exclude] } },
+      orderBy: { createdAt: "desc" },
+      take: limit - sameCat.length,
+    });
+
+    return [...sameCat, ...padded];
+  } catch {
+    return [];
+  }
+}
+
 export function slugify(s: string): string {
   return s
     .toLowerCase()

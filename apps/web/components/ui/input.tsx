@@ -9,7 +9,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       type={type}
       ref={ref}
       className={cn(
-        "h-11 w-full rounded-[var(--radius-button)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-subtle)] transition-colors focus:border-[var(--color-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]/30 disabled:opacity-50",
+        "h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground/70 transition-colors",
+        "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:border-ring",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -25,7 +28,7 @@ export function Label({
   return (
     <label
       className={cn(
-        "text-xs uppercase tracking-wider text-[var(--color-text-muted)]",
+        "text-xs font-medium uppercase tracking-wider text-muted-foreground",
         className
       )}
       {...props}
@@ -35,7 +38,5 @@ export function Label({
 
 export function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return (
-    <p className="mt-1 text-xs text-[var(--color-danger)]">{message}</p>
-  );
+  return <p className="mt-1 text-xs text-destructive">{message}</p>;
 }

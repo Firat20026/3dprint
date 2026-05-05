@@ -3,6 +3,8 @@ import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
+import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
+import { Toaster } from "@/components/ui/sonner";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -50,11 +52,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr" className={`${jakarta.variable} ${spaceGrotesk.variable}`}>
-      <body className="min-h-dvh font-sans antialiased">
+    <html lang="tr" className={`dark ${jakarta.variable} ${spaceGrotesk.variable}`}>
+      <body className="min-h-dvh bg-background pt-20 font-sans text-foreground antialiased sm:pt-24">
         <Nav />
         <main>{children}</main>
         <Footer />
+        <WhatsAppFloat />
+        <Toaster />
       </body>
     </html>
   );

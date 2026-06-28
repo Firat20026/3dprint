@@ -9,22 +9,22 @@ export function CTA() {
       <Container>
         <div className="rounded-xl border border-border bg-card p-10 text-center sm:p-14 md:p-20">
           <h2 className="h-display text-balance text-3xl text-foreground sm:text-4xl">
-            Bir fikrin mi var? Bugün üretelim.
+            Aradığın tasarım burada.
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
-            Üye ol, ilk siparişinde kargo bizden. Kredi paketlerinde başlangıç
-            fırsatları seni bekliyor.
+            Kataloğu keşfet, beğendiğini Shopier güvencesiyle sipariş ver.
+            Türkiye geneli hızlı kargo.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/register" className="w-full sm:w-auto">
+            <Link href="/designs" className="w-full sm:w-auto">
               <Button size="md" className="w-full">
-                Ücretsiz Üye Ol
+                Tasarımları Gör
                 <ArrowRight className="size-4" />
               </Button>
             </Link>
-            <Link href="/upload" className="w-full sm:w-auto">
+            <Link href="/register" className="w-full sm:w-auto">
               <Button size="md" variant="secondary" className="w-full">
-                Hemen Yükle
+                Ücretsiz Üye Ol
               </Button>
             </Link>
           </div>

@@ -18,9 +18,9 @@ export function BentoFeatures() {
     <section className="relative py-20 md:py-28">
       <Container>
         <SectionHeader
-          eyebrow="Öne Çıkan"
-          title="Profesyonel hassasiyet, sade akış."
-          subtitle="Bir tıkla anlık fiyat, dilersen detaylı kontrol. Profesyonel slicer'ın gücü, e-ticaret rahatlığı."
+          eyebrow="Neden frint3d"
+          title="Profesyonel baskı, sade alışveriş."
+          subtitle="Hazır tasarımları seç, Shopier güvencesiyle sipariş ver. Profesyonel baskı kalitesi, e-ticaret rahatlığı."
         />
 
         <div className="mt-12 flex flex-col gap-4 lg:flex-row lg:gap-5 md:mt-16">
@@ -28,14 +28,14 @@ export function BentoFeatures() {
           <div className="flex w-full flex-col gap-4 lg:flex-1 lg:gap-5">
             <BentoCard
               size="big"
-              title="Gerçek Slicing"
-              body="OrcaSlicer CLI dosyayı saniyeler içinde dilimler. Tahmin değil, kesin gram & saat."
+              title="Profesyonel Baskı"
+              body="Snapmaker U1 ile yüksek hassasiyetli, dayanıklı baskılar. Tahmin değil, tutarlı kalite."
               illustration={<LayeredCube />}
             />
             <BentoCard
               size="medium"
-              title="Meshy AI"
-              body="Yazıdan veya görselden 3D model üret. Krediler ile öde, beğen, bastır."
+              title="Hazır Katalog"
+              body="Özenle seçilmiş tasarımlar. Beğen, sipariş ver, kapına gelsin."
               illustration={<AiOrb />}
             />
           </div>
@@ -50,8 +50,8 @@ export function BentoFeatures() {
             />
             <BentoCard
               size="big"
-              title="Türkiye Ödeme"
-              body="iyzico ile güvenli kart ödemesi, taksit desteği. Türkiye geneli kargo, 500₺ üzeri ücretsiz."
+              title="Shopier ile Güvenli Ödeme"
+              body="Shopier güvencesiyle kart ödemesi ve alıcı koruması. Sipariş ve teslimat tek akışta."
               illustration={<ShieldGlyph />}
             />
           </div>

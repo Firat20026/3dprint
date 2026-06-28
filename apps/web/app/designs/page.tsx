@@ -1,40 +1,39 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
-import { DesignCard } from "@/components/shop/DesignCard";
-import { SourceFilterTabs } from "@/components/shop/SourceFilterTabs";
-import {
-  searchPublishedDesigns,
-  listPublishedDesignCategories,
-} from "@/lib/designs";
-import { getDesignRatingSummaries } from "@/lib/reviews";
-import { getWishlistedDesignIds } from "@/lib/wishlist";
-import { auth } from "@/lib/auth";
-import type { DesignSource } from "@prisma/client";
+import { ShopierProductCard } from "@/components/shop/ShopierProductCard";
+import { FixtureNotice } from "@/components/shop/FixtureNotice";
+import { listProducts } from "@/lib/shopier";
+import type { ShopierProduct } from "@/lib/shopier/types";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Tasarım Kataloğu",
   description:
-    "Yüzlerce hazır 3D tasarım arasından seçin — organizasyon, hediyelik, teknik parçalar ve daha fazlası. Snapmaker U1 ile çok renkli baskı.",
+    "Hazır 3D baskı ürünleri — dekorasyon, organizasyon, hediyelik ve daha fazlası. Seç, Shopier güvencesiyle sipariş ver.",
   openGraph: {
     title: "Tasarım Kataloğu — frint3d",
-    description: "Yüzlerce hazır 3D tasarım. Snapmaker U1 ile çok renkli baskı.",
+    description: "Hazır 3D baskı ürünleri. Shopier güvencesiyle sipariş ver.",
   },
 };
 
-const VALID_SOURCES: DesignSource[] = ["ADMIN", "USER_MARKETPLACE", "MESHY"];
-const VALID_SORTS = new Set(["newest", "oldest", "alpha"] as const);
+const VALID_SORTS = new Set(["newest", "price-asc", "price-desc", "alpha"] as const);
+type Sort = "newest" | "price-asc" | "price-desc" | "alpha";
 
 type SearchParams = Promise<{
   q?: string;
   category?: string;
-  source?: string;
-  plates?: string; // "multi" → only multi-plate
-  materials?: string; // "multi" → only multi-material
+  stock?: string; // "in" → only in-stock
   sort?: string;
 }>;
+
+function normalizeText(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "");
+}
 
 export default async function DesignsPage({
   searchParams,
@@ -44,49 +43,44 @@ export default async function DesignsPage({
   const sp = await searchParams;
   const q = sp.q?.trim() ?? "";
   const category = sp.category && sp.category !== "all" ? sp.category : null;
-  const source =
-    sp.source && VALID_SOURCES.includes(sp.source as DesignSource)
-      ? (sp.source as DesignSource)
-      : null;
-  const multiPlate = sp.plates === "multi";
-  const multiMaterial = sp.materials === "multi";
-  const sort = (VALID_SORTS.has(sp.sort as never) ? sp.sort : "newest") as
-    | "newest"
-    | "oldest"
-    | "alpha";
+  const inStockOnly = sp.stock === "in";
+  const sort = (VALID_SORTS.has(sp.sort as never) ? sp.sort : "newest") as Sort;
 
-  const [designs, categories] = await Promise.all([
-    searchPublishedDesigns({
-      q,
-      category,
-      source,
-      multiPlate,
-      multiMaterial,
-      sort,
-    }),
-    listPublishedDesignCategories(),
-  ]);
+  const { products, isFixture } = await listProducts();
 
-  const session = await auth();
-  const [ratings, wishlistedIds] = await Promise.all([
-    getDesignRatingSummaries(designs.map((d) => d.id)),
-    getWishlistedDesignIds(session?.user?.id),
-  ]);
+  // Distinct categories for the filter chips, derived from the catalog itself.
+  const categories = [
+    ...new Set(products.flatMap((p) => p.categories)),
+  ].sort((a, b) => a.localeCompare(b, "tr"));
 
-  const hasActiveFilter =
-    q.length > 0 || category || source || multiPlate || multiMaterial;
+  // In-memory filtering — the store is small enough that fetching once and
+  // filtering here is simpler than round-tripping every filter to Shopier.
+  let filtered = products;
+  if (q) {
+    const nq = normalizeText(q);
+    filtered = filtered.filter((p) => {
+      const hay = normalizeText(
+        `${p.title} ${p.description ?? ""} ${p.categories.join(" ")}`,
+      );
+      return hay.includes(nq);
+    });
+  }
+  if (category) {
+    filtered = filtered.filter((p) => p.categories.includes(category));
+  }
+  if (inStockOnly) {
+    filtered = filtered.filter((p) => p.inStock);
+  }
+  filtered = sortProducts(filtered, sort);
 
-  // Helper builds a URL with one filter changed and others preserved.
-  function urlWith(
-    overrides: Partial<Record<string, string | null>>,
-  ): string {
+  const hasActiveFilter = q.length > 0 || !!category || inStockOnly;
+
+  function urlWith(overrides: Partial<Record<string, string | null>>): string {
     const params = new URLSearchParams();
     const merged: Record<string, string | null | undefined> = {
       q,
       category,
-      source,
-      plates: multiPlate ? "multi" : null,
-      materials: multiMaterial ? "multi" : null,
+      stock: inStockOnly ? "in" : null,
       sort: sort === "newest" ? null : sort,
       ...overrides,
     };
@@ -102,18 +96,16 @@ export default async function DesignsPage({
       <div className="flex items-end justify-between gap-6">
         <div>
           <p className="eyebrow">Katalog</p>
-          <h1 className="mt-3 h-display text-4xl md:text-5xl">
-            Hazır Tasarımlar
-          </h1>
+          <h1 className="mt-3 h-display text-4xl md:text-5xl">Hazır Tasarımlar</h1>
           <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-            Seç, materyal ve kaliteni belirle, Snapmaker U1&apos;de basıp
-            kapına gönderelim. Yeni tasarımlar düzenli olarak eklenir.
+            Beğendiğin ürünü seç, Shopier güvencesiyle sipariş ver. Yeni
+            tasarımlar düzenli olarak eklenir.
           </p>
         </div>
-        <p className="text-xs text-muted-foreground/70">
-          {designs.length} tasarım
-        </p>
+        <p className="text-xs text-muted-foreground/70">{filtered.length} ürün</p>
       </div>
+
+      {isFixture && <FixtureNotice className="mt-6" />}
 
       {/* Search + filter bar */}
       <form
@@ -135,7 +127,8 @@ export default async function DesignsPage({
             className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
           >
             <option value="newest">Yeniden eskiye</option>
-            <option value="oldest">Eskiden yeniye</option>
+            <option value="price-asc">Fiyat: artan</option>
+            <option value="price-desc">Fiyat: azalan</option>
             <option value="alpha">A → Z</option>
           </select>
         </div>
@@ -146,75 +139,57 @@ export default async function DesignsPage({
           Ara
         </button>
 
-        {/* Hidden inputs preserve other filters when submitting via the
-            search box (server reads them from query string). */}
+        {/* Hidden inputs preserve other filters when submitting via the search
+            box (server reads them from the query string). */}
         {category && <input type="hidden" name="category" value={category} />}
-        {source && <input type="hidden" name="source" value={source} />}
-        {multiPlate && <input type="hidden" name="plates" value="multi" />}
-        {multiMaterial && (
-          <input type="hidden" name="materials" value="multi" />
+        {inStockOnly && <input type="hidden" name="stock" value="in" />}
+
+        {categories.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 sm:col-span-2">
+            <FilterChip
+              label="Tüm kategoriler"
+              active={!category}
+              href={urlWith({ category: null })}
+            />
+            {categories.map((c) => (
+              <FilterChip
+                key={c}
+                label={c}
+                active={category === c}
+                href={urlWith({ category: c })}
+              />
+            ))}
+          </div>
         )}
 
-        <div className="flex flex-wrap gap-1.5 sm:col-span-2">
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-3 sm:col-span-2">
           <FilterChip
-            label="Tüm kategoriler"
-            active={!category}
-            href={urlWith({ category: null })}
+            label="Sadece stoktakiler"
+            active={inStockOnly}
+            href={urlWith({ stock: inStockOnly ? null : "in" })}
           />
-          {categories.map((c) => (
-            <FilterChip
-              key={c}
-              label={c}
-              active={category === c}
-              href={urlWith({ category: c })}
-            />
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-3 border-t border-border pt-3 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
-          <SourceFilterTabs
-            active={source ?? "all"}
-            hrefs={{
-              all: urlWith({ source: null }),
-              ADMIN: urlWith({ source: "ADMIN" }),
-              USER_MARKETPLACE: urlWith({ source: "USER_MARKETPLACE" }),
-              MESHY: urlWith({ source: "MESHY" }),
-            }}
-          />
-          <div className="flex flex-wrap items-center gap-1.5">
-            <FilterChip
-              label="Çoklu plate"
-              active={multiPlate}
-              href={urlWith({ plates: multiPlate ? null : "multi" })}
-            />
-            <FilterChip
-              label="Çok renkli"
-              active={multiMaterial}
-              href={urlWith({ materials: multiMaterial ? null : "multi" })}
-            />
-            {hasActiveFilter && (
-              <Link
-                href="/designs"
-                className="ml-1 text-xs text-muted-foreground hover:text-destructive"
-              >
-                Temizle
-              </Link>
-            )}
-          </div>
+          {hasActiveFilter && (
+            <Link
+              href="/designs"
+              className="ml-1 text-xs text-muted-foreground hover:text-destructive"
+            >
+              Temizle
+            </Link>
+          )}
         </div>
       </form>
 
-      {designs.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="mt-10 rounded-xl border border-dashed border-border bg-card p-12 text-center">
           <p className="font-display text-xl uppercase tracking-tight text-foreground">
             {hasActiveFilter
-              ? "Aramaya uyan tasarım bulunamadı"
-              : "Henüz tasarım yayında değil"}
+              ? "Aramaya uyan ürün bulunamadı"
+              : "Henüz ürün yok"}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             {hasActiveFilter
               ? "Filtreleri gevşetmeyi dene veya farklı bir arama yap."
-              : "Admin panelinden ilk tasarımını yüklediğin anda burada görünecek."}
+              : "Shopier mağazasına ürün eklendiğinde burada görünecek."}
           </p>
         </div>
       ) : (
@@ -222,18 +197,28 @@ export default async function DesignsPage({
           className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           data-stagger
         >
-          {designs.map((d) => (
-            <DesignCard
-              key={d.id}
-              design={d}
-              rating={ratings.get(d.id)}
-              wishlisted={wishlistedIds.has(d.id)}
-            />
+          {filtered.map((p) => (
+            <ShopierProductCard key={p.id} product={p} />
           ))}
         </div>
       )}
     </Container>
   );
+}
+
+function sortProducts(list: ShopierProduct[], sort: Sort): ShopierProduct[] {
+  const arr = [...list];
+  switch (sort) {
+    case "price-asc":
+      return arr.sort((a, b) => a.effectivePrice - b.effectivePrice);
+    case "price-desc":
+      return arr.sort((a, b) => b.effectivePrice - a.effectivePrice);
+    case "alpha":
+      return arr.sort((a, b) => a.title.localeCompare(b.title, "tr"));
+    case "newest":
+    default:
+      return arr; // already dateDesc from the API
+  }
 }
 
 function FilterChip({

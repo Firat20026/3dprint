@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight, Upload, ShoppingBag } from "lucide-react";
+import { Sparkles, ArrowRight, ShoppingBag } from "lucide-react";
 
 export function Hero() {
   return (
@@ -9,35 +9,34 @@ export function Hero() {
       <Container className="relative pt-20 pb-16 md:pt-28 md:pb-24">
         <div className="mx-auto max-w-3xl text-center animate-fade-in-up">
           <Link
-            href="/ai"
+            href="/designs"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
           >
             <Sparkles className="size-3" />
-            Yeni — AI ile metinden 3D model
+            Yeni tasarımlar eklendi
             <ArrowRight className="size-3" />
           </Link>
 
           <h1 className="h-display mt-6 text-balance text-5xl text-foreground sm:text-6xl md:text-[72px]">
-            Tasarla, üret, bastır.
+            Seç, sipariş ver, bastır.
           </h1>
 
           <p className="mx-auto mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
-            Hazır tasarımlardan seç, kendi STL&rsquo;ini yükle veya AI ile sıfırdan
-            ürettir. Snapmaker U1 üzerinde çok renkli, çok materyalli baskı —
+            Özenle seçilmiş hazır tasarımlardan beğen, Shopier güvencesiyle
+            sipariş ver. Snapmaker U1 üzerinde çok renkli, çok materyalli baskı —
             kapına kadar.
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/upload">
-              <Button size="lg">
-                <Upload className="size-4" />
-                Dosyanı Yükle
-              </Button>
-            </Link>
             <Link href="/designs">
-              <Button size="lg" variant="secondary">
+              <Button size="lg">
                 <ShoppingBag className="size-4" />
                 Tasarımları Gör
+              </Button>
+            </Link>
+            <Link href="/how-it-works">
+              <Button size="lg" variant="secondary">
+                Nasıl Çalışır
               </Button>
             </Link>
           </div>

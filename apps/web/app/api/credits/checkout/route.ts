@@ -22,7 +22,19 @@ import { rateLimit, clientKey, tooManyRequests } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Kredi satışı geçici olarak kapalı (AI üret + dosya yükle kilitli olduğu için
+// kredi anlamsız). UI butonları gizli ama doğrudan API çağrısını da burada
+// sertçe engelliyoruz. Tekrar açmak için bunu `true` yap.
+const CREDITS_SALE_ENABLED = false;
+
 export async function POST(req: Request) {
+  if (!CREDITS_SALE_ENABLED) {
+    return NextResponse.json(
+      { error: "Kredi satışı şu anda kapalı." },
+      { status: 403 },
+    );
+  }
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "login required" }, { status: 401 });

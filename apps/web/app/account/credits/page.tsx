@@ -2,10 +2,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Card, CardBody } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { PurchaseButton } from "@/components/credits/PurchaseButton";
 
 export const dynamic = "force-dynamic";
 
@@ -30,14 +28,10 @@ export default async function CreditsPage({
 
   const sp = await searchParams;
 
-  const [user, packs, ledger] = await Promise.all([
+  const [user, ledger] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session.user.id },
       select: { credits: true },
-    }),
-    prisma.creditPack.findMany({
-      where: { isActive: true },
-      orderBy: { sortOrder: "asc" },
     }),
     prisma.creditLedger.findMany({
       where: { userId: session.user.id },
@@ -99,47 +93,23 @@ export default async function CreditsPage({
             </p>
           </div>
           <Link
-            href="/ai"
+            href="/designs"
             className="inline-flex items-center gap-2 self-start rounded-lg border border-border bg-secondary px-5 py-3 text-sm text-foreground transition-colors hover:border-primary/40 sm:self-auto"
           >
-            AI ile model üret →
+            Kataloğa göz at →
           </Link>
         </CardBody>
       </Card>
 
-      {/* Packs */}
-      <h2 className="mt-14 font-display text-2xl uppercase tracking-tight">
-        Kredi Paketleri
-      </h2>
-      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-stagger>
-        {packs.map((p) => {
-          const perCredit = Number(p.priceTRY) / p.credits;
-          return (
-            <Card key={p.id} className="hover-lift flex flex-col hover:border-primary/40">
-              <CardBody className="flex flex-1 flex-col">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">{p.name}</p>
-                  {p.badge && <Badge tone="accent">{p.badge}</Badge>}
-                </div>
-                <p className="mt-3 font-display text-4xl uppercase tracking-tight">
-                  {p.credits}
-                  <span className="ml-2 text-sm text-muted-foreground">
-                    kredi
-                  </span>
-                </p>
-                <p className="mt-4 text-3xl font-semibold">
-                  ₺{Number(p.priceTRY).toFixed(2)}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  kredi başına ₺{perCredit.toFixed(2)}
-                </p>
-                <div className="mt-auto">
-                  <PurchaseButton packId={p.id} />
-                </div>
-              </CardBody>
-            </Card>
-          );
-        })}
+      {/* Kredi satışı geçici olarak kapalı (AI üret + dosya yükle kilitli).
+          Mevcut bakiye ve geçmiş görünür; yeni satın alma yok. */}
+      <div className="mt-12 rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
+        <p className="font-medium text-foreground">Kredi satışı şu an kapalı</p>
+        <p className="mt-1">
+          AI üretim ve dosya yükleme geçici olarak bakımda olduğu için kredi
+          satışı durduruldu. Mevcut bakiyen hesabında duruyor; özellikler
+          tekrar açıldığında kredi alımı da açılacak.
+        </p>
       </div>
 
       {/* Ledger */}

@@ -6,9 +6,6 @@ import {
   LogOut,
   Package,
   Heart,
-  CreditCard,
-  Box,
-  Wallet,
   Settings,
   Shield,
 } from "lucide-react";
@@ -29,13 +26,12 @@ interface ProfileMenuProps {
   logoutAction: () => void | Promise<void>;
 }
 
+// Kredi (AI/yükle kapalı) ve pazaryeri (Tasarımlarım/Kazançlarım) linkleri
+// geçici olarak menüden gizlendi; sayfalar repoda duruyor.
 const items = [
   { href: "/account", label: "Profil", icon: UserIcon },
   { href: "/account/orders", label: "Siparişler", icon: Package },
-  { href: "/account/my-designs", label: "Tasarımlarım", icon: Box },
   { href: "/account/wishlist", label: "Favoriler", icon: Heart },
-  { href: "/account/credits", label: "Kredilerim", icon: CreditCard },
-  { href: "/account/earnings", label: "Kazançlarım", icon: Wallet },
   { href: "/account/settings", label: "Ayarlar", icon: Settings },
 ];
 

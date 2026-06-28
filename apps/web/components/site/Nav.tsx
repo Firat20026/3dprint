@@ -3,16 +3,14 @@ import { MobileNav } from "@/components/site/MobileNav";
 import { NavShell } from "@/components/site/NavShell";
 import { auth } from "@/lib/auth";
 
+// AI üret + Dosya yükle geçici olarak kapalı, kredi/fiyatlandırma gizlendi —
+// menüde yalnızca katalog ve "nasıl çalışır" var.
 const baseLinks = [
   { href: "/designs", label: "Tasarımlar" },
-  { href: "/upload", label: "Dosya Yükle" },
-  { href: "/ai", label: "AI Üret" },
-];
-
-const guestOnlyLinks = [
-  { href: "/pricing", label: "Fiyatlandırma" },
   { href: "/how-it-works", label: "Nasıl Çalışır" },
 ];
+
+const guestOnlyLinks: { href: string; label: string }[] = [];
 
 export async function Nav() {
   const session = await auth();

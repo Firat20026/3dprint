@@ -5,7 +5,6 @@ import {
   User as UserIcon,
   LogOut,
   Package,
-  Heart,
   Settings,
   Shield,
 } from "lucide-react";
@@ -26,12 +25,11 @@ interface ProfileMenuProps {
   logoutAction: () => void | Promise<void>;
 }
 
-// Kredi (AI/yükle kapalı) ve pazaryeri (Tasarımlarım/Kazançlarım) linkleri
-// geçici olarak menüden gizlendi; sayfalar repoda duruyor.
+// Kredi, pazaryeri ve favoriler geçici olarak gizlendi; sadece profil,
+// siparişler ve ayarlar görünür. Sayfalar repoda duruyor.
 const items = [
   { href: "/account", label: "Profil", icon: UserIcon },
   { href: "/account/orders", label: "Siparişler", icon: Package },
-  { href: "/account/wishlist", label: "Favoriler", icon: Heart },
   { href: "/account/settings", label: "Ayarlar", icon: Settings },
 ];
 

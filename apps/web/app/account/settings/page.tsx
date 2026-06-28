@@ -200,10 +200,6 @@ export default async function SettingsPage({
     },
   });
 
-  const hasPublishedDesign = (await prisma.design.count({
-    where: { uploaderId: session.user.id, status: "PUBLISHED" },
-  })) > 0;
-
   const params = await searchParams;
   const okMsg = params.ok ? OK_MESSAGES[params.ok] : null;
   const errMsg = params.err ? ERR_MESSAGES[params.err] : null;
@@ -310,58 +306,15 @@ export default async function SettingsPage({
               />
             </div>
 
-            {/* Public designer fields — shown to everyone but only useful for
-                people who upload designs. We always render them so a user
-                can prep their profile before publishing the first design. */}
-            <div className="border-t border-border pt-4">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                Tasarımcı Profili (herkese açık)
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground/70">
-                Tasarımların yayındaysa{" "}
-                {hasPublishedDesign ? (
-                  <Link
-                    href={`/designers/${user.id}`}
-                    target="_blank"
-                    className="font-medium text-foreground hover:underline"
-                  >
-                    /designers/{user.id.slice(0, 8)}…
-                  </Link>
-                ) : (
-                  <span className="text-muted-foreground">
-                    /designers sayfanda
-                  </span>
-                )}{" "}
-                görünür.
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="bio">Tasarımcı Tanıtımı</Label>
-              <textarea
-                id="bio"
-                name="bio"
-                defaultValue={user.bio ?? ""}
-                rows={3}
-                maxLength={600}
-                placeholder="Kısa bir tanıtım — uzmanlık, hangi tarz tasarımlar yapıyorsun, vs."
-                className="mt-1.5 w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-              />
-              <p className="mt-1 text-xs text-muted-foreground/70">
-                En fazla 600 karakter.
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="websiteUrl">Web Sitesi</Label>
-              <Input
-                id="websiteUrl"
-                name="websiteUrl"
-                type="url"
-                defaultValue={user.websiteUrl ?? ""}
-                placeholder="https://portfolyom.com"
-                maxLength={240}
-                className="mt-1.5"
-              />
-            </div>
+            {/* Tasarımcı profili (pazaryeri) geçici olarak gizli. Mevcut
+                değerler kaydetme sırasında silinmesin diye hidden olarak
+                korunuyor. */}
+            <input type="hidden" name="bio" defaultValue={user.bio ?? ""} />
+            <input
+              type="hidden"
+              name="websiteUrl"
+              defaultValue={user.websiteUrl ?? ""}
+            />
 
             <div>
               <SubmitButton pendingLabel="Kaydediliyor...">

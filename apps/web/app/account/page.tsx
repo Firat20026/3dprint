@@ -9,16 +9,11 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import {
   Package,
-  Sparkles,
-  Upload,
   ShieldCheck,
   Mail,
   CalendarDays,
-  Wallet,
-  Heart,
+  ShoppingBag,
 } from "lucide-react";
-import { getDesignerSummary, userHasDesigns } from "@/lib/earnings";
-import { getWishlistCount } from "@/lib/wishlist";
 
 export const dynamic = "force-dynamic";
 
@@ -42,30 +37,19 @@ export default async function AccountPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?redirect=/account");
 
-  const [user, orderCount, designCount, hasDesigns, wishlistCount] =
-    await Promise.all([
-      prisma.user.findUniqueOrThrow({
-        where: { id: session.user.id },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          credits: true,
-          createdAt: true,
-        },
-      }),
-      prisma.order.count({ where: { userId: session.user.id } }),
-      prisma.design.count({
-        where: { uploaderId: session.user.id, source: "USER_MARKETPLACE" },
-      }),
-      userHasDesigns(session.user.id),
-      getWishlistCount(session.user.id),
-    ]);
-
-  const earningsSummary = hasDesigns
-    ? await getDesignerSummary(session.user.id)
-    : null;
+  const [user, orderCount] = await Promise.all([
+    prisma.user.findUniqueOrThrow({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+      },
+    }),
+    prisma.order.count({ where: { userId: session.user.id } }),
+  ]);
 
   const initial = (user.name ?? user.email).charAt(0).toUpperCase();
   const joined = user.createdAt.toLocaleDateString("tr-TR", {
@@ -79,7 +63,7 @@ export default async function AccountPage() {
       <p className="eyebrow">Hesap</p>
       <h1 className="mt-3 h-display text-4xl md:text-5xl">Profil</h1>
       <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-        Bilgilerini güncelle, siparişlerini ve kredilerini tek yerden takip et.
+        Bilgilerini güncelle ve siparişlerini tek yerden takip et.
       </p>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
@@ -127,7 +111,7 @@ export default async function AccountPage() {
                 className="mt-1.5"
               />
               <p className="mt-1 text-xs text-muted-foreground/70">
-                Siparişlerde ve yorumlarında bu ad görünür.
+                Siparişlerde bu ad görünür.
               </p>
             </div>
             <div>
@@ -150,101 +134,53 @@ export default async function AccountPage() {
                 href="/account/settings"
                 className="text-xs text-muted-foreground hover:font-medium text-foreground hover:underline"
               >
-                Detaylı ayarlar (telefon, TCKN, adres, şifre) →
+                Detaylı ayarlar (telefon, adres, şifre) →
               </Link>
             </div>
           </form>
         </section>
 
-        {/* Stats + quick links */}
+        {/* Orders + catalog */}
         <aside className="flex flex-col gap-5">
-          <div className="rounded-xl border border-border bg-card p-6">
+          <Link
+            href="/account/orders"
+            className="group hover-lift rounded-xl border border-border bg-card p-6 hover:border-primary/40"
+          >
             <div className="flex items-center justify-between">
               <div>
-                <p className="eyebrow">Kredi Bakiyesi</p>
+                <p className="eyebrow">Siparişlerim</p>
                 <p className="mt-2 font-display text-4xl text-foreground">
-                  {user.credits}
+                  {orderCount}
                 </p>
               </div>
-              <span className="inline-flex size-11 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] text-primary">
-                <Sparkles className="size-5" />
+              <span className="inline-flex size-11 items-center justify-center rounded-full bg-secondary text-primary transition-transform duration-300 group-hover:scale-110">
+                <Package className="size-5" />
               </span>
             </div>
-            <Link
-              href="/account/credits"
-              className="mt-4 inline-flex items-center gap-1 text-xs font-medium font-medium text-foreground hover:underline"
-            >
-              Kredi satın al →
-            </Link>
-          </div>
+            <span className="mt-3 inline-flex text-xs font-medium text-foreground hover:underline">
+              Siparişlerimi gör →
+            </span>
+          </Link>
 
-          <div className="grid grid-cols-3 gap-3">
-            <Link
-              href="/account/orders"
-              className="group hover-lift rounded-xl border border-border bg-card p-4 hover:border-primary/40"
-            >
-              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-secondary text-primary transition-transform duration-300 group-hover:scale-110">
-                <Package className="size-4" />
-              </span>
-              <p className="mt-3 font-display text-2xl text-foreground">
-                {orderCount}
-              </p>
-              <p className="text-xs text-muted-foreground">Siparişim</p>
-            </Link>
-            <Link
-              href="/account/my-designs"
-              className="group hover-lift rounded-xl border border-border bg-card p-4 hover:border-primary/40"
-            >
-              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-secondary text-primary transition-transform duration-300 group-hover:scale-110">
-                <Upload className="size-4" />
-              </span>
-              <p className="mt-3 font-display text-2xl text-foreground">
-                {designCount}
-              </p>
-              <p className="text-xs text-muted-foreground">Tasarımım</p>
-            </Link>
-            <Link
-              href="/account/wishlist"
-              className="group hover-lift rounded-xl border border-border bg-card p-4 hover:border-destructive/40"
-            >
-              <span className="inline-flex size-9 items-center justify-center rounded-[10px] bg-secondary text-destructive transition-transform duration-300 group-hover:scale-110">
-                <Heart className="size-4" />
-              </span>
-              <p className="mt-3 font-display text-2xl text-foreground">
-                {wishlistCount}
-              </p>
-              <p className="text-xs text-muted-foreground">Favori</p>
-            </Link>
-          </div>
-
-          {earningsSummary && (
-            <Link
-              href="/account/earnings"
-              className="group hover-lift rounded-xl border border-border bg-card p-5 hover:border-primary/40"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="eyebrow">Bekleyen Kazanç</p>
-                  <p className="mt-2 font-display text-3xl text-foreground">
-                    {earningsSummary.pendingTRY.toLocaleString("tr-TR", {
-                      style: "currency",
-                      currency: "TRY",
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                  <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground/70">
-                    {earningsSummary.pendingCount} satış · ödeme bekliyor
-                  </p>
-                </div>
-                <span className="inline-flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
-                  <Wallet className="size-5" />
-                </span>
+          <Link
+            href="/designs"
+            className="group hover-lift rounded-xl border border-border bg-card p-6 hover:border-primary/40"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="eyebrow">Katalog</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Hazır tasarımlara göz at, beğendiğini sipariş ver.
+                </p>
               </div>
-              <span className="mt-3 inline-flex text-xs font-medium font-medium text-foreground hover:underline">
-                Tüm kazançları gör →
+              <span className="inline-flex size-11 items-center justify-center rounded-full bg-secondary text-primary transition-transform duration-300 group-hover:scale-110">
+                <ShoppingBag className="size-5" />
               </span>
-            </Link>
-          )}
+            </div>
+            <span className="mt-3 inline-flex text-xs font-medium text-foreground hover:underline">
+              Kataloğa git →
+            </span>
+          </Link>
         </aside>
       </div>
     </Container>

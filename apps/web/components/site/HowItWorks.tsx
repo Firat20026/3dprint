@@ -1,25 +1,25 @@
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/site/Reveal";
-import { Upload, Wand2, Truck } from "lucide-react";
+import { Search, ShoppingBag, Truck } from "lucide-react";
 
 const steps = [
   {
     n: "01",
-    icon: Upload,
-    title: "Modeli Hazırla",
-    body: "Hazır tasarımlardan seç, STL/3MF dosyanı yükle ya da prompt yazıp AI ile ürettir.",
+    icon: Search,
+    title: "Tasarımı Seç",
+    body: "Hazır tasarım kataloğumuza göz at, beğendiğin ürünü aç.",
   },
   {
     n: "02",
-    icon: Wand2,
-    title: "Anında Fiyat",
-    body: "OrcaSlicer dosyayı saniyeler içinde dilimler. Materyal, renk, kaliteye göre kesin fiyat görürsün.",
+    icon: ShoppingBag,
+    title: "Shopier'de Sipariş Ver",
+    body: "Satın al butonuyla Shopier'e geç, güvenli kart ödemesiyle siparişini tamamla.",
   },
   {
     n: "03",
     icon: Truck,
     title: "Kapına Gelsin",
-    body: "Türkiye geneli kargo. 500₺ üzeri siparişlerde ücretsiz. Sipariş durumunu canlı takip et.",
+    body: "Siparişini Snapmaker U1 ile basıp Türkiye geneli kargoyla gönderiyoruz.",
   },
 ];
 
@@ -30,7 +30,7 @@ export function HowItWorks() {
         <SectionHeader
           eyebrow="Nasıl Çalışır"
           title="Üç adımda elinde."
-          subtitle="Slicing, malzeme hesabı, baskı ayarı senin derdin değil. Sen seç, biz basalım."
+          subtitle="Baskı ayarı, malzeme hesabı senin derdin değil. Sen seç, biz basıp gönderelim."
         />
         <div className="mt-14 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
           {steps.map((s, i) => (

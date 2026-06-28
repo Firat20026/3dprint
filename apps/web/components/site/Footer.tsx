@@ -9,37 +9,28 @@ export function Footer() {
         <div className="md:col-span-5">
           <Logo />
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
-            Türkiye&rsquo;de bulutta tasarla, dakikalar içinde 3 boyutlu bas. Hazır
-            tasarımlar, kendi dosyan veya AI ile üretim — hepsi tek panelden.
+            Türkiye&rsquo;de hazır 3D baskı tasarımları. Beğen, Shopier
+            güvencesiyle sipariş ver, kapına gelsin.
           </p>
           <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground">
             <span className="inline-flex h-7 items-center rounded-md border border-border bg-secondary px-2.5 font-medium">
               Snapmaker U1
             </span>
             <span className="inline-flex h-7 items-center rounded-md border border-border bg-secondary px-2.5 font-medium">
-              OrcaSlicer
-            </span>
-            <span className="inline-flex h-7 items-center rounded-md border border-border bg-secondary px-2.5 font-medium">
-              iyzico
+              Shopier
             </span>
           </div>
         </div>
         <FooterCol
           className="md:col-span-2 md:col-start-7"
           title="Ürün"
-          links={[
-            { href: "/designs", label: "Tasarımlar" },
-            { href: "/upload", label: "Dosya Yükle" },
-            { href: "/ai", label: "AI Üret" },
-            { href: "/pricing", label: "Krediler" },
-          ]}
+          links={[{ href: "/designs", label: "Tasarımlar" }]}
         />
         <FooterCol
           className="md:col-span-2"
           title="Şirket"
           links={[
             { href: "/how-it-works", label: "Nasıl Çalışır" },
-            { href: "/designers", label: "Tasarımcılar" },
             { href: "/contact", label: "İletişim" },
           ]}
         />

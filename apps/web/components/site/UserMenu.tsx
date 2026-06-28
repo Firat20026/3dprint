@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Session } from "next-auth";
 import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { CartButton } from "@/components/site/CartButton";
 import { ProfileMenu } from "@/components/site/ProfileMenu";
 
 export async function UserMenu({
@@ -13,7 +12,6 @@ export async function UserMenu({
   if (!session?.user) {
     return (
       <div className="flex items-center gap-2">
-        <CartButton />
         <Link
           href="/login"
           className="hidden rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:inline-flex sm:items-center"
@@ -39,7 +37,6 @@ export async function UserMenu({
 
   return (
     <div className="flex items-center gap-2">
-      <CartButton />
       <ProfileMenu
         initial={initial}
         name={session.user.name ?? null}

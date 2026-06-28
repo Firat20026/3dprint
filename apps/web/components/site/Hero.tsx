@@ -60,65 +60,24 @@ function ViewerMockup() {
             <span className="size-2 rounded-full bg-muted-foreground/30" />
           </div>
           <div className="font-mono text-[11px] text-muted-foreground">
-            model.stl · 18.4 MB
+            frint3d · hazır tasarımlar
           </div>
           <span className="text-[10px] font-medium text-muted-foreground">
-            HAZIR
+            Snapmaker U1
           </span>
         </div>
 
-        <div className="grid gap-px bg-border md:grid-cols-[1fr_300px]">
-          <div className="relative aspect-[16/10] bg-background md:aspect-auto">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <ModelMockup />
-            </div>
-            <div className="absolute bottom-3 left-3 flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
-              <span>X 64.2</span>
-              <span>Y 48.1</span>
-              <span>Z 22.0</span>
-            </div>
+        <div className="relative aspect-[16/9] bg-background">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ModelMockup />
           </div>
-
-          <div className="space-y-4 bg-card p-5">
-            <PanelRow label="Materyal" value="PLA · Mat Siyah" />
-            <PanelRow label="Kalite" value="Standart · 0.20mm" />
-            <PanelRow label="Doluluk" value="%15 Gyroid" />
-            <PanelRow label="Süre" value="2 sa 36 dk" mono />
-            <PanelRow label="Filament" value="35 g" mono />
-            <div className="border-t border-border pt-4">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                Toplam
-              </div>
-              <div className="mt-1 font-display text-2xl font-semibold text-foreground">
-                ₺248,50
-              </div>
-            </div>
-            <Button size="md" className="w-full">
-              Sepete Ekle
-              <ArrowRight className="size-4" />
-            </Button>
+          <div className="absolute bottom-3 left-3 flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
+            <span>Çok renkli</span>
+            <span>4 materyal</span>
+            <span>0.08mm katman</span>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function PanelRow({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-[11px] text-muted-foreground">{label}</span>
-      <span className={`text-sm text-foreground ${mono ? "font-mono" : ""}`}>
-        {value}
-      </span>
     </div>
   );
 }

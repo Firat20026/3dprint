@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { STORE_URL } from "@/lib/store";
 
 export function CTA() {
   return (
@@ -12,21 +12,16 @@ export function CTA() {
             Aradığın tasarım burada.
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
-            Kataloğu keşfet, beğendiğini Shopier güvencesiyle sipariş ver.
-            Türkiye geneli hızlı kargo.
+            Tüm tasarımlar Shopier mağazamızda. Beğen, güvenle sipariş ver,
+            Türkiye geneli hızlı kargoyla kapına gelsin.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/designs" className="w-full sm:w-auto">
-              <Button size="md" className="w-full">
-                Tasarımları Gör
-                <ArrowRight className="size-4" />
+          <div className="mt-8 flex justify-center">
+            <a href={STORE_URL} target="_blank" rel="noopener noreferrer">
+              <Button size="lg">
+                Shopier Mağazasına Git
+                <ArrowUpRight className="size-4" />
               </Button>
-            </Link>
-            <Link href="/register" className="w-full sm:w-auto">
-              <Button size="md" variant="secondary" className="w-full">
-                Ücretsiz Üye Ol
-              </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </Container>

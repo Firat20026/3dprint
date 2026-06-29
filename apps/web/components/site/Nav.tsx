@@ -1,28 +1,24 @@
-import { UserMenu } from "@/components/site/UserMenu";
-import { MobileNav } from "@/components/site/MobileNav";
+import { ArrowUpRight } from "lucide-react";
 import { NavShell } from "@/components/site/NavShell";
-import { auth } from "@/lib/auth";
+import { STORE_URL } from "@/lib/store";
 
-// AI üret + Dosya yükle geçici olarak kapalı, kredi/fiyatlandırma gizlendi —
-// menüde yalnızca katalog ve "nasıl çalışır" var.
-const baseLinks = [
-  { href: "/designs", label: "Tasarımlar" },
-  { href: "/how-it-works", label: "Nasıl Çalışır" },
-];
-
-const guestOnlyLinks: { href: string; label: string }[] = [];
-
-export async function Nav() {
-  const session = await auth();
-  const loggedIn = !!session?.user;
-  const isAdmin = session?.user?.role === "ADMIN";
-  const links = loggedIn ? baseLinks : [...baseLinks, ...guestOnlyLinks];
-
+// Sade landing — login/hesap yok. Sadece Shopier mağazasına götüren buton.
+export function Nav() {
   return (
     <NavShell
-      links={links}
-      rightSlot={<UserMenu session={session} />}
-      mobileSlot={<MobileNav links={links} loggedIn={loggedIn} isAdmin={isAdmin} />}
+      links={[]}
+      rightSlot={
+        <a
+          href={STORE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+        >
+          Mağazaya Git
+          <ArrowUpRight className="size-4" />
+        </a>
+      }
+      mobileSlot={null}
     />
   );
 }

@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/container";
 import { SectionHeader } from "@/components/site/HowItWorks";
 import { Reveal } from "@/components/site/Reveal";
 import { ShopierProductCard } from "@/components/shop/ShopierProductCard";
-import { listFeaturedProducts } from "@/lib/shopier";
+import { listFeaturedProducts } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -14,10 +14,7 @@ export const dynamic = "force-dynamic";
  * off), so the homepage degrades cleanly before the store is populated.
  */
 export async function FeaturedProducts() {
-  const { products } = await listFeaturedProducts(8).catch(() => ({
-    products: [],
-    isFixture: false,
-  }));
+  const products = await listFeaturedProducts(8).catch(() => []);
   if (products.length === 0) return null;
 
   return (

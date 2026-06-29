@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { ExternalLink, ShieldCheck, Truck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { ProductGallery } from "@/components/shop/ProductGallery";
-import { getProduct, formatMoney } from "@/lib/shopier";
+import { getProduct, formatMoney } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 

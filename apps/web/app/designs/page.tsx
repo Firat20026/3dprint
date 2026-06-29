@@ -2,9 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { ShopierProductCard } from "@/components/shop/ShopierProductCard";
-import { FixtureNotice } from "@/components/shop/FixtureNotice";
-import { listProducts } from "@/lib/shopier";
-import type { ShopierProduct } from "@/lib/shopier/types";
+import { listProducts } from "@/lib/catalog";
+import type { Product } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +45,7 @@ export default async function DesignsPage({
   const inStockOnly = sp.stock === "in";
   const sort = (VALID_SORTS.has(sp.sort as never) ? sp.sort : "newest") as Sort;
 
-  const { products, isFixture } = await listProducts();
+  const products = await listProducts();
 
   // Distinct categories for the filter chips, derived from the catalog itself.
   const categories = [
@@ -104,8 +103,6 @@ export default async function DesignsPage({
         </div>
         <p className="text-xs text-muted-foreground/70">{filtered.length} ürün</p>
       </div>
-
-      {isFixture && <FixtureNotice className="mt-6" />}
 
       {/* Search + filter bar */}
       <form
@@ -189,7 +186,7 @@ export default async function DesignsPage({
           <p className="mt-2 text-sm text-muted-foreground">
             {hasActiveFilter
               ? "Filtreleri gevşetmeyi dene veya farklı bir arama yap."
-              : "Shopier mağazasına ürün eklendiğinde burada görünecek."}
+              : "Admin panelden ürün eklendiğinde burada görünecek."}
           </p>
         </div>
       ) : (
@@ -206,7 +203,7 @@ export default async function DesignsPage({
   );
 }
 
-function sortProducts(list: ShopierProduct[], sort: Sort): ShopierProduct[] {
+function sortProducts(list: Product[], sort: Sort): Product[] {
   const arr = [...list];
   switch (sort) {
     case "price-asc":

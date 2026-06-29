@@ -1,13 +1,13 @@
 import Link from "next/link";
-import type { ShopierProduct } from "@/lib/shopier/types";
-import { formatMoney } from "@/lib/shopier";
+import type { Product } from "@/lib/catalog";
+import { formatMoney } from "@/lib/catalog";
 
 /**
- * Catalog card for a Shopier product. Links to the on-site detail page
- * (/urun/[id]); the actual purchase happens on Shopier (see the detail page's
- * "Shopier'de Satın Al" button).
+ * Catalog card for a product. Links to the on-site detail page (/urun/[id]);
+ * the actual purchase happens on Shopier (see the detail page's "Shopier'de
+ * Satın Al" button).
  */
-export function ShopierProductCard({ product }: { product: ShopierProduct }) {
+export function ShopierProductCard({ product }: { product: Product }) {
   const { thumbnail, title, categories, hasDiscount, price, effectivePrice, currency, inStock } =
     product;
 

@@ -625,6 +625,38 @@ model Settings {
 }
 
 // =====================================================
+// Catalog products (admin-managed, sold via Shopier link)
+// =====================================================
+//
+// Admin enters products manually; "Satın Al" sends the buyer to the product's
+// Shopier page (buyUrl) where Shopier handles cart + payment. Decoupled from
+// the Shopier REST API (which currently denies product reads).
+
+model CatalogProduct {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  // priceTRY is the current selling price; oldPriceTRY (optional, higher) is
+  // shown struck-through to indicate a discount.
+  priceTRY    Decimal  @db.Decimal(10, 2)
+  oldPriceTRY Decimal? @db.Decimal(10, 2)
+  imageUrl    String?  // primary image URL
+  imagesJson  Json     @default("[]") // additional image URLs
+  category    String?
+  buyUrl      String   // Shopier product page link
+  inStock     Boolean  @default(true)
+  featured    Boolean  @default(false) // shown in homepage "Öne Çıkanlar"
+  isActive    Boolean  @default(true)  // hidden from the storefront when false
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, featured])
+  @@index([isActive, sortOrder])
+  @@index([category])
+}
+
+// =====================================================
 // Observability: events + error logs
 // =====================================================
 

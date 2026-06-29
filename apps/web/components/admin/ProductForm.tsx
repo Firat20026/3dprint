@@ -55,7 +55,7 @@ export function ProductForm({
         body: JSON.stringify({ url: buyUrl.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) {
+      if (!res.ok || data.error) {
         setFetchMsg(data.error ?? "Bilgi çekilemedi.");
         return;
       }

@@ -68,7 +68,11 @@ function priceFromJsonLd(html: string): number | null {
 }
 
 export async function POST(req: Request) {
-  await requireAdmin();
+  try {
+    await requireAdmin();
+  } catch {
+    return NextResponse.json({ error: "Yetkisiz" }, { status: 403 });
+  }
 
   const body = (await req.json().catch(() => null)) as { url?: string } | null;
   const url = body?.url?.trim();
@@ -92,7 +96,12 @@ export async function POST(req: Request) {
     );
   }
 
+  // Bound the outbound request so a slow/blocked Shopier fetch can't hang the
+  // handler long enough for the reverse proxy to return a 502. On any failure
+  // we respond with a clean JSON error and the admin fills the form manually.
   let html: string;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
   try {
     const res = await fetch(parsed.toString(), {
       headers: {
@@ -100,21 +109,28 @@ export async function POST(req: Request) {
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
         Accept: "text/html",
       },
-      // Don't cache — admin expects fresh data when pasting a link.
       cache: "no-store",
+      signal: controller.signal,
     });
     if (!res.ok) {
       return NextResponse.json(
-        { error: `Sayfa alınamadı (HTTP ${res.status})` },
-        { status: 502 },
+        { error: `Sayfa alınamadı (HTTP ${res.status}). Bilgileri elle gir.` },
+        { status: 200 },
       );
     }
     html = await res.text();
-  } catch {
+  } catch (e) {
+    const aborted = e instanceof Error && e.name === "AbortError";
     return NextResponse.json(
-      { error: "Sayfaya ulaşılamadı" },
-      { status: 502 },
+      {
+        error: aborted
+          ? "Shopier sayfası zaman aşımına uğradı. Bilgileri elle gir."
+          : "Sayfaya ulaşılamadı. Bilgileri elle gir.",
+      },
+      { status: 200 },
     );
+  } finally {
+    clearTimeout(timeout);
   }
 
   const title =

@@ -2,45 +2,43 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeader } from "@/components/site/HowItWorks";
-import { Reveal } from "@/components/site/Reveal";
-import { ShopierProductCard } from "@/components/shop/ShopierProductCard";
-import { listFeaturedProducts } from "@/lib/catalog";
+import { StoreEmbed } from "@/components/site/StoreEmbed";
 
-export const dynamic = "force-dynamic";
+const STORE_URL =
+  process.env.SHOPIER_STORE_URL || "https://www.shopier.com/frint";
 
 /**
- * Homepage "Öne Çıkanlar" — products from the configured Shopier selection
- * (seçki). Renders nothing when there are no live products (and fixtures are
- * off), so the homepage degrades cleanly before the store is populated.
+ * Homepage product section — embeds the Shopier store so visitors can browse
+ * and buy without leaving the site. Full catalog lives at /designs.
  */
-export async function FeaturedProducts() {
-  const products = await listFeaturedProducts(8).catch(() => []);
-  if (products.length === 0) return null;
-
+export function FeaturedProducts() {
   return (
     <section className="relative py-20 md:py-28">
       <Container>
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <SectionHeader
             align="left"
-            eyebrow="Öne Çıkanlar"
-            title="Seçtiğimiz tasarımlar"
-            subtitle="Mağazamızdan öne çıkan, en sevilen baskılar."
+            eyebrow="Ürünler"
+            title="Hazır tasarımlar"
+            subtitle="Mağazamızdan beğen, Shopier güvencesiyle hemen sipariş ver."
           />
           <Link
             href="/designs"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Tüm katalog
+            Tam ekran katalog
             <ArrowRight className="size-3.5" />
           </Link>
         </div>
-        <Reveal className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" stagger>
-          {products.map((p) => (
-            <ShopierProductCard key={p.id} product={p} />
-          ))}
-        </Reveal>
       </Container>
+
+      <div className="mt-10 overflow-hidden border-y border-border">
+        <StoreEmbed
+          src={STORE_URL}
+          title="frint3d mağaza"
+          className="h-[78vh] min-h-[560px]"
+        />
+      </div>
     </section>
   );
 }
